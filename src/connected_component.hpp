@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <utility>
+#include <cstddef>
 
 using contour = std::vector< std::pair<int, int> >;
 
