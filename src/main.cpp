@@ -60,7 +60,7 @@ int main( int argc, char* argv[] )
 
 	std::string labeled_mapfile = mapfile;
 	labeled_mapfile.replace( labeled_mapfile.begin(), labeled_mapfile.begin() + 5, "maps/taunted/" );
-	labeled_mapfile.replace( labeled_mapfile.end() - 4, labeled_mapfile.end(), " labeled.txt" );
+	labeled_mapfile.replace( labeled_mapfile.end() - 4, labeled_mapfile.end(), "_labeled.txt" );
 	std::ofstream labeled_out( labeled_mapfile );
 	if( !labeled_out.is_open() )
 	{
@@ -103,7 +103,7 @@ int main( int argc, char* argv[] )
 
 	std::string contour_mapfile = mapfile;
 	contour_mapfile.replace( contour_mapfile.begin(), contour_mapfile.begin() + 5, "maps/taunted/" );
-	contour_mapfile.replace( contour_mapfile.end() - 4, contour_mapfile.end(), " contour.txt" );
+	contour_mapfile.replace( contour_mapfile.end() - 4, contour_mapfile.end(), "_contour.txt" );
 	std::ofstream contour_file( contour_mapfile );
 	if( !contour_file.is_open() )
 	{
