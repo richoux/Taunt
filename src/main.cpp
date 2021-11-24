@@ -80,12 +80,15 @@ int main( int argc, char* argv[] )
 
 		for( size_t j = 0; j < labeled_map[ i ].size(); ++j )
 			if( labeled_map[ i ][ j ] == -1 )
-				labeled_map_char[ i ][ j ] = ';';
+				labeled_map_char[ i ][ j ] = '.';
 			else
-				if( labeled_map[ i ][ j ] == -2 )
-					labeled_map_char[ i ][ j ] = '.';
+				if( labeled_map[ i ][ j ] >= 1000 )
+					labeled_map_char[ i ][ j ] = '-';
 				else
-					labeled_map_char[ i ][ j ] = labeled_map[ i ][ j ] + 64;
+					if( labeled_map[ i ][ j ] == 0 || labeled_map[ i ][ j ] == -2 )
+						labeled_map_char[ i ][ j ] = ' ';
+					else
+						labeled_map_char[ i ][ j ] = labeled_map[ i ][ j ] + 64;
 	}
 
 	for( int j = 0; j < height; ++j )
@@ -118,9 +121,15 @@ int main( int argc, char* argv[] )
 	std::stringstream ssc;
 
 	for( auto& contour : contours )
-		for( auto& point : contour )
+	{
+		for( auto& point : contour.outer() )
 			contour_map[ point.y() ][ point.x() ] = true;
 
+		for( auto& inner : contour.inners() )
+			for( auto& point : inner )
+				contour_map[ point.y() ][ point.x() ] = true;
+	}
+	
 	for( int j = 0; j < height; ++j )
 	{
 		for( int i = 0; i < width; ++i )
@@ -137,17 +146,25 @@ int main( int argc, char* argv[] )
 	// reverse y-axis for the SVG file
 	for( size_t i = 0 ; i < contours.size(); ++i )
 	{
-		for( auto& p : contours[i] )
+		for( auto& p : contours[i].outer() )
 			p.y( -p.y() );
-		
-		for( auto& p : simplified[i] )
+
+		for( auto& inner : contours[i].inners() )
+			for( auto& p : inner )
+				p.y( -p.y() );
+
+		for( auto& p : simplified[i].outer() )
 			p.y( -p.y() );
+
+		for( auto& inner : simplified[i].inners() )
+			for( auto& p : inner )
+				p.y( -p.y() );		
 	}
 	
 	std::string contour_mapfile_svg = contour_mapfile;
 	contour_mapfile_svg.replace( contour_mapfile_svg.end() - 3, contour_mapfile_svg.end(), "svg" );
 	std::ofstream contour_svg( contour_mapfile_svg );
-	boost::geometry::svg_mapper<point> mapper( contour_svg, 1000, 1000 );
+	boost::geometry::svg_mapper<point> mapper( contour_svg, 10*width, 10*height );
 
 	for( size_t i = 0; i < contours.size(); ++i )
 	{

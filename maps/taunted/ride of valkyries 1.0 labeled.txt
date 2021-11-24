@@ -1,96 +1,96 @@
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-AA..AAAAAAAAAA....AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA....AAAAAAAAAA..AA
-A..AAAAAAAAAAA....AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA....AAAAAAAAAAA..A
-AA..AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA..AA
-AA..AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA;;;;AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA;;;;AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA..AA
-A..AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA;;;;;;;;;;;;AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA;;;;;;;;;;;;AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA..A
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA;;;;AA;;;;;;;;;;;;;;;;;;AAAAAAAAAAAAAAAAAAAA;;;;;;;;....;;;;;;AA;;;;AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-A..AAAAAAAAAAAAAAAAAAAAAAAAAAA;;;;;;;;;;..;;;...;;;;;;AAAAAAAAAAAAAAAAAAAA;;;;;;........;;;;;;;;;;AAAAAAAAAAAAAAAAAAAAAAAAAAA..A
-A..AAAAAAAAAAAAAAAAAAAAAAA;;;;;;;;;;;;............;;;;AAAAAAAAAAAAAAAAAAAA;;;;............;;;;;;;;;;;;AAAAAAAAAAAAAAAAAAAAAAA..A
-AA..AAAAAAAAAAAAAAAA;;;;AA;;;;;;....................;;;;AAAAAAAAAAAAAAAA;;;;....................;;;;;;AA;;;;AAAAAAAAAAAAAAAA..AA
-AAAAAAAAAAAAAAAAAAAA;;;;;;;;;;......................;;;;..AAAAAAAAAAAA..;;;;......................;;;;;;;;;;AAAAAAAAAAAAAAAAAAAA
-AAAAAAAAAAAAAAAAAAAA;;;;;;;;........................;;;;...AAAAAAAAAA...;;;;........................;;;;;;;;AAAAAAAAAAAAAAAAAAAA
-AAAAAAAAAAAAAAAAAAAAAA;;;;............................;;;;AAAAAAAAAAAA;;;;............................;;;;AAAAAAAAAAAAAAAAAAAAAA
-AAAAAAAAAAAAAAAAAAAA;;;;;;............................;;;;............;;;;............................;;;;;;AAAAAAAAAAAAAAAAAAAA
-;;AAAAAAAAAAAAAAAAAA;;;;;;............................;;;;;;;;....;;;;;;;;............................;;;;;;AAAAAAAAAAAAAAAAAA;;
-;;;;AAAA;;;;AAAA;;;;;;;;................................;;;;;;;;;;;;;;;;................................;;;;;;;;AAAA;;;;AAAA;;;;
-;;;;AAAA;;;;;;AA;;;;;;........................................;;;;........................................;;;;;;AA;;;;;;AAAA;;;;
-;;;;AAAA;;;;;;;;;;;;;;....................................................................................;;;;;;;;;;;;;;AAAA;;;;
-;;;;AAAA;;;;;;;;;;;;;;;;................................................................................;;;;;;;;;;;;;;;;AAAA;;;;
-;;;;AAAA;;;;;;;;;;;;;;;;;;............................................................................;;;;;;;;;;;;;;;;;;AAAA;;;;
-;;;;AAAA;;;;;;;;;;....;;;;;;........................................................................;;;;;;....;;;;;;;;;;AAAA;;;;
-;;;;AAAA;;;;;;;;..A..A..;;;;;;....................................................................;;;;;;..A..A..;;;;;;;;AAAA;;;;
-;;AAAAAAAA;;;;AAAAAAAAAA..;;;;....................................................................;;;;..AAAAAAAAAA;;;;AAAAAAAA;;
-AAAAAAAAAAAAAAAAAAAAAAAAAA;;;;....................................................................;;;;AAAAAAAAAAAAAAAAAAAAAAAAAA
-AAAAAAAAAAAAAAAAAAAAAAAAAA;;;;;;..............;;................................;;..............;;;;;;AAAAAAAAAAAAAAAAAAAAAAAAAA
-;;;;AAAAAAAAAAAAAAAAAAAA....;;;;..............;;................................;;..............;;;;....AAAAAAAAAAAAAAAAAAAA;;;;
-;;;;AAAAAAAAAAAAAAAAAAAA....;;;;................................................................;;;;....AAAAAAAAAAAAAAAAAAAA;;;;
-;;;;AAAAAAAAAAAAAAAAAAAAAAAA;;;;................................................................;;;;AAAAAAAAAAAAAAAAAAAAAAAA;;;;
-;;;;AAAAAAAAAAAAAAAAAAAAAAAA;;;;................................................................;;;;AAAAAAAAAAAAAAAAAAAAAAAA;;;;
-AAAAAAAAAAAAAAAAAAAAAAAAAAAA;;;;................................................................;;;;AAAAAAAAAAAAAAAAAAAAAAAAAAAA
-AAAAAAAAAAAAAAAAAAAAAAAAAAAA;;;;................................................................;;;;AAAAAAAAAAAAAAAAAAAAAAAAAAAA
-AAAAAAAAAAAAAAAAAAAAAAAAAAAA;;;;................................................................;;;;AAAAAAAAAAAAAAAAAAAAAAAAAAAA
-AAAAAAAAAAAA;;;;AAAAAAAAAAAA;;;;................................................................;;;;AAAAAAAAAAAA;;;;AAAAAAAAAAAA
-AAAAAAAA...;;;;;;;AAAAAAAAAA;;;;;.............................;;;;.............................;;;;;AAAAAAAAAA;;;;;;;...AAAAAAAA
-AAAAAA.......;;;;;;;AAAAAAAAAA;;............................;;;;;;;;............................;;AAAAAAAAAA;;;;;;;.......AAAAAA
-AAAA..........;;;;;;AAAAAAAA.;;............................;;;;;;;;;;............................;;.AAAAAAAA;;;;;;..........AAAA
-AA............;;;;;;AAAAAAAA;;..............................;;BBBB;;..............................;;AAAAAAAA;;;;;;............AA
-............CCCC;;;;AAAAAAAA.................................;;..;;.................................AAAAAAAA;;;;CCCC............
-;.........CCCC;;;;AAAAAAAAAA..................................;;;;..................................AAAAAAAAAA;;;;CCCC........;;
-;;;.....CCCCCC;;;;AAAAAAAAAAAA....................................................................AAAAAAAAAAAA;;;;CCCCCC.....;;;
-;;;;..CCCCCCCC;;;;;...AAAAAAAAAA................................................................AAAAAAAAAA...;;;;;CCCCCCCC..;;;;
-CCCCCCCCCCCCCCCC;.......AAAAAAAAAA............................AAAA............................AAAAAAAAAA.......;CCCCCCCCCCCCCCCC
-CCCCCCCCCCCCCCCC..........AAAAAAAAAA........................AAAAAAAA........................AAAAAAAAAA..........CCCCCCCCCCCCCCCC
-CCCCCCCCCCCCCCCC............AAAAAAAAAA....................AAAAAAAAAAAA....................AAAAAAAAAA............CCCCCCCCCCCCCCCC
-CCCCCCCCCCCCCCCCCC............AAAAAAAAAA................AAAAAAAAAAAAAAAA................AAAAAAAAAA............CCCCCCCCCCCCCCCCCC
-CCCCCCCCCCCCCCCCCCCC............AAAAAAAAAA............AAAAAAAAAAAAAAAAAAAA............AAAAAAAAAA............CCCCCCCCCCCCCCCCCCCC
-CCCCCCCCCCCCCCCCCCCCCC............AAAAAAAAAA........AAAAAAAAAA....AAAAAAAAAA........AAAAAAAAAA............CCCCCCCCCCCCCCCCCCCCCC
-CC..CCCCCCCCCCCCCCCCCCCC............AAAAAAAAAA....AAAAAAAAAA........AAAAAAAAAA....AAAAAAAAAA............CCCCCCCCCCCCCCCCCCCC..CC
-C..CCCCCCCCCCCCCCCCCCCCCCC............AAAAAAAAAAAAAAAAAAAA............AAAAAAAAAAAAAAAAAAAA............CCCCCCCCCCCCCCCCCCCCCCC..C
-CCCCCCCCCCCCCCCCCCCCCCCCCCCC............AAAAAAAAAAAAAAAA................AAAAAAAAAAAAAAAA............CCCCCCCCCCCCCCCCCCCCCCCC..CC
-C..CCCCCCCCCCCCCCCCCCCCCCCCCCC............AAAAAAAAAAAA....................AAAAAAAAAAAA............CCCCCCCCCCCCCCCCCCCCCCCCCCC..C
-CC..CCCCCCCCCCCCCCCCCCCC;;;;CCCC............AAAAAAAA........................AAAAAAAA............CCCC;;;;CCCCCCCCCCCCCCCCCCCCCCCC
-C..CCCCCCCCCCCCCCCCCCCCC;;;;;;CCCC............AAAA............CCCC............AAAA............CCCC;;;;;;CCCCCCCCCCCCCCCCCCCCC..C
-CC..CCCCCCCCCCCCCCCCCCCC;;;;;;;;CCCC........................CCCCCCCC........................CCCC;;;;;;;;CCCCCCCCCCCCCCCCCCCC..CC
-CCCCCCCCCCCCCCCCCCCCCCCC;;;;;;;;;.CCCC........;;;;........CCCC;;;;CCCC........;;;;........CCCC;;;;;;;;;;CCCCCCCCCCCCCCCCCCCCCCCC
-CCCCCCCCCCCCCCCCCCCCCCCC;;;;;;;;;;CC.........;;;;;;.....CCCC;;;;;;;;CCCC.....;;;;;;.........CC;;;;;;;;;;CCCCCCCCCCCCCCCCCCCCCCCC
-CCCCCCCCCCCCCCCCCCCCCCCC;;;;;;;;;;..........;;;;;;;;..CCCC;;;;;;;;;;;;CCCC..;;;;;;;;..........;;;;;;;;;;CCCCCCCCCCCCCCCCCCCCCCCC
-CCCCCCCC;;;;CCCCCCCCCCCC;;;;;;;;CC..........CCCCCCCCCCCC;;;;;;;;;;;;;;;;CCCCCCCCCCCC..........CC;;;;;;;;CCCCCCCCCCCC;;;;CCCCCCCC
-CC;;;;;;;;;;;;;;;;CCCC..CC;;;;;;CC............CCCCCCCC;;;;;;;;;;;;;;;;;;;;CCCCCCCC............CC;;;;;;CC..CCCC;;;;;;;;;;;;;;;;CC
-;;;;;;;;DDDD;;;;;;;;..CCCCCC;;;;CC..............CCCC;;;;;;;;;;;;;;;;;;;;;;;;CCCC..............CC;;;;CCCCCC..;;;;;;;;EEEE;;;;;;;;
-;;DDDDDDDDDDDDDD;;;;CCCCCCCCCCCCCC....FFFF......CC;;;;;;;;;;;;;;;;;;;;;;;;;;;;CC......GG......CCCCCCCCCCCCCC;;;;EEEEEEEEEEEEEE;;
-DDDDDDDDDDDDDDDD;;;;CCCCCCCCCCCCCC............CC;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;CC............CCCCCCCCCCCCCC;;;;EEEEEEEEEEEEEEEE
-DDDDDDDDDDDDDDDD;;;;CCCCCCCCCCCCCCCC........CC;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;CC........CCCCCCCCCCCCCCCC;;;;EEEEEEEEEEEEEEEE
-DDDDDDDDDDDD...;;;;;CCCCCCCCCCCCCCCCCC....CC;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;CC....CCCCCCCCCCCCCCCCCC;;;;;...EEEEEEEEEEEE
-DDDDDDDDDDDD;;...;CCCCCCCCCCCCCCCCCCCCCCCC;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;CCCCCCCCCCCCCCCCCCCCCCCC;...;;EEEEEEEEEEEE
-DDDDDDDDDD;;;;;...CCCCCCCCCCCCCCCCCCCCCC;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;CCCCCCCCCCCCCCCCCCCCCC...;;;;;EEEEEEEEEE
-DDDDDDDD;;;;;;;;..CCCCCCCCCCCCCCCCCCCC;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;CCCCCCCCCCCCCCCCCCCC..;;;;;;;;EEEEEEEE
-DDDDDDDD;;;;;;CCCCCCCCCCCCCCCCCC....CC;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;CC....CCCCCCCCCCCCCCCCCC;;;;;;EEEEEEEE
-DDDDDDDDDD;;;;CCCCCCCCCCCCCCCCCC....CC;;;;;;;;;;;;;;;;;;;;;;;;;;;;.;;;;;;;;;;;;;;;;;;;;;;;CC....CCCCCCCCCCCCCCCCCC;;;;EEEEEEEEEE
-DDDDDDDDDDDD;;;;CCCCCCCCCCCCCCCCCCCCCC;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;CCCCCCCCCCCCCCCCCCCCCC;;;;EEEEEEEEEEEE
-DDDDDDDDDDDDDD;;;;CCCCCCCCCCCCCCC..CCC;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;CCC..CCCCCCCCCCCCCCC;;;;EEEEEEEEEEEEEE
-DDDDDDDDDDDDDDDD;;;;CCCCCCCCCCCC..CC;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;.;;;;;;;;;;;;;;;.CC..CCCCCCCCCCCC;;;;EEEEEEEEEEEEEEEE
-DDDDDDDDDDDDDDDD;;;;CCCCCCCCCCCCCCCC;;;;;;;;;;;;;;;;;;;;;;;;;;....;;;;;;;;;;;;;;;;;;;;;;;;;;CCCCCCCCCCCCCCCC;;;;EEEEEEEEEEEEEEEE
-DDDDDDDDDDDDDDDD;;;;CCC..CCC..C..CCC;;;;;;;;;;;;;;;;;;;;HHH..H....H....H;;;;;;;;;;;;;;;;;;;;CCC..C..CCC..CCC;;;;EEEEEEEEEEEEEEEE
-DDDDDDDDDDDDDDDDDD;;;;CCC......CCC;;;;;;;;;;;;;;;;;;;;;;H..HHHHHHHHHHHHH;;;;;;;;;;;;;;;;;;;;;;CCC......CCC;;;;EEEEEEEEEEEEEEEEEE
-DDDDDDDDDDDDDDDDDDDD;;;;CCCCCCCC;;;;;;;;;;;;;;;;;;;;;;;;HHHHHHHHHHHHH..H;;;;;;;;;;;;;;;;;;;;;;;.CCCCCCCC;;;;EEEEEEEEEEEEEEEEEEEE
-DDDDDDDDDDDDDDDDDDDDDD;;;;;;;;CC;;;;;;;;;;;;;;;;;.;;;;;;..HHHHHHHHHHHH..;;;;;;;;;;;;;;;;;;;;;;;;CC;;;;;;;;EEEEEEEEEEEEEEEEEEEEEE
-DDDDDDDDDDDDDDDDDDDDDDDD;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;H..HHHHHHHHHHHHH;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EEEEEEEEEEEEEEEEEEEEEEEE
-DDDDDDDDDDDDDDDDDDDDDDDDDDDDDD;;;;;;;;;;;;;;;;;;;;;;;;;;HHHHHHHHHHHHHHHH;;;;;;;;;;;;;;;;;;;;;;;;;;EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-DDDDDDDDDDDDDDDDDDDDDDDDDDDDDD;;;;;;;;;;;;;;;;;;;;;;;;;;HHHHHHHHHHHHHHHH;;;;;;;;;;;;;;;;;;;;;;;;;;EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-DD..DDDDDDDDDDDDDDDDDDDDDDDDDD;;;;;;;;;;;;;;;;;;;;;;;;;;;;HHHHHHHHHHHH;;;;;;;;;;;;;;;;;;;;;;;;;;;;EEEEEEEEEEEEEEEEEEEEEEEEEE..EE
-DD..DDDDDDDDDDDDDDDDDDDDDDDDDDDD;;;;;;;;;;;;;;;;;;;;;;;;;;HHHHHHHHHHHH;;;;;;;;;;;;;;;;;;;;;;;;;;EEEEEEEEEEEEEEEEEEEEEEEEEEEE..EE
-D..DDDDDDDDDDDDDDDDDDDDDDDDDDDDD;;;;;;;;;;;;;;;;;;;;;;;;;;HHHHHHHHHHHH;;;;;;;;;;;;;;;;;;;;;;;;;;EEEEEEEEEEEEEEEEEEEEEEEEEEEEE..E
-DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD;;;;;;;;;;;;;;;;;;;;;;;;;;HHHHHHHHHHHH;;;;;;;;;;;;;;;;;;;;;;;;;;EEEEEEEEEEEEEEEEEEEEEEEEEEEEE..E
-D..DDDDDDDDDDDDDDDDDDDDDDDDDDDDD;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-DD..DDDDDDDDDDDDDDDDDDDDDDDDDDDD;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EEEEEEEEEEEEEEEEEEEEEEEEEEEEE..E
-D..DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD;;;;.;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE..EE
-D..DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE..E
-DD..DDDDDDDDDDDDDDDDDDDDDDDDDDDD;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EEEEEEEEEEEEEEEEEEEEEEEEEEEE..EE
-DDDDDDD....DDDDDDDDDDDDDDDDDDDDD;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EEEEEEEEEEEEEEEEEEEEE....EEEEEEE
-DDDDDDD....DDDDDDDDDDDDDDDDDDDDD;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EEEEEEEEEEEEEEEEEEEEE....EEEEEEE
-DDDDDDDDDDDDDDDDDDDDDDDDDDDDDD;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-DDDDDDDDDDDDDDDDDDDDDDDDDDDDDD;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-;;;;;DDDDDDDDDDDDDDDDDDDDDDDDDDD;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EEEEEEEEEEEEEEEEEEEEEEEEEEEEE;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                                                                                                                                
+                                                                                                                                
+                                                                                                                                
+                                           ----                                  ------                                         
+                                   -------AAAA---                              ---AAAA-------                                   
+                             -------AAAAAAAAAAAA-------                  -------AAAAAAAAAAAA-------                             
+                             -AAAA--AAAAAAAAAAAAAAAAAA-                  -AAAAAAAA----AAAAAA--AAAA-                             
+                         -----AAAAAAAAAA--AAA---AAAAAA-                  -AAAAAA---  ---AAAAAAAAAA-----                         
+                   -------AAAAAAAAAAAA-------- ---AAAA---              ---AAAA---      ---AAAAAAAAAAAA-------                   
+                   -AAAA--AAAAAA-------          ---AAAA-              -AAAA---          -------AAAAAA--AAAA-                   
+                   -AAAAAAAAAA---                  -AAAA-              -AAAA-                  ---AAAAAAAAAA-                   
+                   -AAAAAAAA---                    -AAAA---          ---AAAA-                    ---AAAAAAAA-                   
+                   ---AAAA---                      ---AAAA-          -AAAA---                      ---AAAA---                   
+ --                -AAAAAA-                          -AAAA-----  -----AAAA-                          -AAAAAA-                  -
+BB---  ------  -----AAAAAA-                          -AAAAAAAA----AAAAAAAA-                          -AAAAAA-----  ------  ---CC
+BBBB-  -AAAA----AAAAAAAA---                          ---AAAAAAAAAAAAAAAA---                          ---AAAAAAAA----AAAA-  -CCCC
+BBBB-  -AAAAAA--AAAAAA---                              -------AAAA-------                              ---AAAAAA--AAAAAA-  -CCCC
+BBBB-  -AAAAAAAAAAAAAA---                                    ------                                    ---AAAAAAAAAAAAAA-  -CCCC
+BBBB-  -AAAAAAAAAAAAAAAA---                                                                          ---AAAAAAAAAAAAAAAA-  -CCCC
+BBBB-  -AAAAAAAAAAAAAAAAAA---                                                                      ---AAAAAAAAAAAAAAAAAA-  -CCCC
+BBBB-  -AAAAAAAAAA----AAAAAA---                                                                  ---AAAAAA----AAAAAAAAAA-  -CCCC
+BBBB-  -AAAAAAAA---  ---AAAAAA-                                                                  -AAAAAA---  ---AAAAAAAA-  -CCCC
+BB---  ---AAAA---      ---AAAA-                                                                  -AAAA---      ---AAAA---  ---CC
+---      ------          -AAAA---              --                                --            ---AAAA-          ------      ---
+ ----                    -AAAAAA-            -DD-                              -EE-            -AAAAAA-                      ---
+FFFF-                    ---AAAA-            -DD-                              -EE-            -AAAA---                    -GGGG
+FFFF-                      -AAAA-            ----                              ----            -AAAA-                      -GGGG
+FFFF-                      -AAAA-                                                              -AAAA-                      -GGGG
+FFFF-                      -AAAA-                                                              -AAAA-                      -GGGG
+-----                      -AAAA-                                                              -AAAA-                      -----
+                           -AAAA-                                                              -AAAA-                           
+             ----          -AAAA-                                                              -AAAA-            ----           
+          --HHHH---        -AAAA--                             ----                           --AAAA-        ---IIII--          
+          -HHHHHHH---      -AAAAA-                         ---JJJJ---                         -AAAAA-      ---IIIIIII-          
+          ---HHHHHHH-      ---AA--                        --JJJJJJJJ--                        --AA---      -IIIIIII---          
+            --HHHHHH-      --AA--                         -JJJJJJJJJJ-                         --AA--      -IIIIII--            
+             -HHHHHH-      -AA--                          --JJ----JJ--                          --AA-      -IIIIII-             
+ -           ---HHHH-      ----                            --JJ--JJ--                            ----      -IIII---            -
+K---         -HHHH---                                       --JJJJ--                                       ---IIII-         --LL
+KKK--        -HHHH--                                         ------                                         --IIII-        --LLL
+KKKK-        -HHHHH-                                                                                        -IIIII-        -LLLL
+-----        ---H---                                                                                        ---I---        -----
+               ---                                                                                            ---               
+                                                                                                                                
+                                                                                                                                
+                                                                                                                                
+                                                                                                                                
+                                                                                                                                
+                                                                                                                                
+                                                                                                                                
+                         ----                                                                        ----                       
+                       -MMMM---                                                                  ---NNNN-                       
+                       -MMMMMM---                                                              ---NNNNNN-                       
+                       -MMMMMMMM--             ----            ----            ----          ---NNNNNNNN-                       
+                       -MMMMMMMMM--         --OOOO--       ---PPPP---       --QQQQ--         -NNNNNNNNNN-                       
+                       -MMMMMMMMMM-        --OOOOOO--    ---PPPPPPPP---    --QQQQQQ--        -NNNNNNNNNN-                       
+         ----          -MMMMMMMMMM-        -OOOOOOOO-  ---PPPPPPPPPPPP---  -QQQQQQQQ-        -NNNNNNNNNN-            ----       
+ -------RRRR-------    -MMMMMMMM---        -------------PPPPPPPPPPPPPPPP-------------        ---NNNNNNNN-    -------SSSS------- 
+--RRRRRRRRRRRRRRRR---  ---MMMMMM-                  ---PPPPPPPPPPPPPPPPPPPP---                  -NNNNNN---  ---SSSSSSSSSSSSSSSS--
+RRRRRRRR----RRRRRRRR-    ---MMMM-                ---PPPPPPPPPPPPPPPPPPPPPPPP---                -NNNN---    -SSSSSSSS----SSSSSSSS
+RR-------  -----RRRR-      ------              ---PPPPPPPPPPPPPPPPPPPPPPPPPPPP---              ------      -SSSS-----  -------SS
+---            -RRRR-                        ---PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP---                        -SSSS-            ---
+              --RRRR-                      ---PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP---                      -SSSS--              
+           ----RRRRR-                    ---PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP---                    -SSSSS----           
+         ---PP---R---                  ---PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP---                  ---S---PP---         
+       ---PPPPP----                  ---PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP---                  ----PPPPP---       
+       -PPPPPPPP-                    -PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP-                    -PPPPPPPP-       
+       -PPPPPP---                    -PPPPPPPPPPPPPPPPPPPPPPPPPPPPSSSSSSSSSSSSSSSSSSSSSSSP-                    ---PPPPPP-       
+       ---PPPP---                    -PPPPPPPPPPPPPPPPPPPPPPPPPPPS SSSSSSSSSSSSSSSSSSSSSSP-                    ---PPPP---       
+         ---PPPP---                  -PPPPPPPPPPPPPPPPPPPPPPPPPPPPSSSSSSSSSSSSSSSSSSSSSSSP-                  ---PPPP---         
+           ---PPPP---              ---PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPSSSSSSSSSSSSSSP--               ---PPPP---           
+             ---PPPP-              -PPPPPPPPPPPPPPPPPPPPPPPPPPSSSSSSSSSSSSS SSSSSSSSSSSSSSP--              -PPPP---             
+               -PPPP-              -PPPPPPPPPPPPPPPPPPPPSSSSSS----SSSSSSSSSSSSSSSSSSSSSSSSSP-              -PPPP-               
+               -PPPP---          ---PPPPPPPPPPPPPPPPPPPS-------  -------SSSSSSSSSSSSSSSSSSSP---          ---PPPP-               
+               ---PPPP---      ---PPPPPPPPPPPPPPPPPPPPPS-              -SSSSSSSSSSSSSSSSSSSSPP--       ---PPPP---               
+                 ---PPPP--------PPPPPPPPPPPPPPPPPSSSSSSS-              -SSSSSSSSSSSSSSSSSSSSSSP---------PPPP---                 
+                   ---PPPPPPPP--PPPPPPPPPPPPPPPPS SSSSSS-              -SSSSSSSSSSSSSSSSSSSSSSSP--PPPPPPPP---                   
+                     ---PPPPPPPPPPPPPPPPPPPPPPPPPSSSSSSS-              -SSSSSSSSSSSSSSSSSSSSSSSSPPPPPPPP---                     
+                       -------PPPPPPPPPPPPPPPPPPPPPPPPPS-              -SSSSSSSSSSSSSSSSSSSSSSSSSP-------                       
+                             -PPPPPPPPPPPPPPPPPPPPPPPPPS---          ---SSSSSSSSSSSSSSSSSSSSSSSSSP-                             
+                             -PPPPPPPPPPPPPPPPPPPPPPPPPPSS-          -SSSSSSSSSSSSSSSSSSSSSSSSSSPP-                             
+                             ---PPPPPPPPPPPPPPPPPPPPPPPPPS-          -SSSSSSSSSSSSSSSSSSSSSSSSSP---                             
+                               -PPPPPPPPPPPPPPPPPPPPPPPPPS-          -SSSSSSSSSSSSSSSSSSSSSSSSSP-                               
+                               -PPPPPPPPPPPPPPPPPPPPPPPPPS------------SSSSSSSSSSSSSSSSSSSSSSSSSP-                               
+                               -PPPPPPPPPPPPPPPPPPPPPPPPPPSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSP-                               
+                               -PPPPPPSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSPP-                               
+                               ---PPPS SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSP---                               
+                               ---PPPPSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSP---                               
+                               -PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP-                               
+                               -PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP-                               
+                             ---PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP---                             
+                             -PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP-                             
+                             -PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP-                             
+------                       ---PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP---                       ------
+PPPPP---------------------------PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP-----------------------------PPPPP
+PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP

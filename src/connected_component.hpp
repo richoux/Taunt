@@ -8,7 +8,7 @@
 #include <boost/geometry/geometries/linestring.hpp>
 
 using point = boost::geometry::model::d2::point_xy<int>;
-using contour = boost::geometry::model::ring<point>;
+using contour = boost::geometry::model::polygon<point>;
 
 namespace taunt
 {
@@ -17,30 +17,37 @@ namespace taunt
 		std::vector< std::vector<int> > _map; // -2 = walkable but unbuidable (slopes, bridges), -1 = unwalkable, 0 = unset, v>0 = label
 		size_t _width;
 		size_t _height;
-		std::vector<int> _labels;
 		unsigned int _last_label;
-		unsigned int _nb_labels;
 		std::vector< contour > _contours;
 
-		bool is_buildable( size_t x, size_t y ) const;
-		bool has_buildable_around( size_t x, size_t y ) const;
-		bool are_all_buildable_around( size_t x, size_t y ) const;
-		void scan_block( size_t x, size_t y );
-		void resolve( int label1, int label2 );
-		void soft_resolve( int label1, int label2 );
-		contour neighbors_with_direction( int direction, const point& current_point );
-		point look_around( const point& current_point, const point& parent );
-		bool is_same_point( const point& point1, const point& point2 );
-		contour search_for_contour( int x, int y );
+		bool is_on_map( size_t x, size_t y ) const;
+		bool is_walkable( size_t x, size_t y ) const;
+		// bool has_walkable_around( size_t x, size_t y ) const;
+		bool are_all_walkable_around( size_t x, size_t y ) const;
+		// bool is_buildable( size_t x, size_t y ) const;
+		// bool has_buildable_around( size_t x, size_t y ) const;
+		// bool are_all_buildable_around( size_t x, size_t y ) const;
 
+		boost::geometry::model::ring<point> neighbors_with_direction( int direction, const point& current_point );
+		point look_around( const point& current_point, const point& parent, bool is_external, int number_inner_rings );
+		void search_for_contour( int x, int y, contour& contour );
+		void start_external_contour( int x, int y );
+		void start_internal_contour( int x, int y );
+
+		inline bool is_labeled( int x, int y ) const { return is_on_map( x, y ) && _map[y][x] > 0; }
+		inline bool is_same_point( const point& point1, const point& point2 ) { return point1.x() == point2.x() && point1.y() == point2.y(); }
+
+		// std::vector< std::vector<int> > compute_cc_he(); // fast connected component from He et al.
+		std::vector< std::vector<int> > compute_cc_chang(); // contour tracing-based connected component from Chang et al.
+		
 	public:
 		connected_component( const std::vector< std::vector<int> >& map ); // input map is supposed to be correctly formated with -2, -1 and 0 values only.
 		connected_component( std::vector< std::vector<int> >&& map );
 
-		std::vector< std::vector<int> > compute_cc();
-		std::vector< contour > compute_contours();
+		inline std::vector< std::vector<int> > compute_cc() { return compute_cc_chang(); }
+		inline std::vector< contour > compute_contours() { return _contours; }
 		std::vector< contour > compute_simplified_contours();
 
-		enum directions {NE, E, SE, S, SW, W, NW, N};
+		enum direction {E, SE, S, SW, W, NW, N, NE};
 	};
 }
