@@ -200,7 +200,7 @@ int main( int argc, char* argv[] )
 	for( size_t i = 0; i < contours.size(); ++i )
 	{
 		mapper.map( contours[i], "fill-opacity:0.5;fill:rgb(253,0,0);stroke:rgb(253,0,0);stroke-width:2");
-		mapper.map( simplified[i], "fill-opacity:0.5;fill:rgb(0,253,0);stroke:rgb(0,0,0);stroke-width:5");
+		mapper.map( simplified[i], "fill-opacity:0.5;fill:rgb(53,255,0);stroke:rgb(0,0,0);stroke-width:5");
 		// mapper.map( simplified[i], "fill-opacity:0.5;fill:rgb(51,51,153);stroke:rgb(0,0,0);stroke-width:5");
 		// boost::geometry::centroid( simplified[i], center );
 		// mapper.text( center, std::to_string( i ), "fill-opacity:1;fill:rgb(0,0,0);stroke:rgb(0,0,0);stroke-width:2;font-size:64");
