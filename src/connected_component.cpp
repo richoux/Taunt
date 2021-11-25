@@ -187,7 +187,7 @@ namespace taunt
 		}
 	}
 
-	point connected_component::look_around( const point& current_point, const point& parent, bool is_external, int number_inner_rings )
+	point connected_component::look_around( const point& current_point, const point& parent, bool is_external, int number_inner_rings, int label )
 	{
 		direction direction;
 		int count_around = 0;
@@ -211,26 +211,32 @@ namespace taunt
 
 		auto neighbors = neighbors_with_direction( direction, current_point );
 
+		point next_point(-1, -1);
+		bool next_point_found = false;
 		for( auto& p : neighbors )
 		{
 			if( is_walkable( p.x(), p.y() ) || !is_on_map( p.x(), p.y() ) )
 			{
 				if( is_on_map( p.x(), p.y() ) && ( _map[p.y()][p.x()] == 0 || _map[p.y()][p.x()] == -2 ) )
 					if( is_external )
-						_map[p.y()][p.x()] = 1000 * _last_label;
+						_map[p.y()][p.x()] = 1000 * label;
 					else
-						_map[p.y()][p.x()] = 1000 * _last_label + number_inner_rings;
+						_map[p.y()][p.x()] = 1000 * label + number_inner_rings;
 			}
 			else
-				return p;
+				if( !next_point_found )
+				{
+					next_point_found = true;
+					next_point = p;
+				}
 		}
-
-		// should never happen
-		return point(-1,-1);
+		
+		// should never return (-1, -1)
+		return next_point;
 	}
 
 	// contour search from Chang et al. - A linear-time component-labeling algorithm using contour tracing technique
-	void connected_component::search_for_contour( int x, int y, contour& contour )
+	void connected_component::search_for_contour( int x, int y, contour& contour, int label )
 	{
 		bool is_external = contour.outer().empty();
 		point starting_point( x, y );
@@ -248,20 +254,19 @@ namespace taunt
 		
 		boost::geometry::append( *ring, current_point );
 
-		int pouet = 0;
-		
 		// we can't have next_point == starting_point at the first iteration of the loop
 		// since Taunt doesn't consider isolated unwalkable tiles.
 		do
 		{
 			// take the second to last point if contour contains at least 2 points, or the last one otherwise.
 			auto parent = ring->size() > 1 ? *(ring->rbegin()+1) : *ring->rbegin();
-			++pouet;		
+
 			// inner_ring_index+1 because we need the current number of inner rings, not the current index.
-			auto next_point = look_around( current_point, parent, is_external, inner_ring_index + 1 ); 
+			auto next_point = look_around( current_point, parent, is_external, inner_ring_index + 1, label ); 
 
 			boost::geometry::append( *ring, next_point );
-			_map[ next_point.y() ][ next_point.x() ] = _last_label;
+			if( !is_labeled( next_point.x(), next_point.y() ) )
+				_map[ next_point.y() ][ next_point.x() ] = label;
 	
 			current_point = next_point;
 		}	while( !is_same_point( current_point, starting_point ) );
@@ -274,12 +279,12 @@ namespace taunt
 		_contours.push_back( contour() );
 
 		// _last_label - 1 because indexes start at 0 and labels start at 1
-		search_for_contour( x, y, _contours[ _last_label - 1 ] );
+		search_for_contour( x, y, _contours[ _last_label - 1 ], _last_label );
 	}
 
-	void connected_component::start_internal_contour( int x, int y )
+	void connected_component::start_internal_contour( int x, int y, int label )
 	{
-		search_for_contour( x, y, _contours[ _last_label - 1 ] );
+		search_for_contour( x, y, _contours[ _last_label - 1 ], label );
 	}
 
 	// 2-scan connected-component search algorithm from He et al. - Fast connected-component labeling
@@ -310,7 +315,7 @@ namespace taunt
 	// 	return _map;
 	// }
 	
-		// contour search from Chang et al. - A linear-time component-labeling algorithm using contour tracing technique
+	// contour search from Chang et al. - A linear-time component-labeling algorithm using contour tracing technique
 	std::vector< std::vector<int> > connected_component::compute_cc_chang()
 	{
 		for( size_t y = 0; y < _height; ++y )
@@ -321,7 +326,15 @@ namespace taunt
 						start_external_contour( x, y );
 
 					if( !is_labeled( x, y + 1 ) && is_walkable( x, y + 1 ) )
-						start_internal_contour( x, y );
+					{
+						int label = ( is_on_map( x - 1, y ) ? _map[y][x-1] : _map[y-1][x] );
+						if( label >= 1000 )
+						{
+							label -= ( label % 1000 );
+							label /= 1000;
+						}
+						start_internal_contour( x, y, label );
+					}
 					
 					if( !is_labeled( x, y ) )
 						if( is_on_map( x - 1, y ) )
@@ -343,13 +356,14 @@ namespace taunt
 
 		for( size_t i = 0 ; i < _contours.size(); ++i )
 		{
+			boost::geometry::correct( _contours[i] );
 			boost::geometry::simplify( _contours[i].outer(), simplified_contours[i].outer(), 1);
 			for( size_t j = 0 ; j < _contours[i].inners().size(); ++j )
 			{
 				simplified_contours[i].inners().push_back( boost::geometry::model::ring<point>() );
-				boost::geometry::correct( _contours[i].inners()[j] );
 				boost::geometry::simplify( _contours[i].inners()[j], simplified_contours[i].inners()[j], 1);
 			}
+			boost::geometry::correct( simplified_contours[i] );
 		}
 		
 		return simplified_contours;

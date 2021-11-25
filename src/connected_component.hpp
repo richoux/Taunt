@@ -29,10 +29,10 @@ namespace taunt
 		// bool are_all_buildable_around( size_t x, size_t y ) const;
 
 		boost::geometry::model::ring<point> neighbors_with_direction( int direction, const point& current_point );
-		point look_around( const point& current_point, const point& parent, bool is_external, int number_inner_rings );
-		void search_for_contour( int x, int y, contour& contour );
+		point look_around( const point& current_point, const point& parent, bool is_external, int number_inner_rings, int label );
+		void search_for_contour( int x, int y, contour& contour, int label );
 		void start_external_contour( int x, int y );
-		void start_internal_contour( int x, int y );
+		void start_internal_contour( int x, int y, int label );
 
 		inline bool is_labeled( int x, int y ) const { return is_on_map( x, y ) && _map[y][x] > 0; }
 		inline bool is_same_point( const point& point1, const point& point2 ) { return point1.x() == point2.x() && point1.y() == point2.y(); }

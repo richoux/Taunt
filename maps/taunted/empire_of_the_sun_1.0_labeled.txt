@@ -1,128 +1,128 @@
-                   AAAAAAA---             BBBBBBBBBBBBBB---          -BBBBBBBBBBBB-BBB-            ---CCCCCCC-                  
-                   --AAAAAAA-             --BBB BBBBBBBBBB-          -BBBBBBBBBBBBBBBB-            -CCCCCCC---                  
-                    ---AAAAA-            ---BBBBBBBBBBBBBB-          ---BBBBBBBBBBBBBB-            -CCCCC---                    
+                  -AAAAAAA---            -BBBBBBBBBBBBBB---          -BBBBBBBBBBBB-BBB-            ---CCCCCCC-                  
+                  ---AAAAAAA-            ---BBB---------BB-          -BBBBBBBBBBBBBBBB-            -CCCCCCC---                  
+                    ---AAAAA-            ---BBBDDDDDDDDDDB-          ---BBBBBBBBBBBBBB-            -CCCCC---                    
                       --AAAA-            -BBBBBBBBBBBBBBBB-          -BBBBBBBBBBBBBBBB-            -CCCC--                      
-                       -AAAA-            -BBBBBCCCCCCCCCCB-          -BBBBBBBBBBCCCCBB-            -CCCC-                       
-                       -AAAA-            ---BBC CCCCCCCCCB-          ---BBBBBBBC CCB---            -CCCC-                       
-                       --AAA-            ---BBBCCCCCCCCCBB-            -BBBBBBBBCCCB---            -CCC--                       
-                        -AAA-            -BBBCCCCCCCCCBB---            -BBBBBBBBBBBBBB-            -CCC-                        
-                        -----            -BBC CCCCCCCB---              ---BBBBBBBBBBBB-            -----                        
-                                         -BBBCCCCCCCCB---              ---BBBBBBBBBBBB-                                         
-                         ----            -BBBBBCCCCCCCBB-              -BBBBBBBBCCCCBB-              ----                       
-                     ---DDDD-            ---BBC CCCCCCCB-              -BBBBBBBC CCB---            -EEEE---                     
-                     -DDDDDD-            ---BBBCCCCCCCCB-----          -BBBBBBBBCCCB---            -EEEEEE-                     
-                     -DDDDDD---        ---BBBBBBBBBBBBEEBBBB------------BBBBBBBBBBBBBB---        ---EEEEEE-                     
-                     --DDDDDDD---      -BBBBBBBBBBBBBE EEEEEBBBBBBBBBB--BBBBBBBBBBBBBBBB-      ---EEEEEEEE-                     
-                      ---DDDDDDD-      -BBBBBBBBBBBBBBEEEE--EEEEEEEEEEBBBEEEEEEEEEEEEEEB-      -EEEEEEE----                     
-                        ---DDDDD-      -BBBBBBBBBBBBBBBBBE------------EEE EEEEEEEEEEEEEB-      -EEEEE---                        
-                          --DDDD-      -BBBBBBBBBBBBBBBBBE---      ---EEEEEEEEEEEEEEEEBB-      -EEEE--                          
-                           -DDDD-      ---BBBBBEEEEEEEEEEEEE-    ---EEEEEEEEEEEEEEEEBB---      -EEEE-                           
-                         ---DDDD-        ---BBE EEEEEEEEEEEE------EEEEEEEEEEEEEEEEBB---        -EEEE---                         
-                       ---DDDDDD-          -BBBEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE EEB---          -EEEEEE---                       
-                     ---DDDDDDDD-          -BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBEEEB-            --EEEEEEE---                     
-                     -DDDDDDD----          ---BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB-             ---EEEEEEE-                     
-                     -DDDDD---               ---BBBBBEEEEEEEEEEEEEEEEEEEEEEEEEBB---               ---EEEEE-                     
-                   ---DDDD--                   ---BBE EEEEEEEEEEEEEEEEEEEEEEBB---                   --EEEE---                   
-                 ---DDDDDD-.                     -BBBEEEEEEEEEEEEEEEEEEE EEB---                     -EEEEEEE---                 
-                 -DDDDDDDD-                      -BBBBBBBBBBBBBBBBBBBBBBEEEB-                       --EEEEEEEE-                 
-     ------      -DDDDD----                      ---BBBBBEEEEEEEEEEEEEEEEEEB-                        ----EEEEE-      ------     
-------DDDD---  ---DDDD---                          ---BBE EEEEEEEEEEEE EEEB--                           --EEEE---  ---EEEE------
-DDDDDDDDDDDD----DDDDDDDD-               .           .-BBBEEEEEEEEEEEEEEEEB--            .               --EEEEEE----EEEEEEEEEEEE
-DDDDDDDDDDDDDDDDDDDDDD---                            -BBBBBBBBBBBBBBBBBBBB-                             -EEEEEEEEEEEEEEEEEEEEEEE
-DDDDDDD--DDDDDDDDDD----                              -BBBBBBBBBBBBBBBBBBBB-                             -----EEEEEEEEEE--EEEEEEE
-D--DD------DDDDDD---                                --BBBBBBBBBBBBBBBBBBBB--                     --         ---EEEEEE------EE--E
-------    ---DD---                                  -BBBBB--BBBBBBBB--BBBBB-                    FF-           ---EE---    ------
- ---------- ----                                    -BBBBBB-----------BBBBB-                    ---             ----   ---------
-GGGGGGGGGG-------                .                  --BB----         -B-BB--                                   -------HHHHHHHHHH
-GGGGGGGGGGGGGGGG----                                 ----            ------                                 ----HHHHHHHHHHHHHHHH
-GGGGGGGGGGGGGGGGGGG-                                                                                        -HHHHHHHHHHHHHHHHHHH
-----------GGGGGGGGG- --                                                                                    --HHHHHHHHH----------
-         -------GG--II---                                                                              ---JJ--HH-------         
-               ----IIIII---                                                                          ---JJJJJ----               
-                 -IIIIIIII-                                                                          -JJJJJJJJ-                 
-                 -IIIIIIII-                                                   .                      -JJJJJJJJ-                 
-                 -----IIII---                 .                                                    ---JJJJ-----                 
-                   -IIJJJJII-----                                                              -----JJJJJJJJ-                   
-                   -IJ--JJJJIIII--                                                            --JJJJJJJJ--JJ-                   
-                   -IJ-JJJJJJJJJI--                                                          --JJJJJJJJJJ-JJ-                   
-                 ---IIJJJJJJIIIIII-                                                          -JJJJJJJJJJJJJJ-                   
-                 -IIIIIIIIII--IIII-                                                          -JJJ-JJ--JJJJJJ-                   
-                 -IIIIIIII---------                                                          ---------JJJJJ----                 
-                 --IIIIIII-         ---                                                    ---       -JJJJJJJJ---               
-                 -IIIIIIII-        KKK--                                                --LLL-       -JJJJJJJJJJ-               
-              ----IIIIII----       -KKK-           --                        --         -LLL--       -JJJJJJJJJJ-              -
-              -I--IIIIIIIII--     --KKK-       ---MM--                    --NN---       -LLL--       -JJJJNNNNJ-----          OO
-            ---IIIIIIIIIIIII---  --KKK--      --MMMMM--                  --NNNNN---     --LLL--    ---JJOO--NNNJ--J-          --
--------    PPP--IIII----IIIIII-  -KKKKK-     --MMMMMMM-                  -NNNPPPNN-     -LLLLL-   --JJJO--ONJJJJJJJ- ---     ---
-PPPPPP------PPP-------IIIIIII--  -KKKKK-    --MMMM-MMM-                  -NNP PPPN--    -LLLLL-  --JJJ--OO----JJJJ--QQQ-------QQ
-PPPPPPPPPPPPPPP-     ----IIIII-  -K-KK--    -MMMMM-----                  ---NPPPPPN-    --LL---  -JJJJJ-JJ-  ------QQQ--QQQQQQQQ
-------PPPPPPPP--        -IIIII-  ------     -MMMMM-                    --  -NNNNNNN-     ----    -JJJJJ----       -QQQQQQQQQQQ--
-     ----------         --II---             --MM---      --           RR-  -----NN--             ---JJ--          --QQQQ------- 
-                     --  ----                ----      -SS-           -R-      ----                ----    --      ------       
- --                 TT-                                -SS-           ---                                 UU-                   
-VV-       -         ---                                ----                                               ---                   
-VV-    --W-                     .                                                                                               
-VV-    -WW-                                                                                     .              .                
+                       -AAAA-            -BBBBBBBBBBBBBBBB-          -BBBBBBBBBBBBBBBB-            -CCCC-                       
+                       -AAAA-            ---BBB-BBBBBBBBBB-          ---BBBBBBBB-BBB---            -CCCC-                       
+                       --AAA-            ---BBBBBBBBBBBBBB-            -BBBBBBBBBBBB---            -CCC--                       
+                        -AAA-            -BBBBBBBBBBBBBB---            -BBBBBBBBBBBBBB-            -CCC-                        
+                        -----            -BBB-BBBBBBBB---              ---BBBBBBBBBBBB-            -----                        
+                                         -BBBBBBBBBBBB---              ---BBBBBBBBBBBB-                                         
+                       ------            -BBBBBBBBBBBBBB-              -BBBBBBBBBBBBBB-            ------                       
+                     ---EEEE-            ---BBB-BBBBBBBB-              -BBBBBBBB-BBB---            -FFFF---                     
+                     -EEEEEE-            ---BBBBBBBBBBBB-----          -BBBBBBBBBBBB---            -FFFFFF-                     
+                     -EEEEEE---        ---BBBBBBBBBBBBBBBBBB------------BBBBBBBBBBBBBB---        ---FFFFFF-                     
+                     --EEEEEEE---      -BBBBBBBBBBBBBB-BBBBBBBBBBBBBBB--BBBBBBBBBBBBBBBB-      ---FFFFFFFF-                     
+                      ---EEEEEEE-      -BBBBBBBBBBBBBBBBBB--BBBBBBBBBBBBBBBBBBBBBBBBBBBB-      -FFFFFFF----                     
+                        ---EEEEE-      -BBBBBBBBBBBBBBBBBB------------BBB-BBBBBBBBBBBBBB-      -FFFFF---                        
+                          --EEEE-      -BBBBBBBBBBBBBBBBBB---      ---BBBBBBBBBBBBBBBBBB-      -FFFF--                          
+                           -EEEE-      ---BBBBBBBBBBBBBBBBBB-    ---BBBBBBBBBBBBBBBBBB---      -FFFF-                           
+                         ---EEEE-        ---BBB-BBBBBBBBBBBB------BBBBBBBBBBBBBBBBBB---        -FFFF---                         
+                       ---EEEEEE-          -BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB-BBB---          -FFFFFF---                       
+                     ---EEEEEEEE-          -BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB-            --FFFFFFF---                     
+                     -EEEEEEE----          ---BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB-             ---FFFFFFF-                     
+                     -EEEEE---               ---BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB---               ---FFFFF-                     
+                   ---EEEE--                   ---BBB-BBBBBBBBBBBBBBBBBBBBBBBB---                   --FFFF---                   
+                 ---EEEEEE-.                     -BBBBBBBBBBBBBBBBBBBBBB-BBB---                     -FFFFFFF---                 
+                 -EEEEEEEE-                      -BBBBBBBBBBBBBBBBBBBBBBBBBB-                       --FFFFFFFF-                 
+     ------      -EEEEE----                      ---BBBBBBBBBBBBBBBBBBBBBBBB-                        ----FFFFF-      ------     
+------EEEE---  ---EEEE---                          ---BBB-BBBBBBBBBBBB-BBBB--                           --FFFF---  ---FFFF------
+EEEEEEEEEEEE----EEEEEEEE-               .           .-BBBBBBBBBBBBBBBBBBBB--            .               --FFFFFF----FFFFFFFFFFFF
+EEEEEEEEEEEEEEEEEEEEEE---                            -BBBBBBBBBBBBBBBBBBBB-                             -FFFFFFFFFFFFFFFFFFFFFFF
+EEEEEEE--EEEEEEEEEE----                              -BBBBBBBBBBBBBBBBBBBB-                             -----FFFFFFFFFF--FFFFFFF
+E--EE------EEEEEE---                                --BBBBBBBBBBBBBBBBBBBB--                   ----         ---FFFFFF------FF--F
+------    ---EE---                                  -BBBBB--BBBBBBBB--BBBBB-                   -GG-           ---FF---    ------
+----------- ----                                    -BBBBBB-----------BBBBB-                   ----             ---- -----------
+HHHHHHHHHH-------                .                  --BB----         -B-BB--                                   -------IIIIIIIIII
+HHHHHHHHHHHHHHHH----                                 ----            ------                                 ----IIIIIIIIIIIIIIII
+HHHHHHHHHHHHHHHHHHH-                                                                                        -IIIIIIIIIIIIIIIIIII
+----------HHHHHHHHH----                                                                                  ----IIIIIIIII----------
+         -------HH--JJ---                                                                              ---KK--II-------         
+               ----JJJJJ---                                                                          ---KKKKK----               
+                 -JJJJJJJJ-                                                                          -KKKKKKKK-                 
+                 -JJJJJJJJ-                                                   .                      -KKKKKKKK-                 
+                 -----JJJJ---                 .                                                    ---KKKK-----                 
+                   -JJJJJJJJ-----                                                              -----KKKKKKKK-                   
+                   -JJ--JJJJJJJJ--                                                            --KKKKKKKK--KK-                   
+                   -JJ-JJJJJJJJJJ--                                                          --KKKKKKKKKK-KK-                   
+                 ---JJJJJJJJJJJJJJ-                                                          -KKKKKKKKKKKKKK-                   
+                 -JJJJJJJJJJ--JJJJ-                                                          -KKK-KK--KKKKKK-                   
+                 -JJJJJJJJ---------                                                          ---------KKKKK----                 
+                 --JJJJJJJ-       -----                                                  -----       -KKKKKKKK---               
+                 -JJJJJJJJ-       -LLL--                                                --MMM-       -KKKKKKKKKK-               
+              ----JJJJJJ----      --LLL-         ----                      ----         -MMM--       -KKKKKKKKKK-            ---
+              -J--JJJJJJJJJ--     --LLL-       ---NN--                    --OO---       -MMM--       -KKKKKKKKK-----         -PP
+          -----JJJJJJJJJJJJJ---  --LLL--      --NNNNN--                  --OOOOO---     --MMM--    ---KKKK-----K--K-         ---
+-------   -QQQ--JJJJ----JJJJJJ-  -LLLLL-     --NNNNNNN-                  -OOOOOOOO-     -MMMMM-   --KKKK--KKKKRRKKK-----     ---
+QQQQQQ------QQQ-------JJJJJJJ--  -LLLLL-    --NNNN-NNN-                  -OOO----O--    -MMMMM-  --KKK--KK----KKKK--SSS-------SS
+QQQQQQQQQQQQQQQ-     ----JJJJJ-  -L-LL--    -NNNNN-----                  ---OTTTTTO-    --MM---  -KKKKK-KK-  ------SSS--SSSSSSSS
+------QQQQQQQQ--        -JJJJJ-  ------     -NNNNN-                  ----  -OOOOOOO-     ----    -KKKKK----       -SSSSSSSSSSS--
+     ----------         --JJ---             --NN---    ----          -UU-  -----OO--             ---KK--          --SSSS------- 
+                   ----  ----                ----      -VV-          --U-      ----                ----  ----      ------       
+---                -WW-                                -VV-           ---                                -XX-                   
+YY-     ---        ----                                ----                                              ----                   
+YY-    --Z-                     .                                                                                               
+YY-    -ZZ-                                                                                     .              .                
 ---    ----                                                                                                                     
                                                                                                                                 
-                         ---                 ---                                  ---                 ---           -----       
-       ---------       -XXX-               -YYY-                                -ZZZ-               -[[[-         -\\\\\--------
-------]]]]]]]]]-     ---XXX---        ---  -YYY------                --    ------ZZZ-    ---      ---[[[-      ----\\\\\\\\\\\\\
-]]]]]]]]]]]]]]]----  -XXXXXXX--     -^^^-  ---YYY-YY--             -__-   --ZZ-ZZZ---  -```-     --[[[---    ---[[--\\\\\\\\\\\\
-]]]]]]]]]]]]]]--XX----XXXXXXXX-   ---^^^-    -YYY-YYY-             -__-   -ZZZZZZZ-    -```---   -[[[[--------[[[[[-----\\\\\\\\
-]]]]]]---------XXXXXXXXXXXXXXX-  --^^^---    -YYYYYYY-             ----   -ZZZZZZZ-    ---```--  -[[[[[[[[--[[[[[[[[-  ---------
--------      -XXXXXXXXXXXXXX---  -^^^^^-     ---YYYY--                    --ZZZZ---     -`````-  -[[[[[[[[--[[[[[[[[-           
-             -XXXXXXXXXXXX---    -^^^^^-       ------                      ------       -`````-  ------[[[[[[[[[-----           
-             -----XXXXX----      ---^^--                                                --``---    -[[[[[[[[[[[[-               
-               -XX`````XXX-        ----                                                  ----      ---[[[[[[[[---               
-               -X`---````X-                                                                        -[[[[[[[[---                 
-               ---```````X-    ---                                                            ---  ---[[[[`[--                  
-                 -XXXXXXXX-  ---X-                                                            -[-----[[[[`-`[--                 
-                 -XXXXXXXX----XXX-                                                            -[[[--[[[[``-`[[-                 
-                 -XXXXXXXXXXXXXX--                                                            --[[[[[[[`--`[---                 
-                 -XXXXXXXXXXXX---                                                              ---[[[[[[``[[-                   
-                 ---XX--XXXX---                                                                  ---[[[[[`---                   
-                  -----XXX---                                                                      ---[[` `---                  
-                  -X--XXXX-                                                                          -[[[`--[-                  
-                ---XXXXXXX-                       .                         .                        -[[[[[[[- ---              
-               aaa--XXXX---                                                                          ---[[[[--bbb-              
-               -aaa------                                                                              ------bbb--              
-         -------aaa-                                                                                        -bbb-------         
-----------aaaaaaaa--                                   ---            -----                                 --bbbbbbbb----------
-aaaaaaaaaaaaaaaa---                                 --ccc-            -ccc--                                 ---bbbbbbbbbbbbbbbb
-aaaaaaaaaa-------                                   -ccc--            --ccc-                                   -------bbbbbbbbbb
------------               .                         -ccc-- ---------- --ccc-                                         -----------
-             ----                                   --ccc---cccccccc---ccc--                  .                  ----           
--------  ---dddd---                                  -ccccccccccccccccccccc-                                 ---eeee---  -------
-dddddd----dddddddd---                                -cccccccccccccccccccc--                               ---eeeeeeee----eeeeee
-dddddddddddddddddddd---                              -cccccccccccccccccccc-                              ---eeeeeeeeeeeeeeeeeeee
-ddddddddddddd--ddddddd-                --            -cccccccccccccccccccc-                              -eeeeeee--eeeeeeeeeeeee
--dd--dddddd------ddddd---             ff-        -----cccccccccccccccccccc---                          ---eeeee------eeeeee--ee-
--------dd---    --dddd-d-             ---        -c-cccccccccccccccccccccccc---                --      -eeeeee--    ---ee-------
-      ----       -dddddd---                      -ccccccccccccccccccccccccffcc-               gg-    ---eeeeee-       ----      
-                 -dddddddd-                      -cccccccccccccccccccccccf ffc-               ---    -eeeeeee--                 
-                 ----ddddd---                  ---ccccccccccccccccccccccccfffc---                  ---eeeee---                  
-                    --dddddd-                ---cccccccccccccccccccccccccccccccc---                -eeeeee--                    
-                     -dddddd---              -ccccccccccccggggggggggggggggggggggcc-              ---eeeeee-                     
-                     --ddddddd---            -cccccccccccg gggggggggg gggggggggggc-            ---eeeeeeee-                     
-                      ---ddddddd-          ---ccccccccccccgggggggggggggggggggggggc---          -eeeeeee----                     
-                        ---ddddd-        ---ccccccccccccccccgg----ggggggggggggggggcc---        -eeeee---                        
-                          --dddd-      ---ccccccccccccgggggg---  ---ggggggggggggggggcc---      -eeee--                          
-                           -dddd-      -cccccccccccccg ggg---    -----ggg ggggggggggggcc-      -eeee-                           
-                         ---dddd-      -ccccccccccccccgggg--------gggggggggggggggggggggc-      -eeee---                         
-                       ---dddddd-      -ccccccccccccccgggggggggggggggggggggggggggggggggc-      -eeeeee---                       
-                       -ddddddd--      -cccccccccccccg--ggggggggggggggggggggggggggggggcc-      --eeeeeee-                       
-                       -ddddd---       ---cccccggggggggg--gggggggg------ggggggggggggcc---       ---eeeee-                       
-                       -dddd--           ---ccg gggggggggg---------    -gggggggg ggc---           --eeee-                       
-                       --ddd-            ---cccggggggggggg-            -gggggggggggc---            -eee--                       
-                        -dd--            -cccccccccccccg---            -ggggggggggggcc-            -eee-                        
-                        ----             -cccccggggggggg-              ---gggggggggggc-            -----                        
-                                         ---ccg gggggggg-              ---gggggggggggc-                                         
-                       ------              -cccggggggggg---          ---ggggggggggggcc-            ------                       
-                     ---cccc-              -ccccccccccccgg-          -gggggggggg ggc---            -cccc---                     
-                     -cccccc-            ---ccccccccccccgg-          -gggggggggggggc-              -cccccc-                     
-                     -ccccc--            -cccccccccccccg---          ---gggggggggggc-              -cccccc-                     
-                     -cccc--             -cccccccccccccg-              -gggggggggggc---            ---cccc-                     
-------               -cccc-            ---cccccccccccccg---          ---ggggggggggggcc-              -cccc-               ------
-ccccc-----------------cccc--------------ccccccccccccccccgg------------gggggggggggggggc----------------cccc-----------------ccccc
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccggggggggggggcccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+                       -----               -----                                -----               -----         -------       
+     -----------       -[[[-               -\\\-                                -]]]-               -^^^-         -_____--------
+------`````````-     ---[[[---      -----  -\\\------              ----    ------]]]-  -----      ---^^^-      ----_____________
+```````````````----  -[[[[[[[--     -aaa-  ---\\\-\\--             -bb-   --]]-]]]---  -ccc-     --^^^---    ---^^--____________
+``````````````--[[----[[[[[[[[-   ---aaa-    -\\\-\\\-             -bb-   -]]]]]]]-    -ccc---   -^^^^--------^^^^^-----________
+``````---------[[[[[[[[[[[[[[[-  --aaa---    -\\\\\\\-             ----   -]]]]]]]-    ---ccc--  -^^^^^^^^--^^^^^^^^-  ---------
+-------      -[[[[[[[[[[[[[[---  -aaaaa-     ---\\\\--                    --]]]]---     -ccccc-  -^^^^^^^^--^^^^^^^^-           
+             -[[[[[[[[[[[[---    -aaaaa-       ------                      ------       -ccccc-  ------^^^^^^^^^-----           
+             -----[[[[[----      ---aa--                                                --cc---    -^^^^^^^^^^^^-               
+               -[[[[[[[[[[-        ----                                                  ----      ---^^^^^^^^---               
+               -[[---[[[[[-                                                                        -^^^^^^^^---                 
+               ---[[[[[[[[-    ---                                                            ---  ---^^^^^^--                  
+                 -[[[[[[[[-  ---[-                                                            -^-----^^^^^--^--                 
+                 -[[[[[[[[----[[[-                                                            -^^^--^^^^^^-d^^-                 
+                 -[[[[[[[[[[[[[[--                                                            --^^^^^^^^--^^---                 
+                 -[[[[[[[[[[[[---                                                              ---^^^^^^^^^^-                   
+                 ---[[--[[[[---                                                                  ---^^^^^^---                   
+                  -----[[[---                                                                      ---^^^-^---                  
+                  -[--[[[[-                                                                          -^^^^--^-                  
+              -----[[[[[[[-                       .                         .                        -^^^^^^^-----              
+              -eee--[[[[---                                                                          ---^^^^--fff-              
+              --eee------                                                                              ------fff--              
+         -------eee-                                                                                        -fff-------         
+----------eeeeeeee--                                 -----            -----                                 --ffffffff----------
+eeeeeeeeeeeeeeee---                                 --ggg-            -ggg--                                 ---ffffffffffffffff
+eeeeeeeeee-------                                   -ggg--            --ggg-                                   -------ffffffffff
+-----------               .                         -ggg-- ---------- --ggg-                                         -----------
+           ------                                   --ggg---gggggggg---ggg--                  .                ------           
+-------  ---hhhh---                                  -ggggggggggggggggggggg-                                 ---iiii---  -------
+hhhhhh----hhhhhhhh---                                -gggggggggggggggggggg--                               ---iiiiiiii----iiiiii
+hhhhhhhhhhhhhhhhhhhh---                              -gggggggggggggggggggg-                              ---iiiiiiiiiiiiiiiiiiii
+hhhhhhhhhhhhh--hhhhhhh-              ----            -gggggggggggggggggggg-                              -iiiiiii--iiiiiiiiiiiii
+-hh--hhhhhh------hhhhh---            -jj-        -----gggggggggggggggggggg---                          ---iiiii------iiiiii--ii-
+-------hh---    --hhhh-h-            ----        -g-gggggggggggggggggggggggg---              ----      -iiiiii--    ---ii-------
+      ----       -hhhhhh---                      -gggggggggggggggggggggggggggg-              -kk-    ---iiiiii-       ----      
+                 -hhhhhhhh-                      -gggggggggggggggggggggggg-ggg-              ----    -iiiiiii--                 
+                 ----hhhhh---                  ---gggggggggggggggggggggggggggg---                  ---iiiii---                  
+                    --hhhhhh-                ---gggggggggggggggggggggggggggggggg---                -iiiiii--                    
+                     -hhhhhh---              -gggggggggggggggggggggggggggggggggggg-              ---iiiiii-                     
+                     --hhhhhhh---            -gggggggggggg-gggggggggg-gggggggggggg-            ---iiiiiiii-                     
+                      ---hhhhhhh-          ---gggggggggggggggggggggggggggggggggggg---          -iiiiiii----                     
+                        ---hhhhh-        ---gggggggggggggggggg----gggggggggggggggggg---        -iiiii---                        
+                          --hhhh-      ---gggggggggggggggggg---  ---gggggggggggggggggg---      -iiii--                          
+                           -hhhh-      -gggggggggggggg-ggg---    -----ggg-gggggggggggggg-      -iiii-                           
+                         ---hhhh-      -gggggggggggggggggg--------gggggggggggggggggggggg-      -iiii---                         
+                       ---hhhhhh-      -gggggggggggggggggggggggggggggggggggggggggggggggg-      -iiiiii---                       
+                       -hhhhhhh--      -gggggggggggggg--gggggggggggggggggggggggggggggggg-      --iiiiiii-                       
+                       -hhhhh---       ---gggggggggggggg--gggggggg------gggggggggggggg---       ---iiiii-                       
+                       -hhhh--           ---ggg-gggggggglg---------    -gggggggg-ggg---           --iiii-                       
+                       --hhh-            ---gggggggggggggg-            -gggggggggggg---            -iii--                       
+                        -hh--            -gggggggggggggg---            -gggggggggggggg-            -iii-                        
+                        ----             -gggggggggggggg-              ---gggggggggggg-            -----                        
+                                         ---ggg-gggggggg-              ---gggggggggggg-                                         
+                       ------              -gggggggggggg---          ---gggggggggggggg-            ------                       
+                     ---gggg-              -gggggggggggggg-          -gggggggggg-ggg---            -gggg---                     
+                     -gggggg-            ---gggggggggggggg-          -gggggggggggggg-              -gggggg-                     
+                     -ggggg--            -gggggggggggggg---          ---gggggggggggg-              -gggggg-                     
+                     -gggg--             -gggggggggggggg-              -gggggggggggg---            ---gggg-                     
+------               -gggg-            ---gggggggggggggg---          ---gggggggggggggg-              -gggg-               ------
+ggggg-----------------gggg--------------gggggggggggggggggg------------gggggggggggggggg----------------gggg-----------------ggggg
+gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg

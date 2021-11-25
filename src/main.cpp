@@ -30,7 +30,7 @@ int main( int argc, char* argv[] )
 	int height = 0;
 	int width = 0;
 
-	std::cout << "Read input file...\n";
+	std::cout << "Read input file " << mapfile << "...\n";
 	std::string line;
 	while( std::getline( in, line ) )
 	{
@@ -114,9 +114,9 @@ int main( int argc, char* argv[] )
 	std::cout << "Computing contours...\n";
 	auto contours = cc.compute_contours();
 	auto simplified = cc.compute_simplified_contours();
-	for( size_t i = 0 ; i < contours.size(); ++i )
-		std::cout	<< "Contour[" << i << "]: " << boost::geometry::dsv(contours[i]) << "\n"
-			        << "Simplified[" << i << "]: " << boost::geometry::dsv(simplified[i]) << "\n\n";
+	// for( size_t i = 0 ; i < contours.size(); ++i )
+	// 	std::cout	<< "Contour[" << i << "]: " << boost::geometry::dsv(contours[i]) << "\n"
+	// 		        << "Simplified[" << i << "]: " << boost::geometry::dsv(simplified[i]) << "\n\n";
 
 	std::stringstream ssc;
 
@@ -160,11 +160,35 @@ int main( int argc, char* argv[] )
 			for( auto& p : inner )
 				p.y( -p.y() );		
 	}
-	
+
+	// reverse x-axis for the SVG file from SC2 maps (?!)
+	if( mapfile.substr( mapfile.size() - 6, 6 ) == "LE.txt" )
+	{
+		for( size_t i = 0 ; i < contours.size(); ++i )
+		{
+			for( auto& p : contours[i].outer() )
+				p.x( -p.x() );
+			
+			for( auto& inner : contours[i].inners() )
+				for( auto& p : inner )
+					p.x( -p.x() );
+			
+			for( auto& p : simplified[i].outer() )
+				p.x( -p.x() );
+			
+			for( auto& inner : simplified[i].inners() )
+				for( auto& p : inner )
+					p.x( -p.x() );		
+		}
+	}
+
 	std::string contour_mapfile_svg = contour_mapfile;
 	contour_mapfile_svg.replace( contour_mapfile_svg.end() - 3, contour_mapfile_svg.end(), "svg" );
 	std::ofstream contour_svg( contour_mapfile_svg );
-	boost::geometry::svg_mapper<point> mapper( contour_svg, 10*width, 10*height );
+	boost::geometry::svg_mapper<point> mapper( contour_svg, 9*width, 9*height );
+
+	// std::vector< boost::geometry::model::ring<point> > contours_ring( contours.size() );
+	// std::vector< boost::geometry::model::ring<point> > simplified_ring( simplified.size() );
 
 	for( size_t i = 0; i < contours.size(); ++i )
 	{
@@ -176,7 +200,8 @@ int main( int argc, char* argv[] )
 	for( size_t i = 0; i < contours.size(); ++i )
 	{
 		mapper.map( contours[i], "fill-opacity:0.5;fill:rgb(253,0,0);stroke:rgb(253,0,0);stroke-width:2");
-		mapper.map( simplified[i], "fill-opacity:0.5;fill:rgb(51,51,153);stroke:rgb(0,0,0);stroke-width:5");
+		mapper.map( simplified[i], "fill-opacity:0.5;fill:rgb(0,253,0);stroke:rgb(0,0,0);stroke-width:5");
+		// mapper.map( simplified[i], "fill-opacity:0.5;fill:rgb(51,51,153);stroke:rgb(0,0,0);stroke-width:5");
 		// boost::geometry::centroid( simplified[i], center );
 		// mapper.text( center, std::to_string( i ), "fill-opacity:1;fill:rgb(0,0,0);stroke:rgb(0,0,0);stroke-width:2;font-size:64");
 	}
