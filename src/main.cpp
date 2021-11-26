@@ -44,10 +44,10 @@ int main( int argc, char* argv[] )
 			switch( c )
 			{
 			case '1':
-				map[ height ].push_back( -1 );
+				map[ height ].push_back( 1 );
 				break;
 			case '2':
-				map[ height ].push_back( -2 );
+				map[ height ].push_back( 2 );
 				break;
 			default:
 				map[ height ].push_back( 0 );
@@ -57,6 +57,8 @@ int main( int argc, char* argv[] )
 		++height;
 	}
 	in.close();
+
+	std::cout << "Map size (w x h): " << width << "x" << height << "\n";
 
 	std::string labeled_mapfile = mapfile;
 	labeled_mapfile.replace( labeled_mapfile.begin(), labeled_mapfile.begin() + 5, "maps/taunted/" );
@@ -68,29 +70,29 @@ int main( int argc, char* argv[] )
 		return EXIT_FAILURE;
 	}
 
-	std::cout << "Computing zones...\n";
+	std::cout << "Computing contours...\n";
+	// auto contours = cc.compute_contours();
 	taunt::connected_component cc( map );
-	std::vector< std::vector< int > > labeled_map = cc.compute_cc();
-	std::vector< std::vector< char > > labeled_map_char( labeled_map.size() );
-	std::vector< std::vector< bool > > contour_map( labeled_map.size() );
-	for( size_t i = 0; i < labeled_map.size(); ++i )
-	{
-		labeled_map_char[ i ] = std::vector<char>( labeled_map[ i ].size() );
-		contour_map[ i ] = std::vector<bool>( labeled_map[ i ].size(), false );
+	auto simplified = cc.compute_simplified_contours();
 
-		for( size_t j = 0; j < labeled_map[ i ].size(); ++j )
-			if( labeled_map[ i ][ j ] == -1 )
-				labeled_map_char[ i ][ j ] = '.';
-			else
-				if( labeled_map[ i ][ j ] >= 1000 )
-					labeled_map_char[ i ][ j ] = '-';
-				else
-					if( labeled_map[ i ][ j ] == 0 || labeled_map[ i ][ j ] == -2 )
-						labeled_map_char[ i ][ j ] = ' ';
-					else
-						labeled_map_char[ i ][ j ] = labeled_map[ i ][ j ] + 64;
-	}
+	// std::vector< std::vector< int > > labeled_map = cc.compute_cc();
+	// std::vector< std::vector< char > > labeled_map_char( labeled_map.size() );
+	// for( size_t i = 0; i < labeled_map.size(); ++i )
+	// {
+	// 	labeled_map_char[ i ] = std::vector<char>( labeled_map[ i ].size() );
+	// 	contour_map[ i ] = std::vector<bool>( labeled_map[ i ].size(), false );
 
+	// 	for( size_t j = 0; j < labeled_map[ i ].size(); ++j )
+	// 		if( labeled_map[ i ][ j ] == 1 )
+	// 			labeled_map_char[ i ][ j ] = '.';
+	// 		else
+	// 			if( labeled_map[ i ][ j ] == 0 || labeled_map[ i ][ j ] == 2 )
+	// 				labeled_map_char[ i ][ j ] = ' ';
+	// 			else
+	// 				labeled_map_char[ i ][ j ] = 'X';
+	// }
+
+	auto labeled_map_char = cc.get_map();	
 	for( int j = 0; j < height; ++j )
 	{
 		for( int i = 0; i < width; ++i )
@@ -101,6 +103,7 @@ int main( int argc, char* argv[] )
 	labeled_out << ss.str();
 	labeled_out.close();
 
+	std::vector< std::vector< bool > > contour_map( height );
 	std::string contour_mapfile = mapfile;
 	contour_mapfile.replace( contour_mapfile.begin(), contour_mapfile.begin() + 5, "maps/taunted/" );
 	contour_mapfile.replace( contour_mapfile.end() - 4, contour_mapfile.end(), "_contour.txt" );
@@ -111,25 +114,19 @@ int main( int argc, char* argv[] )
 		return EXIT_FAILURE;
 	}
 
-	std::cout << "Computing contours...\n";
-	auto contours = cc.compute_contours();
-	auto simplified = cc.compute_simplified_contours();
 	// for( size_t i = 0 ; i < contours.size(); ++i )
 	// 	std::cout	<< "Contour[" << i << "]: " << boost::geometry::dsv(contours[i]) << "\n"
 	// 		        << "Simplified[" << i << "]: " << boost::geometry::dsv(simplified[i]) << "\n\n";
 
 	std::stringstream ssc;
 
-	for( auto& contour : contours )
-	{
-		for( auto& point : contour.outer() )
+	for( int j = 0; j < height; ++j )
+		contour_map[j] = std::vector<bool>( width, false );
+
+	for( const auto& contour : simplified )
+		for( const auto& point : contour.outer() )
 			contour_map[ point.y() ][ point.x() ] = true;
 
-		for( auto& inner : contour.inners() )
-			for( auto& point : inner )
-				contour_map[ point.y() ][ point.x() ] = true;
-	}
-	
 	for( int j = 0; j < height; ++j )
 	{
 		for( int i = 0; i < width; ++i )
@@ -144,44 +141,28 @@ int main( int argc, char* argv[] )
 	contour_file.close();
 
 	// reverse y-axis for the SVG file
-	for( size_t i = 0 ; i < contours.size(); ++i )
+	for( size_t i = 0 ; i < simplified.size(); ++i )
 	{
-		for( auto& p : contours[i].outer() )
-			p.y( -p.y() );
-
-		for( auto& inner : contours[i].inners() )
-			for( auto& p : inner )
-				p.y( -p.y() );
-
 		for( auto& p : simplified[i].outer() )
 			p.y( -p.y() );
-
+		
 		for( auto& inner : simplified[i].inners() )
 			for( auto& p : inner )
-				p.y( -p.y() );		
+				p.y( -p.y() );	
 	}
 
-	// reverse x-axis for the SVG file from SC2 maps (?!)
+	// reverse x-axis for the SVG file from SC2 maps (?!),
 	if( mapfile.substr( mapfile.size() - 6, 6 ) == "LE.txt" )
-	{
-		for( size_t i = 0 ; i < contours.size(); ++i )
+		for( size_t i = 0 ; i < simplified.size(); ++i )
 		{
-			for( auto& p : contours[i].outer() )
-				p.x( -p.x() );
-			
-			for( auto& inner : contours[i].inners() )
-				for( auto& p : inner )
-					p.x( -p.x() );
-			
 			for( auto& p : simplified[i].outer() )
 				p.x( -p.x() );
 			
 			for( auto& inner : simplified[i].inners() )
 				for( auto& p : inner )
-					p.x( -p.x() );		
+					p.x( -p.x() );
 		}
-	}
-
+	
 	std::string contour_mapfile_svg = contour_mapfile;
 	contour_mapfile_svg.replace( contour_mapfile_svg.end() - 3, contour_mapfile_svg.end(), "svg" );
 	std::ofstream contour_svg( contour_mapfile_svg );
@@ -189,17 +170,14 @@ int main( int argc, char* argv[] )
 
 	// std::vector< boost::geometry::model::ring<point> > contours_ring( contours.size() );
 	// std::vector< boost::geometry::model::ring<point> > simplified_ring( simplified.size() );
-
-	for( size_t i = 0; i < contours.size(); ++i )
-	{
-		mapper.add( contours[i] );
+	
+	for( size_t i = 0; i < simplified.size(); ++i )
 		mapper.add( simplified[i] );
-	}
 
 	// point center;
-	for( size_t i = 0; i < contours.size(); ++i )
+	for( size_t i = 0; i < simplified.size(); ++i )
 	{
-		mapper.map( contours[i], "fill-opacity:0.5;fill:rgb(253,0,0);stroke:rgb(253,0,0);stroke-width:2");
+		// mapper.map( contours[i], "fill-opacity:0.5;fill:rgb(253,0,0);stroke:rgb(253,0,0);stroke-width:2");
 		mapper.map( simplified[i], "fill-opacity:0.5;fill:rgb(53,255,0);stroke:rgb(0,0,0);stroke-width:5");
 		// mapper.map( simplified[i], "fill-opacity:0.5;fill:rgb(51,51,153);stroke:rgb(0,0,0);stroke-width:5");
 		// boost::geometry::centroid( simplified[i], center );

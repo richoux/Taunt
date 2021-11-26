@@ -50,8 +50,8 @@ file.each do |line|
   @input_matrix << line.chomp.split('')
 end
 
-for x in (first_row-1)..(last_row+1) do
-  for y in (first_column-1)..(last_column+1) do
+for x in (first_row-3)..(last_row+3) do
+  for y in (first_column-3)..(last_column+3) do
     print "#{@input_matrix[x][y]}"
   end
   puts ""
