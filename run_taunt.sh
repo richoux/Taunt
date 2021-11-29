@@ -11,5 +11,10 @@ do
 		height=$(echo $info | awk -Fx '{print $2}')
 		inkscape -D -o "maps/taunted/${name}_contour.png" -w $width -h $height "maps/taunted/${name}_contour.svg"
 		convert -composite "maps/${name}.jpg" "maps/taunted/${name}_contour.png" -gravity center "maps/taunted/${name}_contour.png"
+		#if [[ ! "$name" == *"LE" ]]
+		#then
+		inkscape -D -o "maps/taunted/${name}_height.png" -w $width -h $height "maps/taunted/${name}_height.svg"
+		convert -composite "maps/${name}.jpg" "maps/taunted/${name}_height.png" -gravity center "maps/taunted/${name}_height.png"
+		#fi
 done
 

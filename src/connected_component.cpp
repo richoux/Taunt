@@ -396,7 +396,7 @@ namespace taunt
 		for( size_t i = 0 ; i < _contours.size(); ++i )
 		{
 			boost::geometry::correct( _contours[i] );
-			boost::geometry::simplify( _contours[i], simplified_contours[i].outer(), 1);
+			boost::geometry::simplify( _contours[i], simplified_contours[i].outer(), 0);
 		}
 
 		_is_inner = std::vector( simplified_contours.size(), false );
@@ -418,7 +418,7 @@ namespace taunt
 				}
 			}
 
-		for( int i = static_cast<int>( simplified_contours.size() ) ; i >= 0 ; --i )
+		for( int i = static_cast<int>( simplified_contours.size() ) - 1 ; i >= 0 ; --i )
 			if( _is_inner[i] )
 				simplified_contours.erase( simplified_contours.begin() + i );
 
