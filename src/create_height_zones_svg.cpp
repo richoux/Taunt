@@ -374,6 +374,7 @@ int main( int argc, char* argv[] )
 	size_t number_zones_0_2 = simplified_0.size() + simplified_2.size();
 	size_t number_zones_0_2_4 = simplified_0.size() + simplified_2.size() + simplified_4.size();
 	std::vector< boost::geometry::model::multi_point<point> > resources( number_zones_0_2_4 );
+	std::vector< int > number_clusters_resources( number_zones_0_2_4, 0 );
 
 	std::vector< point > resource_points;
 	for( int j = 0 ; j < height ; ++j )
@@ -387,7 +388,7 @@ int main( int argc, char* argv[] )
 		for( auto& point : resource_points )
 			if( boost::geometry::within( point, simplified_0[ i ] ) || boost::geometry::intersects( point, simplified_0[ i ] ) )
 				boost::geometry::append( resources[ i ], point );
-
+	
 	for( size_t i = 0 ; i < simplified_2.size() ; ++i )
 		for( auto& point : resource_points )
 			if( boost::geometry::within( point, simplified_2[ i ] ) || boost::geometry::intersects( point, simplified_2[ i ] ) )
@@ -397,6 +398,100 @@ int main( int argc, char* argv[] )
 		for( auto& point : resource_points )
 			if( boost::geometry::within( point, simplified_4[ i ] ) || boost::geometry::intersects( point, simplified_4[ i ] ) )
 				boost::geometry::append( resources[ number_zones_0_2 + i ], point );
+
+	std::vector< std::vector< boost::geometry::model::multi_point<point> > > clusters_on_the_map( number_zones_0_2_4 );
+
+	int max_distance;
+	if( mapfile.substr( mapfile.size() - 6, 6 ) != "LE.txt" )
+		max_distance = 12; // Brood War
+	else
+		max_distance = 17; // StarCraft 2		
+	
+	for( size_t i = 0 ; i < resources.size() ; ++i )
+	{
+		std::vector< boost::geometry::model::multi_point<point> > clusters;
+		for( auto& resource : resources[i] )
+		{
+			bool found_cluster = false;
+			for( int j = 0 ; j < static_cast<int>( clusters.size() ) ; ++j )
+			{
+				point center;
+				boost::geometry::centroid( clusters[j], center );
+				if( boost::geometry::distance( resource, center ) <= max_distance )
+				{
+					found_cluster = true;
+					boost::geometry::append( clusters[j], resource );
+				}
+			}
+			
+			if( !found_cluster )
+			{
+				boost::geometry::model::multi_point<point> new_cluster{{ resource }};
+				clusters.push_back( new_cluster );
+			}
+		}
+
+		for( auto& cluster : clusters )
+			if( boost::geometry::num_points( cluster ) >= 7 )
+				clusters_on_the_map[i].push_back( cluster );
+			else
+			{
+				boost::geometry::model::multi_point<point> temp;
+				boost::geometry::difference( resources[i], cluster, temp );
+				resources[i] = temp;
+			}
+
+		// for( auto& cluster : clusters )
+		// {
+		// 	point center;
+		// 	boost::geometry::centroid( cluster, center );
+		// 	std::cout << "New cluster of center " << boost::geometry::dsv(center) << std::endl;			
+		// 	for( auto& resource: cluster )
+		// 		std::cout << "Distance point " << boost::geometry::dsv(resource)
+		// 		          << " - center " << boost::geometry::dsv(resource)
+		// 		          << ": " << boost::geometry::distance( resource, center ) << std::endl;
+		// }
+	}
+
+
+	// merge very close clusters
+	int cpt = 0;
+	for( auto& clusters : clusters_on_the_map )
+	{
+		if( clusters.empty() )
+		{
+			++cpt;
+			continue;
+		}
+		
+		for( size_t i = 0 ; i < clusters.size() - 1 ; ++i )
+		{
+			if( boost::geometry::is_empty( clusters[i] ) )
+				continue;
+			
+			point center_i;
+			boost::geometry::centroid( clusters[i], center_i );
+			for( size_t j = clusters.size() - 1 ; j > i ; --j )
+			{
+				if( boost::geometry::is_empty( clusters[j] ) )
+					continue;
+			
+				point center_j;
+				boost::geometry::centroid( clusters[j], center_j );
+
+				if( boost::geometry::distance( center_i, center_j ) <= 5 )
+				{
+					boost::geometry::model::multi_point<point> temp;
+					boost::geometry::union_( clusters[i], clusters[j], temp );
+					clusters[i] = temp;
+					clusters.erase( clusters.begin() + j );
+				}
+			}
+		}
+		
+		number_clusters_resources[cpt] = static_cast<int>( clusters.size() );
+		++cpt;
+	}
 	
 // std::vector< std::vector< bool > > contour_map( height );
 	std::string contour_mapfile = mapfile;
@@ -609,17 +704,17 @@ int main( int argc, char* argv[] )
 
 	boost::geometry::model::box<point> box;
 	std::vector< boost::geometry::model::box<point> > boxes;
+	std::vector< int > number_clusters_in_box;
 
-	for( auto& mp : resources )
+	for( size_t i = 0 ; i < resources.size() ; ++i )
 	{
-		//std::cout << "mp.size()=" << boost::geometry::num_points( mp ) << std::endl;
 		boost::geometry::clear( box );
-		if( !boost::geometry::is_empty( mp ) )
+		if( !boost::geometry::is_empty( resources[i] ) )
 		{
-			boost::geometry::envelope( mp, box);
+			boost::geometry::envelope( resources[i], box);
 			mapper_resources.add( box );
 			boxes.push_back( box );
-			//std::cout << "Box: " << boost::geometry::dsv(box) << std::endl;
+			number_clusters_in_box.push_back( number_clusters_resources[i] );
 		}
 	}
 	
@@ -712,7 +807,33 @@ int main( int argc, char* argv[] )
 		mapper_resources.text( center,
 		                       area_string,
 		                       "fill-opacity:1;fill:rgb(0,255,0);font-size:42" );
+
+		boost::geometry::set<0>( center, center.x() + 3 );
+		boost::geometry::set<1>( center, center.y() - 4 );
+		std::string nb_cluster = std::to_string( number_clusters_in_box[i] );
+		mapper_resources.text( center,
+		                       nb_cluster,
+		                       "fill-opacity:1;fill:rgb(0,0,0);font-size:42" );
 	}
+
+	for( auto& clusters : clusters_on_the_map )
+		for( auto& cluster : clusters )
+		{
+			point center;
+			boost::geometry::centroid( cluster, center );
+			if( mapfile.substr( mapfile.size() - 6, 6 ) != "LE.txt" )
+				boost::geometry::set<1>( center, height - center.y() );
+			
+			for( auto& resource: cluster )
+			{
+				if( mapfile.substr( mapfile.size() - 6, 6 ) != "LE.txt" )
+					boost::geometry::set<1>( resource, height - resource.y() );
+				boost::geometry::model::segment<point> seg( center, resource );
+				mapper_resources.map( seg, "stroke:rgb(255,127,0);stroke-width:3" );
+			}
+
+			mapper_resources.map( center, "fill-opacity:1;fill:rgb(255,0,0);stroke:rgb(255,0,0);stroke-width:7" );
+		}
 	
 	return EXIT_SUCCESS;
 }
