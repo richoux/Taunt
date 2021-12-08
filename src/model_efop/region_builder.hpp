@@ -3,6 +3,7 @@
 #include <vector>
 
 #include <ghost/model_builder.hpp>
+#include <ghost/thirdparty/randutils.hpp>
 
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/linestring.hpp>
@@ -16,6 +17,7 @@ class RegionBuilder : public ghost::ModelBuilder
 	int _number_separations;
 	polygon _contour;
 	std::vector<multi_point> _resources;
+	randutils::mt19937_rng _rng;
 	
 	public:
 	RegionBuilder( int number_separations,

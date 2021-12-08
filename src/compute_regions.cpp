@@ -5,13 +5,35 @@
 #include <iomanip>
 #include <cmath>
 #include <vector>
+#include <memory>
 
 #include <ghost/solver.hpp>
 
 #include "connected_component.hpp"
 #include "model_efop/region_builder.hpp"
+#include "model_efop/print_chokes.hpp"
 
 using namespace std::literals::chrono_literals;
+using segment = boost::geometry::model::segment<point>;
+using polygon = boost::geometry::model::polygon<point>;
+	
+void add_chokes( const std::vector< int >& solution, const polygon& contour, std::vector< segment >& chokes )
+{
+	std::vector< bool > processed( solution.size(), false );
+	for( size_t i = 0 ; i < solution.size() - 1 ; ++i )
+		if( solution[i] != 0 && !processed[i] )
+		{
+			processed[i] = true;
+			for( size_t j = i + 1 ; j < solution.size() ; ++j )
+				if( solution[j] == solution[i]  && !processed[j] )
+				{
+					processed[j] = true;
+					segment seg{ contour.outer()[i], contour.outer()[j] };
+					chokes.push_back( seg );
+				}
+		}
+}
+
 
 int main( int argc, char* argv[] )
 {
@@ -27,7 +49,6 @@ int main( int argc, char* argv[] )
 	std::string mapfile_resources = mapfile;
 	mapfile_resources.replace( mapfile_resources.end()-4, mapfile_resources.end(), "_resources.txt" );
 
-// std::ifstream in( "C:/Users/Flo/Documents/GitHub/Taunt/Release/map.txt" );
 	std::ifstream in( mapfile );
 	if( !in.is_open() )
 	{
@@ -272,17 +293,17 @@ int main( int argc, char* argv[] )
 
 	for( size_t i = 0 ; i < number_zones_0 ; ++i )
 		for( auto& point : resource_points )
-			if( boost::geometry::within( point, simplified_0[ i ] ) || boost::geometry::intersects( point, simplified_0[ i ] ) )
+			if( boost::geometry::covered_by( point, simplified_0[ i ] ) )
 				boost::geometry::append( resources[ i ], point );
 	
 	for( size_t i = 0 ; i < simplified_2.size() ; ++i )
 		for( auto& point : resource_points )
-			if( boost::geometry::within( point, simplified_2[ i ] ) || boost::geometry::intersects( point, simplified_2[ i ] ) )
+			if( boost::geometry::covered_by( point, simplified_2[ i ] ) )
 				boost::geometry::append( resources[ number_zones_0 + i ], point );
 
 	for( size_t i = 0 ; i < simplified_4.size() ; ++i )
 		for( auto& point : resource_points )
-			if( boost::geometry::within( point, simplified_4[ i ] ) || boost::geometry::intersects( point, simplified_4[ i ] ) )
+			if( boost::geometry::covered_by( point, simplified_4[ i ] ) )
 				boost::geometry::append( resources[ number_zones_0_2 + i ], point );
 
 	std::vector< std::vector< boost::geometry::model::multi_point<point> > > clusters_on_the_map( number_zones_0_2_4 );
@@ -328,7 +349,6 @@ int main( int argc, char* argv[] )
 			}
 	}
 
-
 	// merge very close clusters
 	int cpt = 0;
 	for( auto& clusters : clusters_on_the_map )
@@ -368,23 +388,35 @@ int main( int argc, char* argv[] )
 		++cpt;
 	}
 
+	std::vector< segment > chokes;
+	
 	// Compute regions with GHOST
 	for( int i = 0 ; i < static_cast<int>( simplified_0.size() ) ; ++i )
 	{
 		if( number_clusters_resources[i] >= 2 )
 		{
+			polygon really_simplified;
+			boost::geometry::simplify( simplified_0[i], really_simplified, 1);
+
 			double cost;
-			std::vector<int> solution( simplified_0[i].outer().size() );
-			RegionBuilder builder( number_clusters_resources[i] - 1, simplified_0[i], clusters_on_the_map[i] );
+			std::vector<int> solution( really_simplified.outer().size() );
+			RegionBuilder builder( number_clusters_resources[i] - 1, really_simplified, clusters_on_the_map[i] );
 		
 			ghost::Options options;
-			// options.parallel_runs = true;
-		
+			//options.parallel_runs = true;
+			options.print = std::make_shared<PrintChokes>( really_simplified );
+			options.custom_starting_point = true;
+			
 			ghost::Solver solver( builder );
-			if( solver.solve( cost, solution, 100ms, options ) )
-				std::cout << "Solution for zone " << i << "\n";
+			if( solver.solve( cost, solution, 1s, options ) )
+			{
+				add_chokes( solution, really_simplified, chokes );
+			}
 			else
+			{
 				std::cout << "Fail to find a solution for zone " << i << "\n";
+				return EXIT_FAILURE;
+			}
 		}
 	}
 
@@ -393,19 +425,28 @@ int main( int argc, char* argv[] )
 		int index = i + number_zones_0;
 		if( number_clusters_resources[index] >= 2 )
 		{
+			polygon really_simplified;
+			boost::geometry::simplify( simplified_2[i], really_simplified, 1);
+
 			double cost;
-			std::cout << "Number variables: " << simplified_2[i].outer().size() << "\n";
-			std::vector<int> solution( simplified_2[i].outer().size() );
-			RegionBuilder builder( number_clusters_resources[index] - 1, simplified_2[i], clusters_on_the_map[index] );
+			std::vector<int> solution( really_simplified.outer().size() );
+			RegionBuilder builder( number_clusters_resources[index] - 1, really_simplified, clusters_on_the_map[index] );
 		
 			ghost::Options options;
-			// options.parallel_runs = true;
+			//options.parallel_runs = true;
+			options.print = std::make_shared<PrintChokes>( really_simplified );
+			options.custom_starting_point = true;
 		
 			ghost::Solver solver( builder );
-			if( solver.solve( cost, solution, 100ms, options ) )
-				std::cout << "Solution for zone " << index << "\n";
+			if( solver.solve( cost, solution, 1s, options ) )
+			{
+				add_chokes( solution, really_simplified, chokes );
+			}
 			else
+			{
 				std::cout << "Fail to find a solution for zone " << index << "\n";
+				return EXIT_FAILURE;
+			}
 		}
 	}
 
@@ -414,20 +455,81 @@ int main( int argc, char* argv[] )
 		int index = i + number_zones_0_2;
 		if( number_clusters_resources[index] >= 2 )
 		{
+			polygon really_simplified;
+			boost::geometry::simplify( simplified_4[i], really_simplified, 1);
+
 			double cost;
-			std::cout << "Number variables: " << simplified_4[i].outer().size() << "\n";
-			std::vector<int> solution( simplified_4[i].outer().size() );
-			RegionBuilder builder( number_clusters_resources[index] - 1, simplified_4[i], clusters_on_the_map[index] );
+			std::vector<int> solution( really_simplified.outer().size() );
+			RegionBuilder builder( number_clusters_resources[index] - 1, really_simplified, clusters_on_the_map[index] );
 		
 			ghost::Options options;
-			// options.parallel_runs = true;
+			//options.parallel_runs = true;
+			options.print = std::make_shared<PrintChokes>( really_simplified );
+			options.custom_starting_point = true;
 		
 			ghost::Solver solver( builder );
-			if( solver.solve( cost, solution, 100ms, options ) )
-				std::cout << "Solution for zone " << index << "\n";
+			if( solver.solve( cost, solution, 1s, options ) )
+			{
+				add_chokes( solution, really_simplified, chokes );
+			}
 			else
+			{
 				std::cout << "Fail to find a solution for zone " << index << "\n";
+				return EXIT_FAILURE;
+			}
 		}
+	// for( int i = 0 ; i < static_cast<int>( simplified_2.size() ) ; ++i )
+	// {
+	// 	int index = i + number_zones_0;
+	// 	if( number_clusters_resources[index] >= 2 )
+	// 	{
+	// 		double cost;
+	// 		std::vector<int> solution( simplified_2[i].outer().size() );
+	// 		RegionBuilder builder( number_clusters_resources[index] - 1, simplified_2[i], clusters_on_the_map[index] );
+		
+	// 		ghost::Options options;
+	// 		options.parallel_runs = true;
+	// 		options.print = std::make_shared<PrintChokes>( simplified_2[i] );
+	// 		options.custom_starting_point = true;
+		
+	// 		ghost::Solver solver( builder );
+	// 		if( solver.solve( cost, solution, 1s, options ) )
+	// 		{
+	// 			add_chokes( solution, simplified_2[i], chokes );
+	// 		}
+	// 		else
+	// 		{
+	// 			std::cout << "Fail to find a solution for zone " << index << "\n";
+	// 			return EXIT_FAILURE;
+	// 		}
+	// 	}
+	// }
+
+	// for( int i = 0 ; i < static_cast<int>( simplified_4.size() ) ; ++i )
+	// {
+	// 	int index = i + number_zones_0_2;
+	// 	if( number_clusters_resources[index] >= 2 )
+	// 	{
+	// 		double cost;
+	// 		std::vector<int> solution( simplified_4[i].outer().size() );
+	// 		RegionBuilder builder( number_clusters_resources[index] - 1, simplified_4[i], clusters_on_the_map[index] );
+		
+	// 		ghost::Options options;
+	// 		options.parallel_runs = true;
+	// 		options.print = std::make_shared<PrintChokes>( simplified_4[i] );
+	// 		options.custom_starting_point = true;
+		
+	// 		ghost::Solver solver( builder );
+	// 		if( solver.solve( cost, solution, 1s, options ) )
+	// 		{
+	// 			add_chokes( solution, simplified_4[i], chokes );
+	// 		}
+	// 		else
+	// 		{
+	// 			std::cout << "Fail to find a solution for zone " << index << "\n";
+	// 			return EXIT_FAILURE;
+	// 		}
+	// 	}
 	}
 
 	std::string contour_mapfile = mapfile;
@@ -471,6 +573,12 @@ int main( int argc, char* argv[] )
 		for( auto& inner : simplified_unbuildable[i].inners() )
 			for( auto& p : inner )
 				p.y( -p.y() );	
+	}
+
+	for( size_t i = 0 ; i < chokes.size(); ++i )
+	{
+		boost::geometry::set<0, 1>( chokes[i], - boost::geometry::get<0, 1>( chokes[i] ) );
+		boost::geometry::set<1, 1>( chokes[i], - boost::geometry::get<1, 1>( chokes[i] ) );
 	}
 
 	// reverse x-axis for the SVG file from SC2 maps (?!),
@@ -517,6 +625,20 @@ int main( int argc, char* argv[] )
 				for( auto& p : inner )
 					p.x( -p.x() );
 		}
+
+	if( mapfile.substr( mapfile.size() - 6, 6 ) == "LE.txt" )
+		for( size_t i = 0 ; i < chokes.size(); ++i )
+		{
+			boost::geometry::set<0, 0>( chokes[i], - boost::geometry::get<0, 0>( chokes[i] ) );
+			boost::geometry::set<1, 0>( chokes[i], - boost::geometry::get<1, 0>( chokes[i] ) );
+		}
+	
+	for( size_t i = 0 ; i < chokes.size(); ++i )
+	{
+		std::cout << "Choke [ ( "
+		          << boost::geometry::get<0, 0>( chokes[i] ) << "," << boost::geometry::get<0, 1>( chokes[i] ) << " ) , ( "
+		          << boost::geometry::get<1, 0>( chokes[i] ) << "," << boost::geometry::get<1, 1>( chokes[i] ) << " ) ]\n";
+	}
 
 	std::string contour_mapfile_svg = contour_mapfile;
 	contour_mapfile_svg.replace( contour_mapfile_svg.begin(), contour_mapfile_svg.begin() + 5, "maps/taunted/" );
@@ -584,6 +706,9 @@ int main( int argc, char* argv[] )
 		mapper_unbuildable.add( simplified_unbuildable[i] );
 	}
 
+	for( size_t i = 0; i < chokes.size(); ++i )
+		mapper.add( chokes[i] );
+
 	for( size_t i = 0; i < simplified_0.size(); ++i )
 	{
 		mapper.map( simplified_0[i], "fill-opacity:0.5;fill:rgb(255,255,0);stroke:rgb(0,0,0);stroke-width:5");
@@ -607,6 +732,9 @@ int main( int argc, char* argv[] )
 		mapper.map( simplified_unbuildable[i], "fill-opacity:0.5;fill:rgb(0,0,255);stroke:rgb(0,0,0);stroke-width:5");
 		mapper_unbuildable.map( simplified_unbuildable[i], "fill-opacity:0.5;fill:rgb(53,255,0);stroke:rgb(0,0,0);stroke-width:5");
 	}
-	
+
+	for( size_t i = 0; i < chokes.size(); ++i )
+		mapper.map( chokes[i], "fill-opacity:1;fill:rgb(155,55,255);stroke:rgb(155,55,255);stroke-width:7");
+
 	return EXIT_SUCCESS;
 }

@@ -1,7 +1,7 @@
 #include "objective_min_separation_width.hpp"
 
 MinSeparationWidth::MinSeparationWidth( const std::vector<ghost::Variable>& variables, const polygon& contour )
-	: Minimize( variables ),
+	: Minimize( variables, "Minimize Separation Width" ),
 	  _contour( contour )
 {}
 

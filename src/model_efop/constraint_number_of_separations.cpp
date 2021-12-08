@@ -9,7 +9,7 @@ double NumberSeparations::required_error( const std::vector<ghost::Variable*>& v
 {
 	int error = 0;
 
-	for( int separation = 1 ; separation < _number_separations; ++separation )
+	for( int separation = 1 ; separation <= _number_separations; ++separation )
 		error += std::abs( 2 - std::count_if( variables.begin(), variables.end(), [&](auto& v){ return v->get_value() == separation; } ) );
 
 	return error;	

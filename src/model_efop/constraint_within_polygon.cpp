@@ -19,9 +19,17 @@ double WithinPolygon::required_error( const std::vector<ghost::Variable*>& varia
 				if( variables[j]->get_value() == variables[i]->get_value() && !processed[j] )
 				{
 					processed[j] = true;
-					ring ring_line{{ _contour.outer()[i], _contour.outer()[j] }};
-					if( boost::geometry::within( ring_line, _contour.outer() ) )
+
+					if( j == i + 1)
 						++error;
+					else
+					{					
+						ring ring_line{{ _contour.outer()[i], _contour.outer()[j] }};
+						// point center;
+						// boost::geometry::centroid( ring_line, center );
+						if( !boost::geometry::covered_by( ring_line, _contour.outer() ) )
+							++error;
+					}
 				}
 		}
 	}

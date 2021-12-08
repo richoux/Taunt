@@ -5,7 +5,7 @@ do
 		filename=$(basename "$i")
 		echo ""
 		echo "Processing $filename..."
-		./bin/taunt "$i"
+		./bin/taunt "$i" 2> /dev/null
 		name="${filename%.*}"
 		info=$(file "maps/${name}.jpg" | awk -F', ' '{print $(NF-1)}')
 		width=$(echo $info | awk -Fx '{print $1}')

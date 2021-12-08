@@ -386,17 +386,17 @@ int main( int argc, char* argv[] )
 	
 	for( size_t i = 0 ; i < number_zones_0 ; ++i )
 		for( auto& point : resource_points )
-			if( boost::geometry::within( point, simplified_0[ i ] ) || boost::geometry::intersects( point, simplified_0[ i ] ) )
+			if( boost::geometry::covered_by( point, simplified_0[ i ] ) )
 				boost::geometry::append( resources[ i ], point );
 	
 	for( size_t i = 0 ; i < simplified_2.size() ; ++i )
 		for( auto& point : resource_points )
-			if( boost::geometry::within( point, simplified_2[ i ] ) || boost::geometry::intersects( point, simplified_2[ i ] ) )
+			if( boost::geometry::covered_by( point, simplified_2[ i ] ) )
 				boost::geometry::append( resources[ number_zones_0 + i ], point );
 
 	for( size_t i = 0 ; i < simplified_4.size() ; ++i )
 		for( auto& point : resource_points )
-			if( boost::geometry::within( point, simplified_4[ i ] ) || boost::geometry::intersects( point, simplified_4[ i ] ) )
+			if( boost::geometry::covered_by( point, simplified_4[ i ] ) )
 				boost::geometry::append( resources[ number_zones_0_2 + i ], point );
 
 	std::vector< std::vector< boost::geometry::model::multi_point<point> > > clusters_on_the_map( number_zones_0_2_4 );

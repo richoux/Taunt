@@ -33,8 +33,7 @@ double NoCuts::required_error( const std::vector<ghost::Variable*>& variables ) 
 								++error;
 
 					for( auto& inner : _contour.inners() )
-						if( boost::geometry::crosses( inner, line )
-						    || boost::geometry::within( ring_line, inner ) )
+						if( boost::geometry::covered_by( ring_line, inner ) || boost::geometry::crosses( inner, line ) )
 							++error;
 
 					for( auto& segment : vec_lines )
