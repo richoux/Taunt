@@ -10,27 +10,38 @@
 #include <ghost/solver.hpp>
 
 #include "connected_component.hpp"
-#include "model_efop/region_builder.hpp"
-#include "model_efop/print_chokes.hpp"
+#include "models/filtered_separations/region_builder.hpp"
+#include "models/filtered_separations/print_chokes.hpp"
 
 using namespace std::literals::chrono_literals;
 using segment = boost::geometry::model::segment<point>;
 using polygon = boost::geometry::model::polygon<point>;
-	
-void add_chokes( const std::vector< int >& solution, const polygon& contour, std::vector< segment >& chokes )
+using line = boost::geometry::model::linestring<point>;
+
+// void add_chokes( const std::vector< int >& solution, const polygon& contour, std::vector< segment >& chokes )
+// {
+// 	std::vector< bool > processed( solution.size(), false );
+// 	for( size_t i = 0 ; i < solution.size() - 1 ; ++i )
+// 		if( solution[i] != 0 && !processed[i] )
+// 		{
+// 			processed[i] = true;
+// 			for( size_t j = i + 1 ; j < solution.size() ; ++j )
+// 				if( solution[j] == solution[i]  && !processed[j] )
+// 				{
+// 					processed[j] = true;
+// 					segment seg{ contour.outer()[i], contour.outer()[j] };
+// 					chokes.push_back( seg );
+// 				}
+// 		}
+// }
+
+void add_chokes( const std::vector< int >& solution, const std::vector<line>& separations, std::vector< segment >& chokes )
 {
-	std::vector< bool > processed( solution.size(), false );
-	for( size_t i = 0 ; i < solution.size() - 1 ; ++i )
-		if( solution[i] != 0 && !processed[i] )
+	for( size_t i = 0 ; i < solution.size() ; ++i )
+		if( solution[i] == 1 )
 		{
-			processed[i] = true;
-			for( size_t j = i + 1 ; j < solution.size() ; ++j )
-				if( solution[j] == solution[i]  && !processed[j] )
-				{
-					processed[j] = true;
-					segment seg{ contour.outer()[i], contour.outer()[j] };
-					chokes.push_back( seg );
-				}
+			segment seg{ separations[i][0], separations[i][1] };
+			chokes.push_back( seg );
 		}
 }
 
@@ -404,13 +415,15 @@ int main( int argc, char* argv[] )
 		
 			ghost::Options options;
 			//options.parallel_runs = true;
-			options.print = std::make_shared<PrintChokes>( really_simplified );
+			//options.print = std::make_shared<PrintChokes>( really_simplified );
+			options.print = std::make_shared<PrintChokes>( builder.separation_candidates );
 			options.custom_starting_point = true;
 			
 			ghost::Solver solver( builder );
 			if( solver.solve( cost, solution, 1s, options ) )
 			{
-				add_chokes( solution, really_simplified, chokes );
+				//add_chokes( solution, really_simplified, chokes );
+				add_chokes( solution, builder.separation_candidates, chokes );
 			}
 			else
 			{
@@ -434,13 +447,15 @@ int main( int argc, char* argv[] )
 		
 			ghost::Options options;
 			//options.parallel_runs = true;
-			options.print = std::make_shared<PrintChokes>( really_simplified );
+			//options.print = std::make_shared<PrintChokes>( really_simplified );
+			options.print = std::make_shared<PrintChokes>( builder.separation_candidates );
 			options.custom_starting_point = true;
 		
 			ghost::Solver solver( builder );
 			if( solver.solve( cost, solution, 1s, options ) )
 			{
-				add_chokes( solution, really_simplified, chokes );
+				//add_chokes( solution, really_simplified, chokes );
+				add_chokes( solution, builder.separation_candidates, chokes );
 			}
 			else
 			{
@@ -464,13 +479,15 @@ int main( int argc, char* argv[] )
 		
 			ghost::Options options;
 			//options.parallel_runs = true;
-			options.print = std::make_shared<PrintChokes>( really_simplified );
+			//options.print = std::make_shared<PrintChokes>( really_simplified );
+			options.print = std::make_shared<PrintChokes>( builder.separation_candidates );
 			options.custom_starting_point = true;
 		
 			ghost::Solver solver( builder );
 			if( solver.solve( cost, solution, 1s, options ) )
 			{
-				add_chokes( solution, really_simplified, chokes );
+				//add_chokes( solution, really_simplified, chokes );
+				add_chokes( solution, builder.separation_candidates, chokes );
 			}
 			else
 			{

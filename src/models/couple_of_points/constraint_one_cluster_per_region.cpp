@@ -58,7 +58,7 @@ double OneClusterPerRegion::required_error( const std::vector<ghost::Variable*>&
 							// }
 							
 							ring ring_one{{ subregions.at(k)[index] }};
-							point p;
+							point p = subregions.at(k)[index];
 							int cpt = index;
 							int loop = 0;
 							while( !boost::geometry::equals( p, _contour.outer()[j] ) && loop < subregions.at(k).size() )
