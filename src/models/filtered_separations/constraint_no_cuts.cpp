@@ -1,45 +1,48 @@
 #include "constraint_no_cuts.hpp"
 
 NoCuts::NoCuts( const std::vector<ghost::Variable>& variables,
-                std::shared_ptr<ghost::AuxiliaryData> data )
+                const polygon& contour,
+                const std::vector<multi_point>& resources,
+                const std::vector<line>& separations )
 	: Constraint( variables ),
-	  _data( std::dynamic_pointer_cast<DataZone>( data ) )
-{ }
+	  _contour( contour ),
+	  _separations( separations )
+{
+	for( auto& resource : resources )
+	{
+		if( !boost::geometry::is_empty( resource ) )
+		{
+			box box;
+			boost::geometry::envelope( resource, box );
+			_resource_boxes.push_back( box );
+		}
+	}
+}
 
 double NoCuts::required_error( const std::vector<ghost::Variable*>& variables ) const
 {
-	std::vector< bool > processed( variables.size(), false );
 	int error = 0;
 
 	std::vector<line> vec_lines;
 	
-	for( size_t i = 0 ; i < variables.size() - 1 ; ++i )
+	for( size_t i = 0 ; i < variables.size() ; ++i )
 	{
-		if( variables[i]->get_value() > 0 && !processed[i] )
+		if( variables[i]->get_value() == 1 )
 		{
-			processed[i] = true;
+			// Don't cross resource boxes
+			for( auto& resource_box : _resource_boxes )
+				if( boost::geometry::intersects( _separations[i], resource_box ) )
+					++error;
+
+			// Don't cross unwalkable/unbuildable parts
+			for( auto& inner : _contour.inners() )
+				if( boost::geometry::crosses( _separations[i], inner ) || boost::geometry::covered_by( _separations[i], inner ) )
+					++error;
+
+			// Don't cross separations each other
 			for( size_t j = i + 1 ; j < variables.size() ; ++j )
-				if( variables[j]->get_value() == variables[i]->get_value() && !processed[j] )
-				{
-					processed[j] = true;
-					ring ring_line{{ _data->contour.outer()[i], _data->contour.outer()[j] }};
-					line line{{ _data->contour.outer()[i], _data->contour.outer()[j] }};
-
-					for( auto& resource_cluster : _data->resources )
-						for( auto& resource_point : resource_cluster )
-							if( boost::geometry::crosses( ring_line, resource_point ) )
-								++error;
-
-					for( auto& inner : _data->contour.inners() )
-						if( boost::geometry::covered_by( ring_line, inner ) || boost::geometry::crosses( inner, line ) )
-							++error;
-
-					for( auto& segment : vec_lines )
-						if( boost::geometry::crosses( segment, line ) )
-							++error;
-
-					vec_lines.push_back( line );
-				}
+				if( variables[j]->get_value() == 1 && boost::geometry::crosses( _separations[i], _separations[j] ) )
+					++error;
 		}
 	}
 

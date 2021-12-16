@@ -26,7 +26,7 @@ class RegionBuilder : public ghost::ModelBuilder
 	void declare_variables() override;
 	void declare_constraints() override;
 	void declare_objective() override;
-	void declare_auxiliary_data() override;
+	//void declare_auxiliary_data() override;
 
 	int number_separations;
 	polygon contour;

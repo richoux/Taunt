@@ -13,27 +13,13 @@
 #include "models/filtered_separations/region_builder.hpp"
 #include "models/filtered_separations/print_chokes.hpp"
 
+#define SIMPLIFY 1.5
+
 using namespace std::literals::chrono_literals;
+using point = boost::geometry::model::d2::point_xy<int>;
 using segment = boost::geometry::model::segment<point>;
 using polygon = boost::geometry::model::polygon<point>;
 using line = boost::geometry::model::linestring<point>;
-
-// void add_chokes( const std::vector< int >& solution, const polygon& contour, std::vector< segment >& chokes )
-// {
-// 	std::vector< bool > processed( solution.size(), false );
-// 	for( size_t i = 0 ; i < solution.size() - 1 ; ++i )
-// 		if( solution[i] != 0 && !processed[i] )
-// 		{
-// 			processed[i] = true;
-// 			for( size_t j = i + 1 ; j < solution.size() ; ++j )
-// 				if( solution[j] == solution[i]  && !processed[j] )
-// 				{
-// 					processed[j] = true;
-// 					segment seg{ contour.outer()[i], contour.outer()[j] };
-// 					chokes.push_back( seg );
-// 				}
-// 		}
-// }
 
 void add_chokes( const std::vector< int >& solution, const std::vector<line>& separations, std::vector< segment >& chokes )
 {
@@ -43,6 +29,66 @@ void add_chokes( const std::vector< int >& solution, const std::vector<line>& se
 			segment seg{ separations[i][0], separations[i][1] };
 			chokes.push_back( seg );
 		}
+}
+
+polygon enrich( const polygon& input )
+{
+	polygon output;
+	for( auto& inner : input.inners() )
+		output.inners().push_back( inner );
+	
+	int perimeter = static_cast<int>( input.outer().size() );
+	
+	for( int i = 0 ; i < perimeter - 1 ; ++i )
+	{
+		boost::geometry::append( output.outer(), input.outer()[i] );
+
+		int next = i + 1;
+
+		auto current_point = input.outer()[i];
+		auto next_point = input.outer()[next];
+		bool same_x = current_point.x() == next_point.x();
+		bool same_y = current_point.y() == next_point.y();
+		
+		if( same_x || same_y )
+		{
+			int distance = boost::geometry::distance( current_point, next_point );
+			if( distance >= 20 )
+				if( same_x )
+				{
+					int up = current_point.y() < next_point.y() ? 1 : -1;
+					point p1( current_point.x(), current_point.y() + up*(distance/3) );
+					point p2( current_point.x(), current_point.y() + up*((2*distance)/3) );
+					boost::geometry::append( output.outer(), p1 );
+					boost::geometry::append( output.outer(), p2 );
+				}
+				else // same_y
+				{
+					int right = current_point.x() < next_point.x() ? 1 : -1;
+					point p1( current_point.x() + right*(distance/3), current_point.y() );
+					point p2( current_point.x() + right*((2*distance)/3), current_point.y() );
+					boost::geometry::append( output.outer(), p1 );
+					boost::geometry::append( output.outer(), p2 );
+				}
+			else
+				if( distance >= 12 )
+					if( same_x )
+					{
+						int up = current_point.y() < next_point.y() ? 1 : -1;
+						point p( current_point.x(), current_point.y() + up*(distance/2) );
+						boost::geometry::append( output.outer(), p );
+					}
+					else // same_y
+					{
+						int right = current_point.x() < next_point.x() ? 1 : -1;
+						point p( current_point.x() + right*(distance/2), current_point.y() );
+						boost::geometry::append( output.outer(), p );
+					}
+		}
+	}
+	
+	boost::geometry::correct(output);
+	return output;
 }
 
 
@@ -401,30 +447,31 @@ int main( int argc, char* argv[] )
 
 	std::vector< segment > chokes;
 	
+	std::vector<polygon> really_simplified_0( simplified_0.size() );
+	std::vector<polygon> really_simplified_2( simplified_2.size() );
+	std::vector<polygon> really_simplified_4( simplified_4.size() );
+	
 	// Compute regions with GHOST
 	for( int i = 0 ; i < static_cast<int>( simplified_0.size() ) ; ++i )
 	{
 		if( number_clusters_resources[i] >= 2 )
 		{
-			polygon really_simplified;
-			boost::geometry::simplify( simplified_0[i], really_simplified, 1);
-
+			polygon temp_simplified;
+			boost::geometry::simplify( simplified_0[i], temp_simplified, SIMPLIFY);
+			really_simplified_0[i] = enrich( temp_simplified );
+			
 			double cost;
-			std::vector<int> solution( really_simplified.outer().size() );
-			RegionBuilder builder( number_clusters_resources[i] - 1, really_simplified, clusters_on_the_map[i] );
+			std::vector<int> solution( really_simplified_0[i].outer().size() );
+			RegionBuilder builder( number_clusters_resources[i] - 1, really_simplified_0[i], clusters_on_the_map[i] );
 		
 			ghost::Options options;
-			//options.parallel_runs = true;
-			//options.print = std::make_shared<PrintChokes>( really_simplified );
+			options.parallel_runs = true;
 			options.print = std::make_shared<PrintChokes>( builder.separation_candidates );
 			options.custom_starting_point = true;
 			
 			ghost::Solver solver( builder );
-			if( solver.solve( cost, solution, 1s, options ) )
-			{
-				//add_chokes( solution, really_simplified, chokes );
+			if( solver.solve( cost, solution, 50ms, options ) )
 				add_chokes( solution, builder.separation_candidates, chokes );
-			}
 			else
 			{
 				std::cout << "Fail to find a solution for zone " << i << "\n";
@@ -438,25 +485,22 @@ int main( int argc, char* argv[] )
 		int index = i + number_zones_0;
 		if( number_clusters_resources[index] >= 2 )
 		{
-			polygon really_simplified;
-			boost::geometry::simplify( simplified_2[i], really_simplified, 1);
+			polygon temp_simplified;
+			boost::geometry::simplify( simplified_2[i], temp_simplified, SIMPLIFY);
+			really_simplified_2[i] = enrich( temp_simplified );
 
 			double cost;
-			std::vector<int> solution( really_simplified.outer().size() );
-			RegionBuilder builder( number_clusters_resources[index] - 1, really_simplified, clusters_on_the_map[index] );
+			std::vector<int> solution( really_simplified_2[i].outer().size() );
+			RegionBuilder builder( number_clusters_resources[index] - 1, really_simplified_2[i], clusters_on_the_map[index] );
 		
 			ghost::Options options;
-			//options.parallel_runs = true;
-			//options.print = std::make_shared<PrintChokes>( really_simplified );
+			options.parallel_runs = true;
 			options.print = std::make_shared<PrintChokes>( builder.separation_candidates );
 			options.custom_starting_point = true;
 		
 			ghost::Solver solver( builder );
-			if( solver.solve( cost, solution, 1s, options ) )
-			{
-				//add_chokes( solution, really_simplified, chokes );
+			if( solver.solve( cost, solution, 50ms, options ) )
 				add_chokes( solution, builder.separation_candidates, chokes );
-			}
 			else
 			{
 				std::cout << "Fail to find a solution for zone " << index << "\n";
@@ -470,83 +514,28 @@ int main( int argc, char* argv[] )
 		int index = i + number_zones_0_2;
 		if( number_clusters_resources[index] >= 2 )
 		{
-			polygon really_simplified;
-			boost::geometry::simplify( simplified_4[i], really_simplified, 1);
+			polygon temp_simplified;
+			boost::geometry::simplify( simplified_4[i], temp_simplified, SIMPLIFY);
+			really_simplified_4[i] = enrich( temp_simplified );
 
 			double cost;
-			std::vector<int> solution( really_simplified.outer().size() );
-			RegionBuilder builder( number_clusters_resources[index] - 1, really_simplified, clusters_on_the_map[index] );
+			std::vector<int> solution( really_simplified_4[i].outer().size() );
+			RegionBuilder builder( number_clusters_resources[index] - 1, really_simplified_4[i], clusters_on_the_map[index] );
 		
 			ghost::Options options;
-			//options.parallel_runs = true;
-			//options.print = std::make_shared<PrintChokes>( really_simplified );
+			options.parallel_runs = true;
 			options.print = std::make_shared<PrintChokes>( builder.separation_candidates );
 			options.custom_starting_point = true;
 		
 			ghost::Solver solver( builder );
-			if( solver.solve( cost, solution, 1s, options ) )
-			{
-				//add_chokes( solution, really_simplified, chokes );
+			if( solver.solve( cost, solution, 50ms, options ) )
 				add_chokes( solution, builder.separation_candidates, chokes );
-			}
 			else
 			{
 				std::cout << "Fail to find a solution for zone " << index << "\n";
 				return EXIT_FAILURE;
 			}
 		}
-	// for( int i = 0 ; i < static_cast<int>( simplified_2.size() ) ; ++i )
-	// {
-	// 	int index = i + number_zones_0;
-	// 	if( number_clusters_resources[index] >= 2 )
-	// 	{
-	// 		double cost;
-	// 		std::vector<int> solution( simplified_2[i].outer().size() );
-	// 		RegionBuilder builder( number_clusters_resources[index] - 1, simplified_2[i], clusters_on_the_map[index] );
-		
-	// 		ghost::Options options;
-	// 		options.parallel_runs = true;
-	// 		options.print = std::make_shared<PrintChokes>( simplified_2[i] );
-	// 		options.custom_starting_point = true;
-		
-	// 		ghost::Solver solver( builder );
-	// 		if( solver.solve( cost, solution, 1s, options ) )
-	// 		{
-	// 			add_chokes( solution, simplified_2[i], chokes );
-	// 		}
-	// 		else
-	// 		{
-	// 			std::cout << "Fail to find a solution for zone " << index << "\n";
-	// 			return EXIT_FAILURE;
-	// 		}
-	// 	}
-	// }
-
-	// for( int i = 0 ; i < static_cast<int>( simplified_4.size() ) ; ++i )
-	// {
-	// 	int index = i + number_zones_0_2;
-	// 	if( number_clusters_resources[index] >= 2 )
-	// 	{
-	// 		double cost;
-	// 		std::vector<int> solution( simplified_4[i].outer().size() );
-	// 		RegionBuilder builder( number_clusters_resources[index] - 1, simplified_4[i], clusters_on_the_map[index] );
-		
-	// 		ghost::Options options;
-	// 		options.parallel_runs = true;
-	// 		options.print = std::make_shared<PrintChokes>( simplified_4[i] );
-	// 		options.custom_starting_point = true;
-		
-	// 		ghost::Solver solver( builder );
-	// 		if( solver.solve( cost, solution, 1s, options ) )
-	// 		{
-	// 			add_chokes( solution, simplified_4[i], chokes );
-	// 		}
-	// 		else
-	// 		{
-	// 			std::cout << "Fail to find a solution for zone " << index << "\n";
-	// 			return EXIT_FAILURE;
-	// 		}
-	// 	}
 	}
 
 	std::string contour_mapfile = mapfile;
@@ -560,7 +549,14 @@ int main( int argc, char* argv[] )
 		for( auto& inner : simplified_0[i].inners() )
 			for( auto& p : inner )
 				p.y( -p.y() );	
-	}
+
+		for( auto& p : really_simplified_0[i].outer() )
+			p.y( -p.y() );
+		
+		for( auto& inner : really_simplified_0[i].inners() )
+			for( auto& p : inner )
+				p.y( -p.y() );	
+}
 
 	for( size_t i = 0 ; i < simplified_2.size(); ++i )
 	{
@@ -568,6 +564,13 @@ int main( int argc, char* argv[] )
 			p.y( -p.y() );
 		
 		for( auto& inner : simplified_2[i].inners() )
+			for( auto& p : inner )
+				p.y( -p.y() );	
+
+		for( auto& p : really_simplified_2[i].outer() )
+			p.y( -p.y() );
+		
+		for( auto& inner : really_simplified_2[i].inners() )
 			for( auto& p : inner )
 				p.y( -p.y() );	
 	}
@@ -578,6 +581,13 @@ int main( int argc, char* argv[] )
 			p.y( -p.y() );
 		
 		for( auto& inner : simplified_4[i].inners() )
+			for( auto& p : inner )
+				p.y( -p.y() );	
+
+		for( auto& p : really_simplified_4[i].outer() )
+			p.y( -p.y() );
+		
+		for( auto& inner : really_simplified_4[i].inners() )
 			for( auto& p : inner )
 				p.y( -p.y() );	
 	}
@@ -608,6 +618,13 @@ int main( int argc, char* argv[] )
 			for( auto& inner : simplified_0[i].inners() )
 				for( auto& p : inner )
 					p.x( -p.x() );
+
+			for( auto& p : really_simplified_0[i].outer() )
+				p.x( -p.x() );
+			
+			for( auto& inner : really_simplified_0[i].inners() )
+				for( auto& p : inner )
+					p.x( -p.x() );
 		}
 
 	if( mapfile.substr( mapfile.size() - 6, 6 ) == "LE.txt" )
@@ -619,6 +636,13 @@ int main( int argc, char* argv[] )
 			for( auto& inner : simplified_2[i].inners() )
 				for( auto& p : inner )
 					p.x( -p.x() );
+
+			for( auto& p : really_simplified_2[i].outer() )
+				p.x( -p.x() );
+			
+			for( auto& inner : really_simplified_2[i].inners() )
+				for( auto& p : inner )
+					p.x( -p.x() );
 		}
 
 	if( mapfile.substr( mapfile.size() - 6, 6 ) == "LE.txt" )
@@ -628,6 +652,13 @@ int main( int argc, char* argv[] )
 				p.x( -p.x() );
 			
 			for( auto& inner : simplified_4[i].inners() )
+				for( auto& p : inner )
+					p.x( -p.x() );
+
+			for( auto& p : really_simplified_4[i].outer() )
+				p.x( -p.x() );
+			
+			for( auto& inner : really_simplified_4[i].inners() )
 				for( auto& p : inner )
 					p.x( -p.x() );
 		}
@@ -681,6 +712,10 @@ int main( int argc, char* argv[] )
 	contour_mapfile_svg_resources.replace( contour_mapfile_svg_resources.begin(), contour_mapfile_svg_resources.begin() + 5, "maps/taunted/" );
 	contour_mapfile_svg_resources.replace( contour_mapfile_svg_resources.end() - 4, contour_mapfile_svg_resources.end(), "_resources.svg" );
 
+	std::string contour_mapfile_svg_simple = contour_mapfile;
+	contour_mapfile_svg_simple.replace( contour_mapfile_svg_simple.begin(), contour_mapfile_svg_simple.begin() + 5, "maps/taunted/" );
+	contour_mapfile_svg_simple.replace( contour_mapfile_svg_simple.end() - 4, contour_mapfile_svg_simple.end(), "_simple.svg" );
+
 	std::ofstream contour_svg( contour_mapfile_svg );
 	boost::geometry::svg_mapper<point> mapper( contour_svg, 9*width, 9*height );
 
@@ -699,22 +734,31 @@ int main( int argc, char* argv[] )
 	std::ofstream contour_svg_resources( contour_mapfile_svg_resources );
 	boost::geometry::svg_mapper<point> mapper_resources( contour_svg_resources, 9*width, 9*height );
 
+	std::ofstream contour_svg_simple( contour_mapfile_svg_simple );
+	boost::geometry::svg_mapper<point> mapper_simple( contour_svg_simple, 9*width, 9*height );
+
 	for( size_t i = 0; i < simplified_0.size(); ++i )
 	{
 		mapper.add( simplified_0[i] );
 		mapper_0.add( simplified_0[i] );
+
+		mapper_simple.add( really_simplified_0[i] );
 	}
 
 	for( size_t i = 0; i < simplified_2.size(); ++i )
 	{
 		mapper.add( simplified_2[i] );
 		mapper_2.add( simplified_2[i] );
+
+		mapper_simple.add( really_simplified_2[i] );
 	}
 
 	for( size_t i = 0; i < simplified_4.size(); ++i )
 	{
 		mapper.add( simplified_4[i] );
 		mapper_4.add( simplified_4[i] );
+
+		mapper_simple.add( really_simplified_4[i] );
 	}
 
 	for( size_t i = 0; i < simplified_unbuildable.size(); ++i )
@@ -724,24 +768,33 @@ int main( int argc, char* argv[] )
 	}
 
 	for( size_t i = 0; i < chokes.size(); ++i )
+	{
 		mapper.add( chokes[i] );
-
+		mapper_simple.add( chokes[i] );
+	}
+	
 	for( size_t i = 0; i < simplified_0.size(); ++i )
 	{
 		mapper.map( simplified_0[i], "fill-opacity:0.5;fill:rgb(255,255,0);stroke:rgb(0,0,0);stroke-width:5");
 		mapper_0.map( simplified_0[i], "fill-opacity:0.5;fill:rgb(53,255,0);stroke:rgb(0,0,0);stroke-width:5");
+
+		mapper_simple.map( really_simplified_0[i], "fill-opacity:0.5;fill:rgb(53,255,0);stroke:rgb(0,0,0);stroke-width:5");
 	}
 	
 	for( size_t i = 0; i < simplified_2.size(); ++i )
 	{
 		mapper.map( simplified_2[i], "fill-opacity:0.5;fill:rgb(255,128,0);stroke:rgb(0,0,0);stroke-width:5");
 		mapper_2.map( simplified_2[i], "fill-opacity:0.5;fill:rgb(53,255,0);stroke:rgb(0,0,0);stroke-width:5");
+
+		mapper_simple.map( really_simplified_2[i], "fill-opacity:0.5;fill:rgb(53,255,0);stroke:rgb(0,0,0);stroke-width:5");
 	}
 	
 	for( size_t i = 0; i < simplified_4.size(); ++i )
 	{
 		mapper.map( simplified_4[i], "fill-opacity:0.5;fill:rgb(255,0,0);stroke:rgb(0,0,0);stroke-width:5");
 		mapper_4.map( simplified_4[i], "fill-opacity:0.5;fill:rgb(53,255,0);stroke:rgb(0,0,0);stroke-width:5");
+
+		mapper_simple.map( really_simplified_4[i], "fill-opacity:0.5;fill:rgb(53,255,0);stroke:rgb(0,0,0);stroke-width:5");
 	}
 	
 	for( size_t i = 0; i < simplified_unbuildable.size(); ++i )
@@ -751,7 +804,10 @@ int main( int argc, char* argv[] )
 	}
 
 	for( size_t i = 0; i < chokes.size(); ++i )
+	{
 		mapper.map( chokes[i], "fill-opacity:1;fill:rgb(155,55,255);stroke:rgb(155,55,255);stroke-width:7");
-
+		mapper_simple.map( chokes[i], "fill-opacity:1;fill:rgb(155,55,255);stroke:rgb(155,55,255);stroke-width:7");
+	}
+	
 	return EXIT_SUCCESS;
 }

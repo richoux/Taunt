@@ -7,15 +7,16 @@
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/linestring.hpp>
 
-#include "data_zone.hpp"
+using point = boost::geometry::model::d2::point_xy<int>;
+using line = boost::geometry::model::linestring<point>;
 
 class MinSeparationWidth : public ghost::Minimize
 {
-	std::shared_ptr<DataZone> _data;
+	std::vector<double> _separation_lengths;
 	
 public:
 	MinSeparationWidth( const std::vector<ghost::Variable>& variables,
-	                    std::shared_ptr<ghost::AuxiliaryData> data );
+	                    const std::vector<line>& separations );
 	
 	double required_cost( const std::vector<ghost::Variable*>& variables ) const override;
 };
