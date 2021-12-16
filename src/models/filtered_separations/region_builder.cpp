@@ -3,6 +3,7 @@
 #include "constraint_one_cluster_per_region.hpp"
 #include "constraint_minimal_region_area.hpp"
 #include "objective_min_separation_width.hpp"
+#include "objective_same_area.hpp"
 
 RegionBuilder::RegionBuilder( int number_separations,
                               const polygon& contour,
@@ -21,8 +22,8 @@ RegionBuilder::RegionBuilder( int number_separations,
 		for( size_t p2 = p1 + 2 ; p2 < contour.outer().size() ; ++p2 )
 		{
 #if defined MUF
-			line line{{ contour.outer()[p1], contour.outer()[p2] }};
-			std::cout << "Testing[" << p1 << "," << p2 << "] "<< boost::geometry::dsv( line )
+			line testline{{ contour.outer()[p1], contour.outer()[p2] }};
+			std::cout << "Testing[" << p1 << "," << p2 << "] "<< boost::geometry::dsv( testline )
 			          << " equals:" << std::boolalpha << boost::geometry::equals( contour.outer()[p1], contour.outer()[p2] )
 			          << " p2>p1+2:" << ( p2 > p1 + 2 )
 			          << " p1.x!=p2.x:" << ( contour.outer()[p1].x() != contour.outer()[p2].x() )
@@ -114,7 +115,8 @@ void RegionBuilder::declare_constraints()
 
 void RegionBuilder::declare_objective()
 {
-	objective = std::make_shared<MinSeparationWidth>( variables, separation_candidates );
+	// objective = std::make_shared<MinSeparationWidth>( variables, separation_candidates );
+	objective = std::make_shared<SameArea>( variables, contour, separation_candidates );
 }
 
 // void RegionBuilder::declare_auxiliary_data()

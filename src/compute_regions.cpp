@@ -13,7 +13,7 @@
 #include "models/filtered_separations/region_builder.hpp"
 #include "models/filtered_separations/print_chokes.hpp"
 
-#define SIMPLIFY 1.5
+#define SIMPLIFY 0 // 1.5
 
 using namespace std::literals::chrono_literals;
 using point = boost::geometry::model::d2::point_xy<int>;
@@ -466,11 +466,12 @@ int main( int argc, char* argv[] )
 		
 			ghost::Options options;
 			options.parallel_runs = true;
+			options.tabu_time_selected = builder.separation_candidates.size() / number_clusters_resources[i];
 			options.print = std::make_shared<PrintChokes>( builder.separation_candidates );
 			options.custom_starting_point = true;
 			
 			ghost::Solver solver( builder );
-			if( solver.solve( cost, solution, 50ms, options ) )
+			if( solver.solve( cost, solution, 100ms, options ) )
 				add_chokes( solution, builder.separation_candidates, chokes );
 			else
 			{
@@ -495,11 +496,12 @@ int main( int argc, char* argv[] )
 		
 			ghost::Options options;
 			options.parallel_runs = true;
+			options.tabu_time_selected = builder.separation_candidates.size() / number_clusters_resources[index];
 			options.print = std::make_shared<PrintChokes>( builder.separation_candidates );
 			options.custom_starting_point = true;
 		
 			ghost::Solver solver( builder );
-			if( solver.solve( cost, solution, 50ms, options ) )
+			if( solver.solve( cost, solution, 100ms, options ) )
 				add_chokes( solution, builder.separation_candidates, chokes );
 			else
 			{
@@ -524,11 +526,12 @@ int main( int argc, char* argv[] )
 		
 			ghost::Options options;
 			options.parallel_runs = true;
+			options.tabu_time_selected = builder.separation_candidates.size() / number_clusters_resources[index];
 			options.print = std::make_shared<PrintChokes>( builder.separation_candidates );
 			options.custom_starting_point = true;
 		
 			ghost::Solver solver( builder );
-			if( solver.solve( cost, solution, 50ms, options ) )
+			if( solver.solve( cost, solution, 100ms, options ) )
 				add_chokes( solution, builder.separation_candidates, chokes );
 			else
 			{
@@ -690,8 +693,12 @@ int main( int argc, char* argv[] )
 
 	std::string contour_mapfile_svg = contour_mapfile;
 	contour_mapfile_svg.replace( contour_mapfile_svg.begin(), contour_mapfile_svg.begin() + 5, "maps/taunted/" );
-	contour_mapfile_svg.replace( contour_mapfile_svg.end() - 4, contour_mapfile_svg.end(), "_height.svg" );
+	contour_mapfile_svg.replace( contour_mapfile_svg.end() - 4, contour_mapfile_svg.end(), "_ghosted.svg" );
 
+	std::string contour_mapfile_svg_height = contour_mapfile;
+	contour_mapfile_svg_height.replace( contour_mapfile_svg_height.begin(), contour_mapfile_svg_height.begin() + 5, "maps/taunted/" );
+	contour_mapfile_svg_height.replace( contour_mapfile_svg_height.end() - 4, contour_mapfile_svg_height.end(), "_height.svg" );
+	
 	std::string contour_mapfile_svg_0 = contour_mapfile;
 	contour_mapfile_svg_0.replace( contour_mapfile_svg_0.begin(), contour_mapfile_svg_0.begin() + 5, "maps/taunted/" );
 	contour_mapfile_svg_0.replace( contour_mapfile_svg_0.end() - 4, contour_mapfile_svg_0.end(), "_0_low.svg" );
@@ -719,6 +726,9 @@ int main( int argc, char* argv[] )
 	std::ofstream contour_svg( contour_mapfile_svg );
 	boost::geometry::svg_mapper<point> mapper( contour_svg, 9*width, 9*height );
 
+	std::ofstream contour_svg_height( contour_mapfile_svg_height );
+	boost::geometry::svg_mapper<point> mapper_height( contour_svg_height, 9*width, 9*height );
+
 	std::ofstream contour_svg_0( contour_mapfile_svg_0 );
 	boost::geometry::svg_mapper<point> mapper_0( contour_svg_0, 9*width, 9*height );
 
@@ -740,6 +750,7 @@ int main( int argc, char* argv[] )
 	for( size_t i = 0; i < simplified_0.size(); ++i )
 	{
 		mapper.add( simplified_0[i] );
+		mapper_height.add( simplified_0[i] );
 		mapper_0.add( simplified_0[i] );
 
 		mapper_simple.add( really_simplified_0[i] );
@@ -748,6 +759,7 @@ int main( int argc, char* argv[] )
 	for( size_t i = 0; i < simplified_2.size(); ++i )
 	{
 		mapper.add( simplified_2[i] );
+		mapper_height.add( simplified_2[i] );
 		mapper_2.add( simplified_2[i] );
 
 		mapper_simple.add( really_simplified_2[i] );
@@ -756,6 +768,7 @@ int main( int argc, char* argv[] )
 	for( size_t i = 0; i < simplified_4.size(); ++i )
 	{
 		mapper.add( simplified_4[i] );
+		mapper_height.add( simplified_4[i] );
 		mapper_4.add( simplified_4[i] );
 
 		mapper_simple.add( really_simplified_4[i] );
@@ -764,18 +777,21 @@ int main( int argc, char* argv[] )
 	for( size_t i = 0; i < simplified_unbuildable.size(); ++i )
 	{
 		mapper.add( simplified_unbuildable[i] );
+		mapper_height.add( simplified_unbuildable[i] );
 		mapper_unbuildable.add( simplified_unbuildable[i] );
 	}
 
 	for( size_t i = 0; i < chokes.size(); ++i )
 	{
 		mapper.add( chokes[i] );
+		mapper_height.add( chokes[i] );
 		mapper_simple.add( chokes[i] );
 	}
 	
 	for( size_t i = 0; i < simplified_0.size(); ++i )
 	{
 		mapper.map( simplified_0[i], "fill-opacity:0.5;fill:rgb(255,255,0);stroke:rgb(0,0,0);stroke-width:5");
+		mapper_height.map( simplified_0[i], "fill-opacity:0.5;fill:rgb(255,255,0);stroke:rgb(0,0,0);stroke-width:5");
 		mapper_0.map( simplified_0[i], "fill-opacity:0.5;fill:rgb(53,255,0);stroke:rgb(0,0,0);stroke-width:5");
 
 		mapper_simple.map( really_simplified_0[i], "fill-opacity:0.5;fill:rgb(53,255,0);stroke:rgb(0,0,0);stroke-width:5");
@@ -783,7 +799,8 @@ int main( int argc, char* argv[] )
 	
 	for( size_t i = 0; i < simplified_2.size(); ++i )
 	{
-		mapper.map( simplified_2[i], "fill-opacity:0.5;fill:rgb(255,128,0);stroke:rgb(0,0,0);stroke-width:5");
+		mapper.map( simplified_2[i], "fill-opacity:0.5;fill:rgb(180,255,0);stroke:rgb(0,0,0);stroke-width:5");
+		mapper_height.map( simplified_2[i], "fill-opacity:0.5;fill:rgb(255,128,0);stroke:rgb(0,0,0);stroke-width:5");
 		mapper_2.map( simplified_2[i], "fill-opacity:0.5;fill:rgb(53,255,0);stroke:rgb(0,0,0);stroke-width:5");
 
 		mapper_simple.map( really_simplified_2[i], "fill-opacity:0.5;fill:rgb(53,255,0);stroke:rgb(0,0,0);stroke-width:5");
@@ -791,7 +808,8 @@ int main( int argc, char* argv[] )
 	
 	for( size_t i = 0; i < simplified_4.size(); ++i )
 	{
-		mapper.map( simplified_4[i], "fill-opacity:0.5;fill:rgb(255,0,0);stroke:rgb(0,0,0);stroke-width:5");
+		mapper.map( simplified_4[i], "fill-opacity:0.5;fill:rgb(0,255,0);stroke:rgb(0,0,0);stroke-width:5");
+		mapper_height.map( simplified_4[i], "fill-opacity:0.5;fill:rgb(255,0,0);stroke:rgb(0,0,0);stroke-width:5");
 		mapper_4.map( simplified_4[i], "fill-opacity:0.5;fill:rgb(53,255,0);stroke:rgb(0,0,0);stroke-width:5");
 
 		mapper_simple.map( really_simplified_4[i], "fill-opacity:0.5;fill:rgb(53,255,0);stroke:rgb(0,0,0);stroke-width:5");
@@ -800,13 +818,14 @@ int main( int argc, char* argv[] )
 	for( size_t i = 0; i < simplified_unbuildable.size(); ++i )
 	{
 		mapper.map( simplified_unbuildable[i], "fill-opacity:0.5;fill:rgb(0,0,255);stroke:rgb(0,0,0);stroke-width:5");
+		mapper_height.map( simplified_unbuildable[i], "fill-opacity:0.5;fill:rgb(0,0,255);stroke:rgb(0,0,0);stroke-width:5");
 		mapper_unbuildable.map( simplified_unbuildable[i], "fill-opacity:0.5;fill:rgb(53,255,0);stroke:rgb(0,0,0);stroke-width:5");
 	}
 
 	for( size_t i = 0; i < chokes.size(); ++i )
 	{
-		mapper.map( chokes[i], "fill-opacity:1;fill:rgb(155,55,255);stroke:rgb(155,55,255);stroke-width:7");
-		mapper_simple.map( chokes[i], "fill-opacity:1;fill:rgb(155,55,255);stroke:rgb(155,55,255);stroke-width:7");
+		mapper.map( chokes[i], "fill-opacity:1;fill:rgb(255,0,0);stroke:rgb(255,0,0);stroke-width:10");
+		mapper_simple.map( chokes[i], "fill-opacity:1;fill:rgb(155,55,255);stroke:rgb(155,55,255);stroke-width:10");
 	}
 	
 	return EXIT_SUCCESS;
