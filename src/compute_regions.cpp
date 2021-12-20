@@ -20,6 +20,7 @@ using point = boost::geometry::model::d2::point_xy<int>;
 using segment = boost::geometry::model::segment<point>;
 using polygon = boost::geometry::model::polygon<point>;
 using line = boost::geometry::model::linestring<point>;
+using multipoint = boost::geometry::model::multi_point<point>;
 
 void add_chokes( const std::vector< int >& solution, const std::vector<line>& separations, std::vector< segment >& chokes )
 {
@@ -45,8 +46,8 @@ polygon enrich( const polygon& input )
 
 		int next = i + 1;
 
-		auto current_point = input.outer()[i];
-		auto next_point = input.outer()[next];
+		auto& current_point = input.outer()[i];
+		auto& next_point = input.outer()[next];
 		bool same_x = current_point.x() == next_point.x();
 		bool same_y = current_point.y() == next_point.y();
 		
@@ -363,7 +364,7 @@ int main( int argc, char* argv[] )
 			if( boost::geometry::covered_by( point, simplified_4[ i ] ) )
 				boost::geometry::append( resources[ number_zones_0_2 + i ], point );
 
-	std::vector< std::vector< boost::geometry::model::multi_point<point> > > clusters_on_the_map( number_zones_0_2_4 );
+	std::vector< std::vector< multipoint > > clusters_on_the_map( number_zones_0_2_4 );
 
 	int max_distance;
 	if( mapfile.substr( mapfile.size() - 6, 6 ) != "LE.txt" )
@@ -373,7 +374,7 @@ int main( int argc, char* argv[] )
 	
 	for( size_t i = 0 ; i < resources.size() ; ++i )
 	{
-		std::vector< boost::geometry::model::multi_point<point> > clusters;
+		std::vector< multipoint > clusters;
 		for( auto& resource : resources[i] )
 		{
 			bool found_cluster = false;
@@ -390,7 +391,7 @@ int main( int argc, char* argv[] )
 			
 			if( !found_cluster )
 			{
-				boost::geometry::model::multi_point<point> new_cluster{{ resource }};
+				multipoint new_cluster{{ resource }};
 				clusters.push_back( new_cluster );
 			}
 		}
@@ -400,7 +401,7 @@ int main( int argc, char* argv[] )
 				clusters_on_the_map[i].push_back( cluster );
 			else
 			{
-				boost::geometry::model::multi_point<point> temp;
+				multipoint temp;
 				boost::geometry::difference( resources[i], cluster, temp );
 				resources[i] = temp;
 			}
@@ -433,7 +434,7 @@ int main( int argc, char* argv[] )
 
 				if( boost::geometry::distance( center_i, center_j ) <= 5 )
 				{
-					boost::geometry::model::multi_point<point> temp;
+					multipoint temp;
 					boost::geometry::union_( clusters[i], clusters[j], temp );
 					clusters[i] = temp;
 					clusters.erase( clusters.begin() + j );

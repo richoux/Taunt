@@ -35,3 +35,9 @@ Release/*
 Debug/*
 
 *~
+*.ipch
+*.pdb
+*.tlog
+*.recipe
+*.log
+.vs/Taunt/v16/Browse.VC.db
