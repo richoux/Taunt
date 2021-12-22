@@ -1,4 +1,4 @@
-#include "objective_same_area.hpp"
+#include "model/objective_same_area.hpp"
 
 SameArea::SameArea( const std::vector<ghost::Variable>& variables, const polygon& contour, const std::vector<line>& separations )
 	: Minimize( variables, "Least Squares Area Difference" ),

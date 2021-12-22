@@ -10,8 +10,8 @@
 #include <ghost/solver.hpp>
 
 #include "connected_component.hpp"
-#include "models/filtered_separations/region_builder.hpp"
-#include "models/filtered_separations/print_chokes.hpp"
+#include "model/region_builder.hpp"
+#include "model/print_chokes.hpp"
 
 #define SIMPLIFY 0 // 1.5
 

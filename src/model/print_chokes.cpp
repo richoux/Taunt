@@ -1,6 +1,6 @@
 #include <iomanip>
 
-#include "print_chokes.hpp"
+#include "model/print_chokes.hpp"
 
 PrintChokes::PrintChokes( const std::vector<line>& separations )
 	: _separations( separations )

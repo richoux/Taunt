@@ -4,7 +4,7 @@
 #include <list>
 #include <iterator>
 
-#include "constraint_minimal_region_area.hpp"
+#include "model/constraint_minimal_region_area.hpp"
 
 MinRegionArea::MinRegionArea( const std::vector<ghost::Variable>& variables,
                               const polygon& contour,

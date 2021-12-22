@@ -1,4 +1,4 @@
-#include "objective_min_separation_width.hpp"
+#include "model/objective_min_separation_width.hpp"
 
 MinSeparationWidth::MinSeparationWidth( const std::vector<ghost::Variable>& variables, const std::vector<line>& separations )
 	: Minimize( variables, "Minimize Separation Width" ),

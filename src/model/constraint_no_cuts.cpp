@@ -1,4 +1,4 @@
-#include "constraint_no_cuts.hpp"
+#include "model/constraint_no_cuts.hpp"
 
 NoCuts::NoCuts( const std::vector<ghost::Variable>& variables,
                 const polygon& contour,

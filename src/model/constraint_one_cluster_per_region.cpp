@@ -5,7 +5,7 @@
 #include <iterator>
 #include <algorithm>
 
-#include "constraint_one_cluster_per_region.hpp"
+#include "model/constraint_one_cluster_per_region.hpp"
 
 OneClusterPerRegion::OneClusterPerRegion( const std::vector<ghost::Variable>& variables,
                                           const polygon& contour,

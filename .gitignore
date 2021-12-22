@@ -40,4 +40,4 @@ Debug/*
 *.tlog
 *.recipe
 *.log
-.vs/Taunt/v16/Browse.VC.*
+Browse.VC.*
