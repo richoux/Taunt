@@ -46,8 +46,9 @@ namespace taunt
 		void compute_contours();
 		
 	public:
-		connected_component( const std::vector< std::vector<int> >& map ); // input map is supposed to be correctly formated with -2, -1 and 0 values only.
+		connected_component( const std::vector< std::vector<int> >& map ); // input map is supposed to be correctly formated with 0, 1 and 2 values only.
 		connected_component( std::vector< std::vector<int> >&& map );
+		connected_component( const std::vector< std::vector<bool> >& map_bool );
 
 		// inline std::vector< std::vector<int> > compute_cc() { return compute_cc_chang(); }
 		std::vector< boost::geometry::model::polygon<point> > compute_simplified_contours();

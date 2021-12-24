@@ -1,12 +1,12 @@
 #include <iomanip>
 
-#include "model/print_chokes.hpp"
+#include "model/print_frontiers.hpp"
 
-PrintChokes::PrintChokes( const std::vector<line>& separations )
+PrintFrontiers::PrintFrontiers( const std::vector<line>& separations )
 	: _separations( separations )
 { }
 	
-std::stringstream PrintChokes::print_candidate( const std::vector<ghost::Variable>& variables ) const
+std::stringstream PrintFrontiers::print_candidate( const std::vector<ghost::Variable>& variables ) const
 {
 	std::stringstream ss;
 

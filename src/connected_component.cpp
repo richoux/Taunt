@@ -19,6 +19,18 @@ namespace taunt
 		  _contours( std::vector<contour>() )
 	{}
 
+	connected_component::connected_component( const std::vector< std::vector<bool> >& map_bool )
+		: _map( std::vector< std::vector<int> >( map_bool.size(), std::vector<int>( map_bool[0].size(), 0 ) ) ),
+		  _height( _map.size() ), // maps are implemented as [y][x], but all methods interface are [x][y]
+		  _width( _map[ 0 ].size() ),
+		  _contours( std::vector<contour>() )
+	{
+		for( size_t y = 0; y < _height; ++y )
+			for( size_t x = 0; x < _width; ++x )
+				if( !map_bool[y][x] )
+					_map[y][x] = 1;
+	}
+
 	bool connected_component::is_on_map( size_t x, size_t y ) const
 	{
 		return x >= 0 && x < _width && y >= 0 && y < _height;

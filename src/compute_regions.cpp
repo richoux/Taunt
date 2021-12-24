@@ -11,7 +11,7 @@
 
 #include "connected_component.hpp"
 #include "model/region_builder.hpp"
-#include "model/print_chokes.hpp"
+#include "model/print_frontiers.hpp"
 
 #define SIMPLIFY 0 // 1.5
 
@@ -468,7 +468,7 @@ int main( int argc, char* argv[] )
 			ghost::Options options;
 			options.parallel_runs = true;
 			options.tabu_time_selected = builder.separation_candidates.size() / number_clusters_resources[i];
-			options.print = std::make_shared<PrintChokes>( builder.separation_candidates );
+			options.print = std::make_shared<PrintFrontiers>( builder.separation_candidates );
 			options.custom_starting_point = true;
 			
 			ghost::Solver solver( builder );
@@ -498,7 +498,7 @@ int main( int argc, char* argv[] )
 			ghost::Options options;
 			options.parallel_runs = true;
 			options.tabu_time_selected = builder.separation_candidates.size() / number_clusters_resources[index];
-			options.print = std::make_shared<PrintChokes>( builder.separation_candidates );
+			options.print = std::make_shared<PrintFrontiers>( builder.separation_candidates );
 			options.custom_starting_point = true;
 		
 			ghost::Solver solver( builder );
@@ -528,7 +528,7 @@ int main( int argc, char* argv[] )
 			ghost::Options options;
 			options.parallel_runs = true;
 			options.tabu_time_selected = builder.separation_candidates.size() / number_clusters_resources[index];
-			options.print = std::make_shared<PrintChokes>( builder.separation_candidates );
+			options.print = std::make_shared<PrintFrontiers>( builder.separation_candidates );
 			options.custom_starting_point = true;
 		
 			ghost::Solver solver( builder );
