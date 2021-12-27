@@ -39,13 +39,13 @@
     <ClCompile Include="..\src\model\objective_same_area.cpp">
       <Filter>Fichiers sources\model</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\model\print_chokes.cpp">
-      <Filter>Fichiers sources\model</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\model\region_builder.cpp">
       <Filter>Fichiers sources\model</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\compute_regions.cpp">
+    <ClCompile Include="..\src\model\print_frontiers.cpp">
+      <Filter>Fichiers sources\model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\terrain_analysis.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>
@@ -68,9 +68,6 @@
     <ClInclude Include="..\include\model\objective_same_area.hpp">
       <Filter>Fichiers d%27en-tête\model</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\model\print_chokes.hpp">
-      <Filter>Fichiers d%27en-tête\model</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\model\region_builder.hpp">
       <Filter>Fichiers d%27en-tête\model</Filter>
     </ClInclude>
@@ -90,6 +87,12 @@
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="..\include\analyze_type.hpp">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\model\print_frontiers.hpp">
+      <Filter>Fichiers d%27en-tête\model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\polygon.hpp">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>

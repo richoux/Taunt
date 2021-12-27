@@ -19,15 +19,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\compute_regions.cpp" />
     <ClCompile Include="..\src\connected_component.cpp" />
     <ClCompile Include="..\src\model\constraint_minimal_region_area.cpp" />
     <ClCompile Include="..\src\model\constraint_no_cuts.cpp" />
     <ClCompile Include="..\src\model\constraint_one_cluster_per_region.cpp" />
     <ClCompile Include="..\src\model\objective_min_separation_width.cpp" />
     <ClCompile Include="..\src\model\objective_same_area.cpp" />
-    <ClCompile Include="..\src\model\print_chokes.cpp" />
+    <ClCompile Include="..\src\model\print_frontiers.cpp" />
     <ClCompile Include="..\src\model\region_builder.cpp" />
+    <ClCompile Include="..\src\terrain_analysis.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\analyze_type.hpp" />
@@ -39,8 +39,9 @@
     <ClInclude Include="..\include\model\constraint_one_cluster_per_region.hpp" />
     <ClInclude Include="..\include\model\objective_min_separation_width.hpp" />
     <ClInclude Include="..\include\model\objective_same_area.hpp" />
-    <ClInclude Include="..\include\model\print_chokes.hpp" />
+    <ClInclude Include="..\include\model\print_frontiers.hpp" />
     <ClInclude Include="..\include\model\region_builder.hpp" />
+    <ClInclude Include="..\include\polygon.hpp" />
     <ClInclude Include="..\include\positions.hpp" />
     <ClInclude Include="..\include\region.hpp" />
     <ClInclude Include="..\include\terrain_analysis.hpp" />
@@ -141,7 +142,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalIncludeDirectories>../include</AdditionalIncludeDirectories>
     </ClCompile>
@@ -175,7 +176,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>SC2API;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalIncludeDirectories>../include</AdditionalIncludeDirectories>
     </ClCompile>

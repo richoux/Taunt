@@ -117,13 +117,13 @@ void terrain_analysis::analyze()
 #if defined SC2API
 	for( auto& resource : _bot->Observation()->GetUnits() )
 	{
-		if( !is_mineral( resource.getType() ) && !is_geyser( resource.getType() ) )
+		if( !is_mineral( resource->unit_type ) && !is_geyser( resource->unit_type ) )
 			continue;
 
-		int width = resource.getType().tileWidth();
-		int height = resource.getType().tileHeight();
-		int tile_x = static_cast<int>( std::floor( resource.getPosition().x ) - ( width / 2 ) );
-		int tile_y = static_cast<int>( std::floor( resource.getPosition().y ) - ( height / 2 ) );
+		int width = is_mineral( resource->unit_type ) ? 2 : 3; // width 2 if mineral, 3 if geyser
+		int height = is_mineral( resource->unit_type ) ? 1 : 3; // height 1 if mineral, 3 if geyser
+		int tile_x = static_cast<int>( std::floor( resource->pos.x ) - ( width / 2 ) );
+		int tile_y = static_cast<int>( std::floor( resource->pos.y ) - ( height / 2 ) );
 
 		for( int y = tile_y ; y < tile_y + height ; ++y )
 			for( int x = tile_x ; x < tile_x + width ; ++x )
@@ -659,11 +659,6 @@ bool terrain_analysis::get_bit( const sc2::ImageData& grid, int tile_x, int tile
 region terrain_analysis::get_region_at( const position& p ) const
 {
 	return get_region_at( static_cast<int>(p.x), static_cast<int>(p.y) );
-}
-
-bool terrain_analysis::is_walkable_terrain( const walk_position& wp ) const
-{
-	return is_walkable_terrain( static_cast<int>(wp.x), static_cast<int>(wp.y) );
 }
 	
 bool terrain_analysis::is_walkable_terrain( const position& p ) const

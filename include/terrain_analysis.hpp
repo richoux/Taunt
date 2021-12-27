@@ -125,7 +125,9 @@ namespace taunt
 		// std::vector< tile_position > get_shortest_path( int tile_x, int tile_y ) const;
 
 		inline bool is_walkable_terrain( const tile_position& tp ) const { return is_walkable_terrain( tp.x, tp.y ); }
+#if not defined SC2API
 		bool is_walkable_terrain( const walk_position& wp ) const;
+#endif
 		bool is_walkable_terrain( const position& p ) const;
 		inline bool is_walkable_terrain( int tile_x, int tile_y ) const { return _walkable[tile_y][tile_x]; }
 
