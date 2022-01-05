@@ -13,6 +13,9 @@ using namespace std::literals::chrono_literals;
 using taunt::terrain_analysis;
 using taunt::region;
 
+#define SIMPLIFY 0.5 //1.5
+#define TIMEOUT 150000
+
 /******************/
 /***   Common   ***/
 /******************/
@@ -89,6 +92,11 @@ boost_polygon terrain_analysis::enrich( const boost_polygon& input ) const
 
 void terrain_analysis::analyze()
 {
+  std::chrono::duration<double, std::milli> elapsed_time( 0 );
+  std::chrono::time_point<std::chrono::steady_clock> start;
+
+  start = std::chrono::steady_clock::now();
+
 	for( int y = 0 ; y < _map_height ; ++y )
 		for( int x = 0 ; x < _map_width ; ++x )
 		{
@@ -99,13 +107,13 @@ void terrain_analysis::analyze()
 			switch( _terrain_height[y][x] )
 			{
 			case 0:
-				_terrain_properties_low[y][x] = _walkable[y][x];
+				_terrain_properties_low[y][x] = _buildable[y][x]; //_walkable[y][x];
 				break;
 			case 2:
-				_terrain_properties_high[y][x] = _walkable[y][x];
+				_terrain_properties_high[y][x] = _buildable[ y ][ x ]; //_walkable[y][x];
 				break;
 			default: // case 4
-				_terrain_properties_very_high[y][x] = _walkable[y][x];
+				_terrain_properties_very_high[y][x] = _buildable[ y ][ x ]; //_walkable[y][x];
 			}
 
 			if( !_buildable[y][x] && _walkable[y][x] )
@@ -114,11 +122,16 @@ void terrain_analysis::analyze()
 				_terrain_unbuildable_unwalkable[y][x] = 1;
 		}
 
+	elapsed_time = std::chrono::steady_clock::now() - start;
+	std::cout<< "Fill matrices: " << elapsed_time.count() << "\n";
+
 #if defined SC2API
 	for( auto& resource : _bot->Observation()->GetUnits() )
 	{
 		if( !is_mineral( resource->unit_type ) && !is_geyser( resource->unit_type ) )
 			continue;
+
+		std::cout << "POUEt RESSOURCE\n";
 
 		int width = is_mineral( resource->unit_type ) ? 2 : 3; // width 2 if mineral, 3 if geyser
 		int height = is_mineral( resource->unit_type ) ? 1 : 3; // height 1 if mineral, 3 if geyser
@@ -160,6 +173,8 @@ void terrain_analysis::analyze()
 			}
 	}
 #else
+	start = std::chrono::steady_clock::now();
+
 	for( auto& resource : BWAPI::Broodwar->getStaticNeutralUnits() )
 	{
 		if( !resource->getType().isResourceContainer() )
@@ -202,7 +217,12 @@ void terrain_analysis::analyze()
 			}
 	}
 #endif
-		
+	
+	elapsed_time = std::chrono::steady_clock::now() - start;
+	std::cout << "Search for resources: " << elapsed_time.count() << "\n";
+
+	start = std::chrono::steady_clock::now();
+
 	//region_id
 	taunt::connected_component cc_low( _terrain_properties_low );
 	_simplified_cc_low = cc_low.compute_simplified_contours();
@@ -215,6 +235,11 @@ void terrain_analysis::analyze()
 
 	taunt::connected_component cc_unbuildable( _terrain_unbuildable_unwalkable );
 	_simplified_cc_unbuildable = cc_unbuildable.compute_simplified_contours();
+
+	elapsed_time = std::chrono::steady_clock::now() - start;
+	std::cout << "Compute CCs: " << elapsed_time.count() << "\n";
+
+	start = std::chrono::steady_clock::now();
 
 	size_t number_zones_l = _simplified_cc_low.size();
 	size_t number_zones_lh = number_zones_l + _simplified_cc_high.size();
@@ -245,6 +270,11 @@ void terrain_analysis::analyze()
 				boost::geometry::append( resource_clusters[ number_zones_lh + i ], point );
 
 	std::vector< std::vector< multipoint > > clusters_on_the_map( number_zones_lhvh );
+
+	elapsed_time = std::chrono::steady_clock::now() - start;
+	std::cout << "Compute clusters: " << elapsed_time.count() << "\n";
+
+	start = std::chrono::steady_clock::now();
 
 #ifdef SC2API
 	int max_distance = 17;
@@ -287,6 +317,12 @@ void terrain_analysis::analyze()
 			}
 	}
 
+	elapsed_time = std::chrono::steady_clock::now() - start;
+	std::cout << "Assign resources for each cluster: " << elapsed_time.count() << "\n";
+
+	start = std::chrono::steady_clock::now();
+
+
 	// merge very close clusters
 	int cpt = 0;
 	for( auto& clusters : clusters_on_the_map )
@@ -326,6 +362,11 @@ void terrain_analysis::analyze()
 		++cpt;
 	}
 
+	elapsed_time = std::chrono::steady_clock::now() - start;
+	std::cout << "Merge clusters: " << elapsed_time.count() << "\n";
+
+	auto start_ghost = std::chrono::steady_clock::now();
+
 	std::vector<boost_polygon> really_simplified_low( _simplified_cc_low.size() );
 	std::vector<boost_polygon> really_simplified_high( _simplified_cc_high.size() );
 	std::vector<boost_polygon> really_simplified_very_high( _simplified_cc_very_high.size() );
@@ -335,93 +376,224 @@ void terrain_analysis::analyze()
 	{
 		if( number_resource_clusters[i] >= 2 )
 		{
-			// boost_polygon temp_simplified;
-			// boost::geometry::simplify( _simplified_cc_low[i], temp_simplified, SIMPLIFY);
-			// really_simplified_low[i] = enrich( temp_simplified );
-			really_simplified_low[i] = enrich( _simplified_cc_low[i] );
-				
+		  int timeout = TIMEOUT;
+		  auto start_inner = std::chrono::steady_clock::now();
+		  
+		  boost_polygon temp_simplified;
+			boost::geometry::simplify( _simplified_cc_low[i], temp_simplified, SIMPLIFY );
+			really_simplified_low[i] = enrich( temp_simplified );
+			//really_simplified_low[i] = enrich( _simplified_cc_low[i] );
+			
+			elapsed_time = std::chrono::steady_clock::now() - start_inner;
+			std::cout << "enrich: " << elapsed_time.count() << "\n";
+
 			double cost;
 			std::vector<int> solution( really_simplified_low[i].outer().size() );
+			
+			start_inner = std::chrono::steady_clock::now();
 			RegionBuilder builder( number_resource_clusters[i] - 1, really_simplified_low[i], clusters_on_the_map[i] );
-		
+			elapsed_time = std::chrono::steady_clock::now() - start_inner;
+			std::cout << "Make Builder: " << elapsed_time.count() << "\n";
+
 			ghost::Options options;
-			options.parallel_runs = true;
+			//options.parallel_runs = true;
 			options.tabu_time_selected = builder.separation_candidates.size() / number_resource_clusters[i];
-			options.print = std::make_shared<PrintFrontiers>( builder.separation_candidates );
+			//options.print = std::make_shared<PrintFrontiers>( builder.separation_candidates );
 			options.custom_starting_point = true;
 			
+			start_inner = std::chrono::steady_clock::now();
+
 			ghost::Solver solver( builder );
-			if( solver.solve( cost, solution, 100ms, options ) )
-				make_frontiers( solution, builder.separation_candidates );
-			// else
-			// {
-			// 	std::cout << "Fail to find a solution for zone " << i << "\n";
-			// 	return EXIT_FAILURE;
-			// }
+
+			elapsed_time = std::chrono::steady_clock::now() - start_inner;
+			std::cout << "Make Solver: " << elapsed_time.count() << "\n";
+
+			start_inner = std::chrono::steady_clock::now();
+			bool found_solution = solver.solve( cost, solution, timeout, options );
+			elapsed_time = std::chrono::steady_clock::now() - start_inner;
+			std::cout << "Run Solver: " << elapsed_time.count() << "\n";
+
+			while( !found_solution && timeout < 10 * TIMEOUT )
+			{
+			  timeout *= 2;
+			  std::cout << "Run Solver again with new timeout=" << timeout << "\n";
+			  start_inner = std::chrono::steady_clock::now();
+			  found_solution = solver.solve( cost, solution, timeout, options );
+			  elapsed_time = std::chrono::steady_clock::now() - start_inner;
+			  std::cout << "Run Solver: " << elapsed_time.count() << "\n";
+			}
+
+			if( found_solution )
+			{
+			  start_inner = std::chrono::steady_clock::now();
+
+			  make_frontiers( solution, builder.separation_candidates );
+			  elapsed_time = std::chrono::steady_clock::now() - start_inner;
+			  std::cout << "Make frontiers: " << elapsed_time.count() << "\n";
+
+			}
+			 else
+			 {
+			 	std::cout << "Fail to find a solution for zone " << i << "\n";
+			 }
 		}
 	}
+
+	elapsed_time = std::chrono::steady_clock::now() - start;
+	std::cout << "GHOST computation low terrain: " << elapsed_time.count() << "\n";
+
+	start = std::chrono::steady_clock::now();
 
 	for( int i = 0 ; i < static_cast<int>( _simplified_cc_high.size() ) ; ++i )
 	{
 		int index = i + number_zones_l;
 		if( number_resource_clusters[index] >= 2 )
 		{
-			// boost_polygon temp_simplified;
-			// boost::geometry::simplify( simplified_2[i], temp_simplified, SIMPLIFY);
-			// really_simplified_2[i] = enrich( temp_simplified );
-			really_simplified_high[i] = enrich( _simplified_cc_high[i] );
-	
+		  int timeout = TIMEOUT;
+		  auto start_inner = std::chrono::steady_clock::now();
+
+			boost_polygon temp_simplified;
+			boost::geometry::simplify( _simplified_cc_high[i], temp_simplified, SIMPLIFY);
+			really_simplified_high[i] = enrich( temp_simplified );
+
+			
+			//really_simplified_high[i] = enrich( _simplified_cc_high[i] );
+
+			elapsed_time = std::chrono::steady_clock::now() - start_inner;
+			std::cout << "enrich: " << elapsed_time.count() << "\n";
+
 			double cost;
 			std::vector<int> solution( really_simplified_high[i].outer().size() );
+
+			start_inner = std::chrono::steady_clock::now();
 			RegionBuilder builder( number_resource_clusters[index] - 1, really_simplified_high[i], clusters_on_the_map[index] );
-		
+			elapsed_time = std::chrono::steady_clock::now() - start_inner;
+			std::cout << "Make Builder: " << elapsed_time.count() << "\n";
+
 			ghost::Options options;
-			options.parallel_runs = true;
+			//options.parallel_runs = true;
 			options.tabu_time_selected = builder.separation_candidates.size() / number_resource_clusters[index];
-			options.print = std::make_shared<PrintFrontiers>( builder.separation_candidates );
+			//options.print = std::make_shared<PrintFrontiers>( builder.separation_candidates );
 			options.custom_starting_point = true;
-		
+
+			start_inner = std::chrono::steady_clock::now();
+
 			ghost::Solver solver( builder );
-			if( solver.solve( cost, solution, 100ms, options ) )
-				make_frontiers( solution, builder.separation_candidates );
-			// else
-			// {
-			// 	std::cout << "Fail to find a solution for zone " << index << "\n";
-			// 	return EXIT_FAILURE;
-			// }
+
+			elapsed_time = std::chrono::steady_clock::now() - start_inner;
+			std::cout << "Make Solver: " << elapsed_time.count() << "\n";
+
+			start_inner = std::chrono::steady_clock::now();
+			bool found_solution = solver.solve( cost, solution, 150ms, options );
+			elapsed_time = std::chrono::steady_clock::now() - start_inner;
+			std::cout << "Run Solver: " << elapsed_time.count() << "\n";
+
+			while( !found_solution && timeout < 10 * TIMEOUT )
+			{
+			  timeout *= 2;
+			  std::cout << "Run Solver again with new timeout=" << timeout << "\n";
+			  start_inner = std::chrono::steady_clock::now();
+			  found_solution = solver.solve( cost, solution, timeout, options );
+			  elapsed_time = std::chrono::steady_clock::now() - start_inner;
+			  std::cout << "Run Solver: " << elapsed_time.count() << "\n";
+			}
+
+			if( found_solution )
+			{
+			  start_inner = std::chrono::steady_clock::now();
+
+			  make_frontiers( solution, builder.separation_candidates );
+			  elapsed_time = std::chrono::steady_clock::now() - start_inner;
+			  std::cout << "Make frontiers: " << elapsed_time.count() << "\n";
+
+
+			}
+			 else
+			 {
+			 	std::cout << "Fail to find a solution for zone " << index << "\n";
+			 }
 		}
 	}
+
+	elapsed_time = std::chrono::steady_clock::now() - start;
+	std::cout << "GHOST computation high terrain: " << elapsed_time.count() << "\n";
+
+	start = std::chrono::steady_clock::now();
 
 	for( int i = 0 ; i < static_cast<int>( _simplified_cc_very_high.size() ) ; ++i )
 	{
 		int index = i + number_zones_lh;
 		if( number_resource_clusters[index] >= 2 )
 		{
-			// boost_polygon temp_simplified;
-			// boost::geometry::simplify( simplified_4[i], temp_simplified, SIMPLIFY);
-			// really_simplified_4[i] = enrich( temp_simplified );
-			really_simplified_very_high[i] = enrich( _simplified_cc_very_high[i] );
+		  int timeout = TIMEOUT;
+		  auto start_inner = std::chrono::steady_clock::now();
+
+			boost_polygon temp_simplified;
+			boost::geometry::simplify( _simplified_cc_very_high[i], temp_simplified, SIMPLIFY);
+			really_simplified_very_high[i] = enrich( temp_simplified );
+			//really_simplified_very_high[i] = enrich( _simplified_cc_very_high[i] );
+
+			elapsed_time = std::chrono::steady_clock::now() - start_inner;
+			std::cout << "enrich: " << elapsed_time.count() << "\n";
 
 			double cost;
 			std::vector<int> solution( really_simplified_very_high[i].outer().size() );
+			
+			start_inner = std::chrono::steady_clock::now();
 			RegionBuilder builder( number_resource_clusters[index] - 1, really_simplified_very_high[i], clusters_on_the_map[index] );
-		
+			elapsed_time = std::chrono::steady_clock::now() - start_inner;
+			std::cout << "Make Builder: " << elapsed_time.count() << "\n";
+
 			ghost::Options options;
-			options.parallel_runs = true;
+			//options.parallel_runs = true;
 			options.tabu_time_selected = builder.separation_candidates.size() / number_resource_clusters[index];
-			options.print = std::make_shared<PrintFrontiers>( builder.separation_candidates );
+			//options.print = std::make_shared<PrintFrontiers>( builder.separation_candidates );
 			options.custom_starting_point = true;
 		
+			start_inner = std::chrono::steady_clock::now();
+
 			ghost::Solver solver( builder );
-			if( solver.solve( cost, solution, 100ms, options ) )
-				make_frontiers( solution, builder.separation_candidates );
-			// else
-			// {
-			// 	std::cout << "Fail to find a solution for zone " << index << "\n";
-			// 	return EXIT_FAILURE;
-			// }
+
+			elapsed_time = std::chrono::steady_clock::now() - start_inner;
+			std::cout << "Make Solver: " << elapsed_time.count() << "\n";
+
+			start_inner = std::chrono::steady_clock::now();
+			bool found_solution = solver.solve( cost, solution, 150ms, options );
+			elapsed_time = std::chrono::steady_clock::now() - start_inner;
+			std::cout << "Run Solver: " << elapsed_time.count() << "\n";
+
+			while( !found_solution && timeout < 10 * TIMEOUT )
+			{
+			  timeout *= 2;
+			  std::cout << "Run Solver again with new timeout=" << timeout << "\n";
+			  start_inner = std::chrono::steady_clock::now();
+			  found_solution = solver.solve( cost, solution, timeout, options );
+			  elapsed_time = std::chrono::steady_clock::now() - start_inner;
+			  std::cout << "Run Solver: " << elapsed_time.count() << "\n";
+			}
+
+			if( found_solution )
+			{
+			  start_inner = std::chrono::steady_clock::now();
+
+			  make_frontiers( solution, builder.separation_candidates );
+			  elapsed_time = std::chrono::steady_clock::now() - start_inner;
+			  std::cout << "Make frontiers: " << elapsed_time.count() << "\n";
+
+			}
+			 else
+			 {
+			 	std::cout << "Fail to find a solution for zone " << index << "\n";
+			 }
 		}
 	}
+
+	elapsed_time = std::chrono::steady_clock::now() - start;
+	std::cout << "GHOST computation very high terrain: " << elapsed_time.count() << "\n";
+
+	elapsed_time = std::chrono::steady_clock::now() - start_ghost;
+	std::cout << "Total GHOST computation: " << elapsed_time.count() << "\n";
+
 }
 
 void terrain_analysis::print()
@@ -528,7 +700,7 @@ void terrain_analysis::print()
 	contour_mapfile_svg.replace( contour_mapfile_svg.end() - 4, contour_mapfile_svg.end(), "_taunted.svg" );
 
 	std::ofstream contour_svg( contour_mapfile_svg );
-	boost::geometry::svg_mapper<point> mapper( contour_svg, 9*_map_width, 9*_map_height );
+	boost::geometry::svg_mapper<point> mapper( contour_svg, 5*_map_width, 5*_map_height );
 
 	for( size_t i = 0 ; i < _simplified_cc_low.size() ; ++i )
 		mapper.add( _simplified_cc_low[i] );
@@ -710,7 +882,11 @@ terrain_analysis::terrain_analysis( analyze_type at )
 	  _depot_buildable( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
 	  _resources( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
 	  _region_id( matrix_int( _map_height, std::vector<int>( _map_width, -1 ) ) ),
-	  _terrain_height( matrix_int( _map_height, std::vector<int>( _map_width, 0 ) ) )
+	  _terrain_height( matrix_int( _map_height, std::vector<int>( _map_width, 0 ) ) ),
+      _terrain_properties_low( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
+	  _terrain_properties_high( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
+	  _terrain_properties_very_high( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
+	  _terrain_unbuildable_unwalkable( matrix_int( _map_height, std::vector<int>( _map_width, 0 ) ) )
 {}
 
 int terrain_analysis::compute_terrain_height( int tile_x, int tile_y ) const

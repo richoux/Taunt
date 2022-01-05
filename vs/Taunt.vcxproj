@@ -106,7 +106,7 @@
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(BWAPI_DIR)\include;$(BOOST_DIR);$(GHOST_DIR)\include;$(IncludePath)</IncludePath>
     <TargetName>$(ProjectName)_SC1</TargetName>
-    <LibraryPath>$(BWAPI_DIR)\Release;$(GHOST_DIR)\lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(BWAPI_DIR)\Release;$(GHOST_DIR)\lib32;$(LibraryPath)</LibraryPath>
     <OutDir>$(ProjectDir)/../lib/</OutDir>
     <IntDir>$(SolutionName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
@@ -145,6 +145,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalIncludeDirectories>../include</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -179,6 +180,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalIncludeDirectories>../include</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
