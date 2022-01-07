@@ -14,8 +14,7 @@ using taunt::terrain_analysis;
 using taunt::region;
 
 #define SIMPLIFY 0.5 //1.5
-#define CLUSTER_MERGING_DISTANCE 7
-#define TIMEOUT 150000
+#define TIMEOUT 100000
 
 /******************/
 /***   Common   ***/
@@ -96,6 +95,21 @@ void terrain_analysis::analyze()
   std::chrono::duration<double, std::milli> elapsed_time( 0 );
   std::chrono::time_point<std::chrono::steady_clock> start;
 
+#if defined SC2API
+  _map_width = _bot->Observation()->GetGameInfo().width;
+  _map_height = _bot->Observation()->GetGameInfo().height;
+  _walkable = matrix_bool( _map_height, std::vector<bool>( _map_width, true ) );
+  _buildable = matrix_bool( _map_height, std::vector<bool>( _map_width, false ) );
+  _depot_buildable = matrix_bool( _map_height, std::vector<bool>( _map_width, false ) );
+  _resources = matrix_bool( _map_height, std::vector<bool>( _map_width, false ) );
+  _region_id = matrix_int( _map_height, std::vector<int>( _map_width, -1 ) );
+  _terrain_height = matrix_int( _map_height, std::vector<int>( _map_width, 0 ) );
+  _terrain_properties_low = matrix_bool( _map_height, std::vector<bool>( _map_width, false ) );
+  _terrain_properties_high = matrix_bool( _map_height, std::vector<bool>( _map_width, false ) );
+  _terrain_properties_very_high = matrix_bool( _map_height, std::vector<bool>( _map_width, false ) );
+  _terrain_unbuildable_unwalkable = matrix_int( _map_height, std::vector<int>( _map_width, 0 ) );
+#endif
+
   start = std::chrono::steady_clock::now();
 
   std::string mapfile = map_filename();
@@ -143,8 +157,6 @@ void terrain_analysis::analyze()
 		if( !is_mineral( resource->unit_type ) && !is_geyser( resource->unit_type ) )
 			continue;
 
-		ss << "POUET RESSOURCE\n";
-
 		int width = is_mineral( resource->unit_type ) ? 2 : 3; // width 2 if mineral, 3 if geyser
 		int height = is_mineral( resource->unit_type ) ? 1 : 3; // height 1 if mineral, 3 if geyser
 		int tile_x = static_cast<int>( std::floor( resource->pos.x ) - ( width / 2 ) );
@@ -155,13 +167,10 @@ void terrain_analysis::analyze()
 			{
 			  if( !is_valid_tile( x, y ) )
 				continue;
-			  ss << "Dealing with tile (" << x << "," << y << ")\n";
 
 				_buildable[y][x] = false;
 				_resources[y][x] = true;
 				_terrain_unbuildable_unwalkable[y][x] = 1;
-
-				ss << "Muf\n";
 
 				switch( _terrain_height[y][x] )
 				{
@@ -175,22 +184,16 @@ void terrain_analysis::analyze()
 					_terrain_properties_very_high[y][x] = true;
 				}
 
-				ss << "Mahuf\n";
-
 				// depots can't be built within 3 tiles of any resource
 				for( int ry = -3 ; ry <= 3 ; ++ry )
 					for( int rx = -3 ; rx <= 3 ; ++rx )
 					{
-
-					  ss << "Makapuf\n";
 						// sc2 doesn't fill out the corners of the mineral 3x3 boxes for some reason
 						if( std::abs(rx) + std::abs(ry) == 6 )
 							continue;
 							
 						if( !is_valid_tile( x + rx, y + ry ) )
 							continue;
-
-						ss << "And now dealing with depot tile (" << x+rx << "," << y+ry << ")\n";
 
 						_depot_buildable[ y + ry ][ x + rx ] = false;
 					}
@@ -244,10 +247,6 @@ void terrain_analysis::analyze()
 	
 	elapsed_time = std::chrono::steady_clock::now() - start;
 	ss << "Search for resources: " << elapsed_time.count() << std::endl;
-	log << ss.str();
-	std::cout << "Makapuf\n";
-	ss.str( "" );
-	ss.clear();
 
 	start = std::chrono::steady_clock::now();
 
@@ -376,7 +375,7 @@ void terrain_analysis::analyze()
 				point center_j;
 				boost::geometry::centroid( clusters[j], center_j );
 
-				if( boost::geometry::distance( center_i, center_j ) <= CLUSTER_MERGING_DISTANCE )
+				if( boost::geometry::distance( center_i, center_j ) <= 7 )
 				{
 					multipoint temp;
 					boost::geometry::union_( clusters[i], clusters[j], temp );
@@ -404,7 +403,7 @@ void terrain_analysis::analyze()
 	{
 		if( number_resource_clusters[i] >= 2 )
 		{
-		  int timeout = TIMEOUT;
+		  int timeout = TIMEOUT * ( number_resource_clusters[ i ] - 1 );
 		  auto start_inner = std::chrono::steady_clock::now();
 		  
 		  boost_polygon temp_simplified;
@@ -477,7 +476,7 @@ void terrain_analysis::analyze()
 		int index = i + number_zones_l;
 		if( number_resource_clusters[index] >= 2 )
 		{
-		  int timeout = TIMEOUT;
+		  int timeout = TIMEOUT * ( number_resource_clusters[ i ] - 1 );
 		  auto start_inner = std::chrono::steady_clock::now();
 
 			boost_polygon temp_simplified;
@@ -553,7 +552,7 @@ void terrain_analysis::analyze()
 		int index = i + number_zones_lh;
 		if( number_resource_clusters[index] >= 2 )
 		{
-		  int timeout = TIMEOUT;
+		  int timeout = TIMEOUT * ( number_resource_clusters[ i ] - 1 );
 		  auto start_inner = std::chrono::steady_clock::now();
 
 			boost_polygon temp_simplified;
@@ -730,7 +729,11 @@ void terrain_analysis::print()
 	contour_mapfile_svg.replace( contour_mapfile_svg.end() - 4, contour_mapfile_svg.end(), "_taunted.svg" );
 
 	std::ofstream contour_svg( contour_mapfile_svg );
-	boost::geometry::svg_mapper<point> mapper( contour_svg, 5*_map_width, 5*_map_height );
+#if defined SC2API
+	boost::geometry::svg_mapper<point> mapper( contour_svg, 4*_map_width, 4*_map_height );
+#else
+	boost::geometry::svg_mapper<point> mapper( contour_svg, 5 * _map_width, 5 * _map_height );
+#endif
 
 	for( size_t i = 0 ; i < _simplified_cc_low.size() ; ++i )
 		mapper.add( _simplified_cc_low[i] );
@@ -769,19 +772,7 @@ void terrain_analysis::print()
 #ifdef SC2API
 terrain_analysis::terrain_analysis( sc2::Agent *bot, analyze_type at )
 	: _bot( bot ),
-	  _analyze_type( at ),
-	  _map_width( _bot->Observation()->GetGameInfo().width ),
-	  _map_height( _bot->Observation()->GetGameInfo().height ),
-	  _walkable( matrix_bool( _map_height, std::vector<bool>( _map_width, true ) ) ),
-	  _buildable( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
-	  _depot_buildable( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
-	  _resources( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
-	  _region_id( matrix_int( _map_height, std::vector<int>( _map_width, -1 ) ) ),
-	  _terrain_height( matrix_int( _map_height, std::vector<int>( _map_width, 0 ) ) ),
-	  _terrain_properties_low( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
-	  _terrain_properties_high( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
-	  _terrain_properties_very_high( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
-	  _terrain_unbuildable_unwalkable( matrix_int( _map_height, std::vector<int>( _map_width, 0 ) ) )
+	  _analyze_type( at )
 {}
 	
 int terrain_analysis::compute_terrain_height( int tile_x, int tile_y ) const

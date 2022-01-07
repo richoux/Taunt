@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "ProjectMap": {
+    "00d8da04-13d7-4914-a609-87f37f415f0c": {
+      "ProjectGuid": "00d8da04-13d7-4914-a609-87f37f415f0c",
+      "DisplayName": "Taunt",
+      "ColorIndex": 0
+    }
+  },
+  "NextColorIndex": 1
+}
