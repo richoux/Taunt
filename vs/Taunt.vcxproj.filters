@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Fichiers sources">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Fichiers de ressources">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Fichiers sources\model">
+      <UniqueIdentifier>{e5f4101f-c6b4-4ec0-9976-ceec0b7adb00}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\model">
+      <UniqueIdentifier>{d60b071c-e559-4ca0-83f6-38818e8481b1}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\connected_component.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\model\constraint_minimal_region_area.cpp">
+      <Filter>Fichiers sources\model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\model\constraint_no_cuts.cpp">
+      <Filter>Fichiers sources\model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\model\constraint_one_cluster_per_region.cpp">
+      <Filter>Fichiers sources\model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\model\objective_min_separation_width.cpp">
+      <Filter>Fichiers sources\model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\model\objective_same_area.cpp">
+      <Filter>Fichiers sources\model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\model\region_builder.cpp">
+      <Filter>Fichiers sources\model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\model\print_frontiers.cpp">
+      <Filter>Fichiers sources\model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\terrain_analysis.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\connected_component.hpp">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\model\constraint_minimal_region_area.hpp">
+      <Filter>Fichiers d%27en-tête\model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\model\constraint_no_cuts.hpp">
+      <Filter>Fichiers d%27en-tête\model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\model\constraint_one_cluster_per_region.hpp">
+      <Filter>Fichiers d%27en-tête\model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\model\objective_min_separation_width.hpp">
+      <Filter>Fichiers d%27en-tête\model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\model\objective_same_area.hpp">
+      <Filter>Fichiers d%27en-tête\model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\model\region_builder.hpp">
+      <Filter>Fichiers d%27en-tête\model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\region.hpp">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\positions.hpp">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\base_location.hpp">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\chokepoint.hpp">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\terrain_analysis.hpp">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\analyze_type.hpp">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\model\print_frontiers.hpp">
+      <Filter>Fichiers d%27en-tête\model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\polygon.hpp">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

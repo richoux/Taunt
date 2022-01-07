@@ -19,6 +19,18 @@ namespace taunt
 		  _contours( std::vector<contour>() )
 	{}
 
+	connected_component::connected_component( const std::vector< std::vector<bool> >& map_bool )
+		: _map( std::vector< std::vector<int> >( map_bool.size(), std::vector<int>( map_bool[0].size(), 0 ) ) ),
+		  _height( _map.size() ), // maps are implemented as [y][x], but all methods interface are [x][y]
+		  _width( _map[ 0 ].size() ),
+		  _contours( std::vector<contour>() )
+	{
+		for( size_t y = 0; y < _height; ++y )
+			for( size_t x = 0; x < _width; ++x )
+				if( !map_bool[y][x] )
+					_map[y][x] = 1;
+	}
+
 	bool connected_component::is_on_map( size_t x, size_t y ) const
 	{
 		return x >= 0 && x < _width && y >= 0 && y < _height;
@@ -52,38 +64,6 @@ namespace taunt
 			  && ( is_walkable( x    , y + 1 )  || !is_on_map( x    , y + 1 ) )
 			  && ( is_walkable( x + 1, y + 1 )  || !is_on_map( x + 1, y + 1 ) );
 	}
-
-	// bool connected_component::is_buildable( size_t x, size_t y ) const
-	// {
-	// 	if( !is_on_map( x, y ) )
-	// 		return false;
-	// 	else
-	// 		return _map[ y ][ x ] >= 0 && _map[ y ][ x ] < 1000;
-	// }
-
-	// bool connected_component::has_buildable_around( size_t x, size_t y ) const
-	// {
-	// 	return is_buildable( x - 1, y - 1 )
-	// 		|| is_buildable( x    , y - 1 )
-	// 		|| is_buildable( x + 1, y - 1 )
-	// 		|| is_buildable( x - 1, y     )
-	// 		|| is_buildable( x + 1, y     )
-	// 		|| is_buildable( x - 1, y + 1 )
-	// 		|| is_buildable( x    , y + 1 )
-	// 		|| is_buildable( x + 1, y + 1 );
-	// }
-
-	// bool connected_component::are_all_buildable_around( size_t x, size_t y ) const
-	// {
-	// 	return is_buildable( x - 1, y - 1 )
-	// 		&& is_buildable( x, y - 1 )
-	// 		&& is_buildable( x + 1, y - 1 )
-	// 		&& is_buildable( x - 1, y )
-	// 		&& is_buildable( x + 1, y )
-	// 		&& is_buildable( x - 1, y + 1 )
-	// 		&& is_buildable( x, y + 1 )
-	// 		&& is_buildable( x + 1, y + 1 );
-	// }
 
 	boost::geometry::model::ring<point> connected_component::neighbors_with_direction( int direction, const point& current_point )
 	{
@@ -209,54 +189,7 @@ namespace taunt
 			return point( current_point.x(), p.y() );
 
 		return point( p.x() - 1, p.y() ); // if( diff_x == 0 && diff_y == -1 )
-
-		// 	if( diff_x == -1 && diff_y == -1 )
-		// 	if( clockwise )
-		// 		return point( p.x(), current_point.y() );
-		// 	else
-		// 		return point( current_point.x(), p.y() );
-		
-		// if( diff_x == -1 && diff_y == 0 )
-		// 	if( clockwise )
-		// 		return point( p.x(), p.y() + 1 );
-		// 	else
-		// 		return point( p.x(), p.y() - 1 );
-				
-		// if( diff_x == -1 && diff_y == 1 )
-		// 	if( clockwise )
-		// 		return point( current_point.x(), p.y() );
-		// 	else
-		// 		return point( p.x(), current_point.y() );
-
-		// if( diff_x == 0 && diff_y == 1 )
-		// 	if( clockwise )
-		// 		return point( p.x() + 1, p.y() );
-		// 	else
-		// 		return point( p.x() - 1, p.y() );
-
-		// if( diff_x == 1 && diff_y == 1 )
-		// 	if( clockwise )
-		// 		return point( p.x(), current_point.y() );
-		// 	else
-		// 		return point( current_point.x(), p.y() );
-
-		// if( diff_x == 1 && diff_y == 0 )
-		// 	if( clockwise )
-		// 		return point( p.x(), p.y() - 1 );
-		// 	else
-		// 		return point( p.x(), p.y() + 1 );
-
-		// if( diff_x == 1 && diff_y == -1 )
-		// 	if( clockwise )
-		// 		return point( current_point.x(), p.y() );
-		// 	else
-		// 		return point( p.x(), current_point.y() );
-
-		// if( clockwise )
-		// 	return point( p.x() - 1, p.y() ); // if( diff_x == 0 && diff_y == -1 )
-		// else
-		// 	return point( p.x() + 1, p.y() ); // if( diff_x == 0 && diff_y == -1 )
-}
+	}
 	
 	point connected_component::look_around( const point& current_point, const point& parent, direction direction )
 	{
@@ -310,46 +243,6 @@ namespace taunt
 		while( !is_same_point( current_point, starting_point ) );
 	}
 
-	// void connected_component::start_external_contour( int x, int y )
-	// {
-	// 	_contours.push_back( contour() );
-	// 	search_for_contour( x, y );
-	// 	++_current_contour_index;
-	// }
-
-	// void connected_component::start_internal_contour( int x, int y )
-	// {
-	// 	search_for_contour( x, y );
-	// }
-
-	// 2-scan connected-component search algorithm from He et al. - Fast connected-component labeling
-	// std::vector< std::vector<int> > connected_component::compute_cc_he()
-	// {
-	// 	// first scan: labels creation
-	// 	for( size_t y = 0; y < _height; ++y )
-	// 		for( size_t x = 0; x < _width; ++x )
-	// 			scan_block( x, y );
-
-	// 	// rename labels from 1 to n
-	// 	for( size_t i = 1; i < _labels.size(); ++i )
-	// 		if( _labels[ i ] == _nb_labels + 1 )
-	// 			++_nb_labels;
-	// 		else
-	// 			if( _labels[ i ] > static_cast<int>( _nb_labels + 1 ) )
-	// 			{
-	// 				++_nb_labels;
-	// 				soft_resolve( _nb_labels, _labels[ i ] );
-	// 			}
-
-	// 	// second scan: replacement
-	// 	for( size_t y = 0; y < _height; ++y )
-	// 		for( size_t x = 0; x < _width; ++x )
-	// 			if( is_walkable( x, y ) )
-	// 				_map[ y ][ x ] = _labels[ _map[ y ][ x ] ];
-
-	// 	return _map;
-	// }
-	
 	// contour search from Chang et al. - A linear-time component-labeling algorithm using contour tracing technique
 	void connected_component::compute_contours()
 	{
@@ -370,22 +263,6 @@ namespace taunt
 									search_for_contour( x, y, direction::W );
 				}
 	}
-
-	// std::vector< std::vector<int> > connected_component::compute_cc_chang()
-	// {
-	// 	for( size_t y = 0; y < _height; ++y )
-	// 		for( size_t x = 0; x < _width; ++x )
-	// 			if( !is_walkable( x, y ) && !are_all_walkable_around( x, y ))
-	// 			{
-	// 				if( is_walkable( x, y - 1 ) && !is_marked( x, y - 1 ) )
-	// 					start_external_contour( x, y );
-
-	// 				if( is_walkable( x, y + 1 ) && !is_marked( x, y + 1 ) )
-	// 					start_internal_contour( x, y );
-	// 			}
-
-	// 	return _map;
-	// }
 
 	std::vector< boost::geometry::model::polygon<point> > connected_component::compute_simplified_contours()
 	{
