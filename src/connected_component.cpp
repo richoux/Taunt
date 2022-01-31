@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <iostream>
 
 #include "connected_component.hpp"
 

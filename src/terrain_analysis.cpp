@@ -113,7 +113,6 @@ void terrain_analysis::analyze()
 
 #if defined TAUNT_BENCH
 	start = std::chrono::steady_clock::now();
-#endif
 
 	std::string mapfile = map_filename();
 	mapfile.replace( mapfile.end() - 4, mapfile.end(), "_log.txt" );
@@ -122,7 +121,6 @@ void terrain_analysis::analyze()
 	{
 		std::cerr << "Can't open file " << mapfile << "\n";
 	}
-#if defined TAUNT_BENCH
 	std::stringstream ss;
 #endif
 
@@ -985,18 +983,18 @@ std::string terrain_analysis::map_name() const
 /**************/
 terrain_analysis::terrain_analysis( analyze_type at )
 	: _analyze_type( at ),
-	_map_width( BWAPI::Broodwar->mapWidth() ),
-	_map_height( BWAPI::Broodwar->mapHeight() ),
-	_walkable( matrix_bool( _map_height, std::vector<bool>( _map_width, true ) ) ),
-	_buildable( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
-	_depot_buildable( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
-	_resources( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
-	_region_id( matrix_int( _map_height, std::vector<int>( _map_width, -1 ) ) ),
-	_terrain_height( matrix_int( _map_height, std::vector<int>( _map_width, 0 ) ) ),
-	_terrain_properties_low( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
-	_terrain_properties_high( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
-	_terrain_properties_very_high( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
-	_terrain_unbuildable_unwalkable( matrix_int( _map_height, std::vector<int>( _map_width, 0 ) ) )
+	  _map_width( BWAPI::Broodwar->mapWidth() ),
+	  _map_height( BWAPI::Broodwar->mapHeight() ),
+	  _walkable( matrix_bool( _map_height, std::vector<bool>( _map_width, true ) ) ),
+	  _buildable( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
+	  _depot_buildable( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
+	  _resources( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
+	  _region_id( matrix_int( _map_height, std::vector<int>( _map_width, -1 ) ) ),
+	  _terrain_height( matrix_int( _map_height, std::vector<int>( _map_width, 0 ) ) ),
+	  _terrain_properties_low( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
+	  _terrain_properties_high( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
+	  _terrain_properties_very_high( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
+	  _terrain_unbuildable_unwalkable( matrix_int( _map_height, std::vector<int>( _map_width, 0 ) ) )
 {}
 
 int terrain_analysis::compute_terrain_height( int tile_x, int tile_y ) const
