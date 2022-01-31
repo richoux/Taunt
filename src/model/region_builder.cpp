@@ -1,9 +1,9 @@
 #include "model/region_builder.hpp"
 #include "model/constraint_no_cuts.hpp"
 #include "model/constraint_one_cluster_per_region.hpp"
-#include "model/constraint_minimal_region_area.hpp"
+//#include "model/constraint_minimal_region_area.hpp"
 #include "model/objective_min_separation_width.hpp"
-#include "model/objective_same_area.hpp"
+//#include "model/objective_same_area.hpp"
 
 RegionBuilder::RegionBuilder( int number_separations,
                               const polygon& contour,
