@@ -103,7 +103,7 @@ void terrain_analysis::analyze()
 	_buildable = matrix_bool( _map_height, std::vector<bool>( _map_width, false ) );
 	_depot_buildable = matrix_bool( _map_height, std::vector<bool>( _map_width, false ) );
 	_resources = matrix_bool( _map_height, std::vector<bool>( _map_width, false ) );
-	_region_id = matrix_int( _map_height, std::vector<int>( _map_width, -1 ) );
+	_region_id = matrix_int( _map_height, std::vector<int>( _map_width, 0 ) );
 	_terrain_height = matrix_int( _map_height, std::vector<int>( _map_width, 0 ) );
 	_terrain_properties_low = matrix_bool( _map_height, std::vector<bool>( _map_width, false ) );
 	_terrain_properties_high = matrix_bool( _map_height, std::vector<bool>( _map_width, false ) );
@@ -257,17 +257,54 @@ void terrain_analysis::analyze()
 #endif
 
 	//region_id
-	taunt::connected_component cc_low( _terrain_properties_low );
+	taunt::connected_component cc_low( _terrain_properties_low, _region_id );
 	_simplified_cc_low = cc_low.compute_simplified_contours();
 
-	taunt::connected_component cc_high( _terrain_properties_high );
+	auto last_label = cc_low.get_last_label();
+	taunt::connected_component cc_high( _terrain_properties_high, _region_id, last_label );
 	_simplified_cc_high = cc_high.compute_simplified_contours();
 
-	taunt::connected_component cc_very_high( _terrain_properties_very_high );
+	last_label = cc_high.get_last_label();
+	taunt::connected_component cc_very_high( _terrain_properties_very_high, _region_id, last_label );
 	_simplified_cc_very_high = cc_very_high.compute_simplified_contours();
 
 	taunt::connected_component cc_unbuildable( _terrain_unbuildable_unwalkable );
 	_simplified_cc_unbuildable = cc_unbuildable.compute_simplified_contours();
+
+	std::string map_id = map_filename();
+	map_id.replace( map_id.end() - 4, map_id.end(), "_region_id.txt" );
+	std::ofstream log( map_id );
+	if( !log.is_open() )
+	{
+		std::cerr << "Can't open file " << map_id << "\n";
+	}
+	std::stringstream ss;
+	for( int y = 0; y < _map_height; ++y )
+	{
+		for( int x = 0; x < _map_width; ++x )
+			ss << _region_id[ y ][ x ];
+		ss << "\n";
+	}
+	log << ss.str();
+	log.close();
+
+	std::string map_height = map_filename();
+	map_height.replace( map_height.end() - 4, map_height.end(), "_height.txt" );
+	std::ofstream log2( map_height );
+	if( !log2.is_open() )
+	{
+		std::cerr << "Can't open file " << map_height << "\n";
+	}
+	std::stringstream ss2;
+	for( int y = 0; y < _map_height; ++y )
+	{
+		for( int x = 0; x < _map_width; ++x )
+			ss2 << _terrain_height[ y ][ x ];
+		ss2 << "\n";
+	}
+	log2 << ss2.str();
+	log2.close();
+
 
 #if defined TAUNT_BENCH
 	elapsed_time = std::chrono::steady_clock::now() - start;
@@ -989,7 +1026,7 @@ terrain_analysis::terrain_analysis( analyze_type at )
 	  _buildable( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
 	  _depot_buildable( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
 	  _resources( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
-	  _region_id( matrix_int( _map_height, std::vector<int>( _map_width, -1 ) ) ),
+	  _region_id( matrix_int( _map_height, std::vector<int>( _map_width, 0 ) ) ),
 	  _terrain_height( matrix_int( _map_height, std::vector<int>( _map_width, 0 ) ) ),
 	  _terrain_properties_low( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
 	  _terrain_properties_high( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),

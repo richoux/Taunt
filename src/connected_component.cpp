@@ -18,16 +18,20 @@ namespace taunt
 		  _contours( std::vector<contour>() )
 	{}
 
-	connected_component::connected_component( const std::vector< std::vector<bool> >& map_bool )
+	connected_component::connected_component( const std::vector< std::vector<bool> >& map_bool, std::vector< std::vector<int> >& region_id, int last_label )
 		: _map( std::vector< std::vector<int> >( map_bool.size(), std::vector<int>( map_bool[0].size(), 0 ) ) ),
 		  _height( _map.size() ), // maps are implemented as [y][x], but all methods interface are [x][y]
 		  _width( _map[ 0 ].size() ),
-		  _contours( std::vector<contour>() )
+		  _contours( std::vector<contour>() ),
+		  _region_id( region_id ),
+		  _last_label( last_label )
 	{
 		for( size_t y = 0; y < _height; ++y )
 			for( size_t x = 0; x < _width; ++x )
-				if( !map_bool[y][x] )
-					_map[y][x] = 1;
+				if( map_bool[ y ][ x ] )
+					_map[ y ][ x ] = 0;
+				else
+					_map[ y ][ x ] = 1;
 	}
 
 	bool connected_component::is_on_map( size_t x, size_t y ) const
@@ -37,7 +41,7 @@ namespace taunt
 	
 	bool connected_component::is_walkable( size_t x, size_t y ) const
 	{
-		return is_on_map( x, y ) && ( _map[ y ][ x ] == 0 || _map[ y ][ x ] == 2 || _map[ y ][ x ] == 3 );
+		return is_on_map( x, y ) && _map[ y ][ x ] != 1;
 	}
 
 	bool connected_component::has_walkable_around( size_t x, size_t y ) const
@@ -228,11 +232,27 @@ namespace taunt
 		point current_point( x, y );
 		boost::geometry::append( contour, current_point );
 
+		int label;
+
+		if( !has_region_id( x, y ) )
+		{
+			if( has_region_id( x - 1, y ) )
+				label = _region_id[ y ][ x - 1 ];
+			else
+				if( has_region_id( x, y - 1 ) )
+					label = _region_id[ y - 1 ][ x ];
+				else
+					label = ++_last_label; // new label
+		}
+		else // should never happen
+			label = _region_id[ y ][ x ];
+
 		// we can't have next_point == starting_point at the first iteration of the loop
 		// since Taunt doesn't consider isolated unwalkable tiles.
 		do
 		{
 			_map[ current_point.y() ][ current_point.x() ] = 3;
+			_region_id[ current_point.y() ][ current_point.x() ] = label;
 			// take the second to last point if contour contains at least 2 points, or the last one otherwise.
 			auto parent = contour.size() > 1 ? *(contour.rbegin()+1) : *contour.rbegin();
 			auto next_point = look_around( current_point, parent, direction ); 
@@ -260,6 +280,17 @@ namespace taunt
 							else
 								if( !is_walkable( x - 1, y ) )
 									search_for_contour( x, y, direction::W );
+								else // walkable tile inside a walkable area
+									if( !has_region_id( x, y ) )
+									{
+										if( has_region_id( x - 1, y ) )
+											_region_id[y][x] = _region_id[y][x - 1];
+										else
+											if( has_region_id( x, y - 1 ) )
+												_region_id[ y ][ x ] = _region_id[ y - 1 ][ x ];
+											else
+												_region_id[ y ][ x ] = ++_last_label; // new label
+									}
 				}
 	}
 
