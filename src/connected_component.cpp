@@ -75,8 +75,8 @@ namespace taunt
 
 	contour connected_component::neighbors_with_direction( int direction, const point& current_point )
 	{
-		int x = current_point.x();
-		int y = current_point.y();
+		double x = current_point.x();
+		double y = current_point.y();
 
 		switch( direction )
 		{

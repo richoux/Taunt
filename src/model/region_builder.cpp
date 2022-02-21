@@ -6,8 +6,8 @@
 //#include "model/objective_same_area.hpp"
 
 RegionBuilder::RegionBuilder( int number_separations,
-                              const polygon& contour,
-                              const std::vector<multi_point>& resources )
+                              const boost_polygon& contour,
+                              const std::vector<multipoint>& resources )
 	: ghost::ModelBuilder( true ), // permutation problem
 	  number_separations( number_separations ),
 	  contour( contour ),
@@ -21,8 +21,8 @@ RegionBuilder::RegionBuilder( int number_separations,
 			    && ( p2 > p1 + 2 || ( contour.outer()[p1].x() != contour.outer()[p2].x() && contour.outer()[p1].y() != contour.outer()[p2].y() ) ) )
 			{
 				bool to_add = true;
-				line line{{ contour.outer()[p1], contour.outer()[p2] }};
-				ring ring_line{{ contour.outer()[p1], contour.outer()[p2] }};
+				line line{ contour.outer()[p1], contour.outer()[p2] };
+				ring ring_line{ contour.outer()[p1], contour.outer()[p2] };
 				boost::geometry::correct( ring_line );
 				
 				for( auto& resource_cluster : resources )

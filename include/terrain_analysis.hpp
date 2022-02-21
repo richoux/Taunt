@@ -42,7 +42,7 @@ namespace taunt
 		tile_position _start_location;
 		std::vector< region > _regions;
 		std::vector< chokepoint > _chokepoints;
-
+		
 		// From the CommandCenter bot
 		matrix_bool	_walkable;			// whether a tile is buildable (includes static resources)
 		matrix_bool	_buildable;			// whether a tile is buildable (includes static resources)
@@ -60,10 +60,21 @@ namespace taunt
 		std::vector<boost_polygon> _simplified_cc_level_2;
 		std::vector<boost_polygon> _simplified_cc_level_3;
 		std::vector<boost_polygon> _simplified_cc_unbuildable;
-		std::vector<segment> _frontiers;
+		multipolygon _separation_zones;
+		std::vector<line> _frontiers;
 
-		void make_frontiers( const std::vector< int >& solution, const std::vector<line>& separations );
-		void make_contour_label( const boost_polygon& poly );
+		boost::geometry::strategy::buffer::distance_symmetric<double> _small_distance_strategy;
+		boost::geometry::strategy::buffer::distance_symmetric<double> _distance_strategy;
+		boost::geometry::strategy::buffer::side_straight _side_strategy;
+		boost::geometry::strategy::buffer::join_miter _join_strategy;
+		boost::geometry::strategy::buffer::end_round _end_strategy;
+		boost::geometry::strategy::buffer::point_square _point_strategy;
+
+		void make_frontiers(const std::vector<int>& solution, const std::vector<line>& separations);
+		multipolygon make_regions( const std::vector<line>& separations, const boost_polygon& polygon );
+		void compute_region_id( const boost_polygon& region );
+		void compute_region_id( const multipolygon& regions );
+		//void make_contour_label( const boost_polygon& poly );
 		boost_polygon enrich( const boost_polygon& input ) const;
 
 		int compute_terrain_height( int tile_x, int tile_y ) const;

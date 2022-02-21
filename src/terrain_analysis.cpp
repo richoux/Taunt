@@ -23,111 +23,76 @@ void terrain_analysis::make_frontiers( const std::vector<int>& solution,
 {
 	for( size_t i = 0; i < solution.size(); ++i )
 		if( solution[ i ] == 1 )
-		{
-			segment seg{ separations[ i ][ 0 ], separations[ i ][ 1 ] };
-			_frontiers.push_back( seg );
-		}
+			_frontiers.push_back( separations[ i ] );		
 }
 
-void make_regions( const std::vector<line>& separations, std::vector<boost_polygon>& polygons )
+multipolygon terrain_analysis::make_regions( const std::vector<line>& separations, const boost_polygon& polygon )
 {
-	int index_poly;
-	for( auto& separation : separations )
-	{
-		for( index_poly = 0; index_poly < static_cast<int>( polygons.size() ); ++index_poly )
-		{
-			int index_point = 0;
-			int number_points = static_cast<int>( polygons[ index_poly ].outer().size() );
-			if( !boost::geometry::equals( separation[ 1 ], polygons[ index_poly ].outer()[ index_point ] ) )
-				for( index_point = 1; index_point < number_points; ++index_point )
-				{
-					line last_line{ polygons[ index_poly ].outer()[ index_point - 1 ], polygons[ index_poly ].outer()[ index_point ] };
-					if( boost::geometry::touches( separation[ 1 ], last_line ) )
-						break;
-				}
+	multiline ml_separations;
+	ml_separations.assign( separations.begin(), separations.end() );
 
-			if( index_point == number_points )
-				continue;
+	// bufferize separations to get a multipolygon (and thicker separations)
+	multipolygon buffered_separations;
+	boost::geometry::buffer( ml_separations, buffered_separations, _distance_strategy, _side_strategy, _join_strategy, _end_strategy, _point_strategy );
 
-			// First polygon
-			boost_polygon new_poly;
-			boost::geometry::append( new_poly.outer(), separation[ 0 ] );
-			if( !boost::geometry::equals( separation[ 1 ], polygons[ index_poly ].outer()[ index_point ] ) )
-				boost::geometry::append( new_poly.outer(), separation[ 1 ] );
+	// only keep parts of separations that intersect with the polygon to cut. 
+	multipolygon fit_separations;
+	boost::geometry::intersection( buffered_separations, polygon, fit_separations );
 
-			int previous_point = -1;
-			line last_line;
+	// add these separations into the multipolygon of all separations (used to compute the region id of separations)
+	_separation_zones.insert( _separation_zones.end(), fit_separations.begin(), fit_separations.end() );
 
-			//while( !( boost::geometry::equals( separation[ 0 ], polygons[ index_poly ].outer()[ index_point ] )
-			//			 || ( previous_point != -1 && boost::geometry::touches( separation[ 0 ], last_line ) ) ) )
-			while( previous_point == -1 || !boost::geometry::touches( separation[ 0 ], last_line ) )
-			{
-				boost::geometry::append( new_poly.outer(), polygons[ index_poly ].outer()[ index_point ] );
-				previous_point = index_point;
-				index_point = ( index_point + 1 ) % number_points;
-				last_line = line{ polygons[ index_poly ].outer()[ previous_point ], polygons[ index_poly ].outer()[ index_point ] };
-			}
+	// cut the polygon into multi_polygons
+	std::list<boost_polygon> cut_polygon;
+	boost::geometry::difference( polygon, fit_separations, cut_polygon );
 
-			boost::geometry::append( new_poly.outer(), separation[ 0 ] );
-
-			for( auto& inner : polygons[ index_poly ].inners() )
-				if( boost::geometry::covered_by( inner[ 0 ], new_poly.outer() ) )
-				{
-					//boost::geometry::interior_rings( new_poly ).resize( new_poly.inners().size() + 1 );
-					//boost::geometry::append( new_poly.inners(), inner );
-					new_poly.inners().push_back( inner );
-				}
-
-			polygons.push_back( new_poly );
-			
-			// Second polygon
-			new_poly.clear();
-			boost::geometry::append( new_poly.outer(), separation[ 1 ] );
-			boost::geometry::append( new_poly.outer(), separation[ 0 ] );
-			previous_point = -1;
-
-			if( boost::geometry::equals( separation[ 0 ], polygons[ index_poly ].outer()[ index_point ] ) )
-				index_point = ( index_point + 1 ) % number_points;
-
-			while( previous_point == -1 || !boost::geometry::touches( separation[ 1 ], last_line ) )
-			{
-				boost::geometry::append( new_poly.outer(), polygons[ index_poly ].outer()[ index_point ] );
-				previous_point = index_point;
-				index_point = ( index_point + 1 ) % number_points;
-				last_line = line{ polygons[ index_poly ].outer()[ previous_point ], polygons[ index_poly ].outer()[ index_point ] };
-			}
-
-			boost::geometry::append( new_poly.outer(), separation[ 1 ] );
-
-			for( auto& inner : polygons[ index_poly ].inners() )
-				if( boost::geometry::covered_by( inner[ 0 ], new_poly.outer() ) )
-				{
-					//boost::geometry::interior_rings( new_poly ).resize( new_poly.inners().size() + 1 );
-					//boost::geometry::append( new_poly.inners(), inner );
-					new_poly.inners().push_back( inner );
-				}
-
-			polygons.push_back( new_poly );
-
-			// if we reach this line, it means we have treated the right polygon. No need to check the others.
-			break;
-		}
-
-		if( index_poly < static_cast<int>( polygons.size() ) )
-			polygons.erase( polygons.begin() + index_poly );
-	}
+	multipolygon mp_regions;
+	mp_regions.assign( cut_polygon.begin(), cut_polygon.end() );
+	
+	return mp_regions;
 }
 
-void terrain_analysis::make_contour_label( const boost_polygon& poly )
+void terrain_analysis::compute_region_id( const boost_polygon& region )
 {
 	++_last_label;
-	for( auto& p : poly.outer() )
-		_region_id[ p.y() ][ p.x() ] = _last_label;
+	box region_box;
+	boost::geometry::envelope( region, region_box );
+	int min_x = std::round( region_box.min_corner().x() );
+	int min_y = std::round( region_box.min_corner().y() );
+	int max_x = std::round( region_box.max_corner().x() );
+	int max_y = std::round( region_box.max_corner().y() );
 
-	for( auto& inner : poly.inners() )
-		for( auto& p : inner )
-			_region_id[ p.y() ][ p.x() ] = _last_label;
+	// To get around a bug of boost::geometry::covered_by: very slightly enlarge the polygon to make sure bg::covered_by is working properly
+	multipolygon buffered_region;
+	boost::geometry::buffer( region, buffered_region, _small_distance_strategy, _side_strategy, _join_strategy, _end_strategy, _point_strategy );
+
+	//for( int y = min_y; y <= max_y; ++y )
+	//	for( int x = min_x; x <= max_x; ++x )
+	for( double y = region_box.min_corner().y() ; y <= region_box.max_corner().y() ; ++y )
+		for( double x = region_box.min_corner().x() ; x <= region_box.max_corner().x() ; ++x )
+		{
+			point p{ x, y };
+			if( boost::geometry::covered_by( p, buffered_region ) )
+				_region_id[ y ][ x ] = _last_label;
+		}	
 }
+
+void terrain_analysis::compute_region_id( const multipolygon& regions )
+{
+	for( const auto& region : regions )
+		compute_region_id( region );
+}
+
+//void terrain_analysis::make_contour_label( const boost_polygon& poly )
+//{
+//	++_last_label;
+//	for( auto& p : poly.outer() )
+//		_region_id[ p.y() ][ p.x() ] = _last_label;
+//
+//	for( auto& inner : poly.inners() )
+//		for( auto& p : inner )
+//			_region_id[ p.y() ][ p.x() ] = _last_label;
+//}
 
 boost_polygon terrain_analysis::enrich( const boost_polygon& input ) const
 {
@@ -588,35 +553,34 @@ void terrain_analysis::analyze()
 				start_inner = std::chrono::steady_clock::now();
 #endif
 
-				std::vector<boost_polygon> polygons_level_1{ really_simplified_level_1[ i ] };
 				std::vector<line> separations;
 
 				for( size_t i = 0; i < solution.size(); ++i )
 					if( solution[ i ] == 1 )
 					{
 						separations.push_back( builder.separation_candidates[ i ] );
-						segment seg{ builder.separation_candidates[ i ][ 0 ], builder.separation_candidates[ i ][ 1 ] };
-						_frontiers.push_back( seg );
+						_frontiers.push_back( builder.separation_candidates[ i ] );
 					}
 
-				make_regions( separations, polygons_level_1 );
-
-				for( auto& poly : polygons_level_1 )
-					make_contour_label( poly );				
-			}
-
+				auto regions = make_regions( separations, really_simplified_level_1[ i ] );
+				compute_region_id( regions );
 #if defined TAUNT_BENCH
 				elapsed_time = std::chrono::steady_clock::now() - start_inner;
 				ss << "Make frontiers: " << elapsed_time.count() << "\n";
 #endif
-		}
+			}
 #if defined TAUNT_BENCH
 			else
 			{
-				ss << "Fail to find a solution for zone " << i << "\n";
+				ss << "Fail to find a solution for zone " << index << "\n";
 			}
 #endif
 		}
+		else
+		{
+			compute_region_id( _simplified_cc_level_1[ i ] );
+		}
+	}
 			
 
 #if defined TAUNT_BENCH
@@ -705,21 +669,17 @@ void terrain_analysis::analyze()
 				start_inner = std::chrono::steady_clock::now();
 #endif
 
-				std::vector<boost_polygon> polygons_level_2{ really_simplified_level_2[ i ] };
 				std::vector<line> separations;
 
 				for( size_t i = 0; i < solution.size(); ++i )
 					if( solution[ i ] == 1 )
 					{
 						separations.push_back( builder.separation_candidates[ i ] );
-						segment seg{ builder.separation_candidates[ i ][ 0 ], builder.separation_candidates[ i ][ 1 ] };
-						_frontiers.push_back( seg );
+						_frontiers.push_back( builder.separation_candidates[ i ] );
 					}
 
-				make_regions( separations, polygons_level_2 );
-
-				for( auto& poly : polygons_level_2 )
-					make_contour_label( poly );
+				auto regions = make_regions( separations, really_simplified_level_2[ i ] );
+				compute_region_id( regions );
 
 				//std::vector<ring> rings;
 				//std::vector<boost_polygon> outputs;
@@ -744,15 +704,19 @@ void terrain_analysis::analyze()
 				elapsed_time = std::chrono::steady_clock::now() - start_inner;
 				ss << "Make frontiers: " << elapsed_time.count() << "\n";
 #endif
-		}
+			}
 #if defined TAUNT_BENCH
 			else
 			{
 				ss << "Fail to find a solution for zone " << index << "\n";
 			}
 #endif
+		}
+		else
+		{
+			compute_region_id( _simplified_cc_level_2[ i ] );
+		}
 	}
-}
 
 #if defined TAUNT_BENCH
 	elapsed_time = std::chrono::steady_clock::now() - start;
@@ -840,21 +804,17 @@ void terrain_analysis::analyze()
 				start_inner = std::chrono::steady_clock::now();
 #endif
 
-				std::vector<boost_polygon> polygons_level_3{ really_simplified_level_3[ i ] };
 				std::vector<line> separations;
 
 				for( size_t i = 0; i < solution.size(); ++i )
 					if( solution[ i ] == 1 )
 					{
 						separations.push_back( builder.separation_candidates[ i ] );
-						segment seg{ builder.separation_candidates[ i ][ 0 ], builder.separation_candidates[ i ][ 1 ] };
-						_frontiers.push_back( seg );
+						_frontiers.push_back( builder.separation_candidates[ i ] );
 					}
 
-				make_regions( separations, polygons_level_3 );
-
-				for( auto& poly : polygons_level_3 )
-					make_contour_label( poly );
+				auto regions = make_regions( separations, really_simplified_level_3[ i ] );
+				compute_region_id( regions );
 
 				//std::vector<ring> rings;
 				//std::vector<boost_polygon> outputs;
@@ -879,7 +839,7 @@ void terrain_analysis::analyze()
 				elapsed_time = std::chrono::steady_clock::now() - start_inner;
 				ss << "Make frontiers: " << elapsed_time.count() << "\n";
 #endif
-		}
+			}
 #if defined TAUNT_BENCH
 			else
 			{
@@ -887,7 +847,17 @@ void terrain_analysis::analyze()
 			}
 #endif
 		}
+		else
+		{
+			compute_region_id( _simplified_cc_level_3[ i ] );
+		}
 	}
+
+	// assign region id to unbuildables zones (slopes, bridges, ...) and separations.
+	multipolygon unbuildables;
+	unbuildables.assign( _simplified_cc_unbuildable.begin(), _simplified_cc_unbuildable.end() );
+	compute_region_id( unbuildables );
+	compute_region_id( _separation_zones );
 
 	//for( size_t y = 0; y < _map_height; ++y )
 	//	for( size_t x = 0; x < _map_width; ++x )
@@ -982,8 +952,10 @@ void terrain_analysis::print()
 
 	for( size_t i = 0; i < _frontiers.size(); ++i )
 	{
-		boost::geometry::set<0, 0>( _frontiers[ i ], -boost::geometry::get<0, 0>( _frontiers[ i ] ) );
-		boost::geometry::set<1, 0>( _frontiers[ i ], -boost::geometry::get<1, 0>( _frontiers[ i ] ) );
+		//boost::geometry::set<0, 0>( _frontiers[ i ], -boost::geometry::get<0, 0>( _frontiers[ i ] ) );
+		//boost::geometry::set<1, 0>( _frontiers[ i ], -boost::geometry::get<1, 0>( _frontiers[ i ] ) );
+		for( auto& point : _frontiers[ i ] )
+			boost::geometry::set<0>( point, -boost::geometry::get<0>( point ) );
 	}
 #endif
 
@@ -1030,8 +1002,10 @@ void terrain_analysis::print()
 
 	for( size_t i = 0; i < _frontiers.size(); ++i )
 	{
-		boost::geometry::set<0, 1>( _frontiers[ i ], -boost::geometry::get<0, 1>( _frontiers[ i ] ) );
-		boost::geometry::set<1, 1>( _frontiers[ i ], -boost::geometry::get<1, 1>( _frontiers[ i ] ) );
+		//boost::geometry::set<0, 1>( _frontiers[ i ], -boost::geometry::get<0, 1>( _frontiers[ i ] ) );
+		//boost::geometry::set<1, 1>( _frontiers[ i ], -boost::geometry::get<1, 1>( _frontiers[ i ] ) );
+		for( auto& point : _frontiers[ i ] )
+			boost::geometry::set<1>( point, -boost::geometry::get<1>( point ) );
 	}
 
 	std::string contour_mapfile_svg = mapfile;
@@ -1082,7 +1056,9 @@ void terrain_analysis::print()
 terrain_analysis::terrain_analysis( sc2::Agent* bot, analyze_type at )
 	: _bot( bot ),
 	_analyze_type( at ),
-	_last_label( 0 )
+	_last_label( 0 ),
+	_small_distance_strategy( 0.01 ),
+	_distance_strategy( 0.5 )
 {}
 
 int terrain_analysis::compute_terrain_height( int tile_x, int tile_y ) const
@@ -1218,7 +1194,9 @@ terrain_analysis::terrain_analysis( analyze_type at )
 	_terrain_properties_level_1( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
 	_terrain_properties_level_2( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
 	_terrain_properties_level_3( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
-	_terrain_unbuildable_unwalkable( matrix_int( _map_height, std::vector<int>( _map_width, 0 ) ) )
+	_terrain_unbuildable_unwalkable( matrix_int( _map_height, std::vector<int>( _map_width, 0 ) ) ),
+	_small_distance_strategy( 0.01 ),
+	_distance_strategy( 0.5 )
 {}
 
 int terrain_analysis::compute_terrain_height( int tile_x, int tile_y ) const
