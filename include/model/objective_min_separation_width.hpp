@@ -7,8 +7,9 @@
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/linestring.hpp>
 
-using point = boost::geometry::model::d2::point_xy<int>;
-using line = boost::geometry::model::linestring<point>;
+#include "../geometry.hpp"
+//using point = boost::geometry::model::d2::point_xy<int>;
+//using line = boost::geometry::model::linestring<point>;
 
 class MinSeparationWidth : public ghost::Minimize
 {

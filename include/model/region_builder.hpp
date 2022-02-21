@@ -8,11 +8,13 @@
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/linestring.hpp>
 
-using point = boost::geometry::model::d2::point_xy<int>;
-using polygon = boost::geometry::model::polygon<point>;
-using multi_point = boost::geometry::model::multi_point<point>;
-using ring = boost::geometry::model::ring<point>;
-using line = boost::geometry::model::linestring<point>;
+#include "../geometry.hpp"
+
+//using point = boost::geometry::model::d2::point_xy<int>;
+//using polygon = boost::geometry::model::polygon<point>;
+//using multi_point = boost::geometry::model::multi_point<point>;
+//using ring = boost::geometry::model::ring<point>;
+//using line = boost::geometry::model::linestring<point>;
 
 class RegionBuilder : public ghost::ModelBuilder
 {
@@ -20,8 +22,8 @@ class RegionBuilder : public ghost::ModelBuilder
 	
 	public:
 	RegionBuilder( int number_separations,
-	               const polygon& contour,
-	               const std::vector<multi_point>& resources );
+	               const boost_polygon& contour,
+	               const std::vector<multipoint>& resources );
 
 	void declare_variables() override;
 	void declare_constraints() override;
@@ -29,7 +31,7 @@ class RegionBuilder : public ghost::ModelBuilder
 	//void declare_auxiliary_data() override;
 
 	int number_separations;
-	polygon contour;
-	std::vector<multi_point> resources;
+	boost_polygon contour;
+	std::vector<multipoint> resources;
 	std::vector<line> separation_candidates;
 };

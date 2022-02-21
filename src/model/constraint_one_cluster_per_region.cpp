@@ -8,8 +8,8 @@
 #include "model/constraint_one_cluster_per_region.hpp"
 
 OneClusterPerRegion::OneClusterPerRegion( const std::vector<ghost::Variable>& variables,
-                                          const polygon& contour,
-                                          const std::vector<multi_point>& resources,
+                                          const boost_polygon& contour,
+                                          const std::vector<multipoint>& resources,
                                           const std::vector<line>& separations )
 	: Constraint( variables ),
 	  _contour( contour ),

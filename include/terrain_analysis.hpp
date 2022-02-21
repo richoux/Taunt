@@ -3,13 +3,12 @@
 #include <vector>
 #include <string>
 
-#include <boost/geometry.hpp>
-#include <boost/geometry/geometries/linestring.hpp>
-
+#include "geometry.hpp"
 #include "analyze_type.hpp"
 #include "region.hpp"
 #include "positions.hpp"
 #include "chokepoint.hpp"
+#include "connected_component.hpp"
 
 #ifdef SC2API
 #include "sc2api/sc2_api.h"
@@ -19,12 +18,6 @@
 
 using matrix_bool = std::vector< std::vector<bool> >;
 using matrix_int = std::vector< std::vector<int> >;
-
-using point = boost::geometry::model::d2::point_xy<int>;
-using segment = boost::geometry::model::segment<point>;
-using boost_polygon = boost::geometry::model::polygon<point>;
-using line = boost::geometry::model::linestring<point>;
-using multipoint = boost::geometry::model::multi_point<point>;
 
 #ifdef SC2API
 using unit_type = sc2::UnitTypeID;
@@ -42,13 +35,14 @@ namespace taunt
 		analyze_type _analyze_type;
 		int _map_width;
 		int _map_height;
+		int _last_label;
 
 		std::vector< tile_position > _base_locations;
 		std::vector< tile_position > _start_base_locations;
 		tile_position _start_location;
 		std::vector< region > _regions;
 		std::vector< chokepoint > _chokepoints;
-
+		
 		// From the CommandCenter bot
 		matrix_bool	_walkable;			// whether a tile is buildable (includes static resources)
 		matrix_bool	_buildable;			// whether a tile is buildable (includes static resources)
@@ -57,18 +51,30 @@ namespace taunt
 		matrix_int	_region_id;			// connectivity sector number, two tiles are ground connected if they have the same number
 		matrix_int	_terrain_height;	// height of the map (modification of SC2 heights to match BW heights)
 
-		matrix_bool _terrain_properties_low;
-		matrix_bool _terrain_properties_high;
-		matrix_bool _terrain_properties_very_high;
+		matrix_bool _terrain_properties_level_1;
+		matrix_bool _terrain_properties_level_2;
+		matrix_bool _terrain_properties_level_3;
 		matrix_int  _terrain_unbuildable_unwalkable;
 
-		std::vector<boost_polygon> _simplified_cc_low;
-		std::vector<boost_polygon> _simplified_cc_high;
-		std::vector<boost_polygon> _simplified_cc_very_high;
+		std::vector<boost_polygon> _simplified_cc_level_1;
+		std::vector<boost_polygon> _simplified_cc_level_2;
+		std::vector<boost_polygon> _simplified_cc_level_3;
 		std::vector<boost_polygon> _simplified_cc_unbuildable;
-		std::vector<segment> _frontiers;
+		multipolygon _separation_zones;
+		std::vector<line> _frontiers;
 
-		void make_frontiers( const std::vector< int >& solution, const std::vector<line>& separations );
+		boost::geometry::strategy::buffer::distance_symmetric<double> _small_distance_strategy;
+		boost::geometry::strategy::buffer::distance_symmetric<double> _distance_strategy;
+		boost::geometry::strategy::buffer::side_straight _side_strategy;
+		boost::geometry::strategy::buffer::join_miter _join_strategy;
+		boost::geometry::strategy::buffer::end_round _end_strategy;
+		boost::geometry::strategy::buffer::point_square _point_strategy;
+
+		void make_frontiers(const std::vector<int>& solution, const std::vector<line>& separations);
+		multipolygon make_regions( const std::vector<line>& separations, const boost_polygon& polygon );
+		void compute_region_id( const boost_polygon& region );
+		void compute_region_id( const multipolygon& regions );
+		//void make_contour_label( const boost_polygon& poly );
 		boost_polygon enrich( const boost_polygon& input ) const;
 
 		int compute_terrain_height( int tile_x, int tile_y ) const;
@@ -78,6 +84,7 @@ namespace taunt
 		bool is_geyser( const unit_type& unit_type ) const;
 		inline bool is_valid_tile( const tile_position& tp ) const { return is_valid_tile( tp.x, tp.y ); }
 		inline bool is_valid_tile( int tile_x, int tile_y ) const { return tile_x >= 0 && tile_y >= 0 && tile_x < _map_width&& tile_y < _map_height; }
+		inline bool has_region_id( int x, int y ) const { return is_valid_tile( x, y ) && _region_id[ y ][ x ] != 0; }
 #ifdef SC2API
 		bool get_bit( const sc2::ImageData& grid, int tile_x, int tile_y ) const;
 #endif
