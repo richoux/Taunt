@@ -29,6 +29,106 @@ void terrain_analysis::make_frontiers( const std::vector<int>& solution,
 		}
 }
 
+void make_regions( const std::vector<line>& separations, std::vector<boost_polygon>& polygons )
+{
+	int index_poly;
+	for( auto& separation : separations )
+	{
+		for( index_poly = 0; index_poly < static_cast<int>( polygons.size() ); ++index_poly )
+		{
+			int index_point = 0;
+			int number_points = static_cast<int>( polygons[ index_poly ].outer().size() );
+			if( !boost::geometry::equals( separation[ 1 ], polygons[ index_poly ].outer()[ index_point ] ) )
+				for( index_point = 1; index_point < number_points; ++index_point )
+				{
+					line last_line{ polygons[ index_poly ].outer()[ index_point - 1 ], polygons[ index_poly ].outer()[ index_point ] };
+					if( boost::geometry::touches( separation[ 1 ], last_line ) )
+						break;
+				}
+
+			if( index_point == number_points )
+				continue;
+
+			// First polygon
+			boost_polygon new_poly;
+			boost::geometry::append( new_poly.outer(), separation[ 0 ] );
+			if( !boost::geometry::equals( separation[ 1 ], polygons[ index_poly ].outer()[ index_point ] ) )
+				boost::geometry::append( new_poly.outer(), separation[ 1 ] );
+
+			int previous_point = -1;
+			line last_line;
+
+			//while( !( boost::geometry::equals( separation[ 0 ], polygons[ index_poly ].outer()[ index_point ] )
+			//			 || ( previous_point != -1 && boost::geometry::touches( separation[ 0 ], last_line ) ) ) )
+			while( previous_point == -1 || !boost::geometry::touches( separation[ 0 ], last_line ) )
+			{
+				boost::geometry::append( new_poly.outer(), polygons[ index_poly ].outer()[ index_point ] );
+				previous_point = index_point;
+				index_point = ( index_point + 1 ) % number_points;
+				last_line = line{ polygons[ index_poly ].outer()[ previous_point ], polygons[ index_poly ].outer()[ index_point ] };
+			}
+
+			boost::geometry::append( new_poly.outer(), separation[ 0 ] );
+
+			for( auto& inner : polygons[ index_poly ].inners() )
+				if( boost::geometry::covered_by( inner[ 0 ], new_poly.outer() ) )
+				{
+					//boost::geometry::interior_rings( new_poly ).resize( new_poly.inners().size() + 1 );
+					//boost::geometry::append( new_poly.inners(), inner );
+					new_poly.inners().push_back( inner );
+				}
+
+			polygons.push_back( new_poly );
+			
+			// Second polygon
+			new_poly.clear();
+			boost::geometry::append( new_poly.outer(), separation[ 1 ] );
+			boost::geometry::append( new_poly.outer(), separation[ 0 ] );
+			previous_point = -1;
+
+			if( boost::geometry::equals( separation[ 0 ], polygons[ index_poly ].outer()[ index_point ] ) )
+				index_point = ( index_point + 1 ) % number_points;
+
+			while( previous_point == -1 || !boost::geometry::touches( separation[ 1 ], last_line ) )
+			{
+				boost::geometry::append( new_poly.outer(), polygons[ index_poly ].outer()[ index_point ] );
+				previous_point = index_point;
+				index_point = ( index_point + 1 ) % number_points;
+				last_line = line{ polygons[ index_poly ].outer()[ previous_point ], polygons[ index_poly ].outer()[ index_point ] };
+			}
+
+			boost::geometry::append( new_poly.outer(), separation[ 1 ] );
+
+			for( auto& inner : polygons[ index_poly ].inners() )
+				if( boost::geometry::covered_by( inner[ 0 ], new_poly.outer() ) )
+				{
+					//boost::geometry::interior_rings( new_poly ).resize( new_poly.inners().size() + 1 );
+					//boost::geometry::append( new_poly.inners(), inner );
+					new_poly.inners().push_back( inner );
+				}
+
+			polygons.push_back( new_poly );
+
+			// if we reach this line, it means we have treated the right polygon. No need to check the others.
+			break;
+		}
+
+		if( index_poly < static_cast<int>( polygons.size() ) )
+			polygons.erase( polygons.begin() + index_poly );
+	}
+}
+
+void terrain_analysis::make_contour_label( const boost_polygon& poly )
+{
+	++_last_label;
+	for( auto& p : poly.outer() )
+		_region_id[ p.y() ][ p.x() ] = _last_label;
+
+	for( auto& inner : poly.inners() )
+		for( auto& p : inner )
+			_region_id[ p.y() ][ p.x() ] = _last_label;
+}
+
 boost_polygon terrain_analysis::enrich( const boost_polygon& input ) const
 {
 	boost_polygon output;
@@ -105,9 +205,9 @@ void terrain_analysis::analyze()
 	_resources = matrix_bool( _map_height, std::vector<bool>( _map_width, false ) );
 	_region_id = matrix_int( _map_height, std::vector<int>( _map_width, 0 ) );
 	_terrain_height = matrix_int( _map_height, std::vector<int>( _map_width, 0 ) );
-	_terrain_properties_low = matrix_bool( _map_height, std::vector<bool>( _map_width, false ) );
-	_terrain_properties_high = matrix_bool( _map_height, std::vector<bool>( _map_width, false ) );
-	_terrain_properties_very_high = matrix_bool( _map_height, std::vector<bool>( _map_width, false ) );
+	_terrain_properties_level_1 = matrix_bool( _map_height, std::vector<bool>( _map_width, false ) );
+	_terrain_properties_level_2 = matrix_bool( _map_height, std::vector<bool>( _map_width, false ) );
+	_terrain_properties_level_3 = matrix_bool( _map_height, std::vector<bool>( _map_width, false ) );
 	_terrain_unbuildable_unwalkable = matrix_int( _map_height, std::vector<int>( _map_width, 0 ) );
 #endif
 
@@ -134,13 +234,13 @@ void terrain_analysis::analyze()
 			switch( _terrain_height[ y ][ x ] )
 			{
 			case 0:
-				_terrain_properties_low[ y ][ x ] = _buildable[ y ][ x ]; //_walkable[y][x];
+				_terrain_properties_level_1[ y ][ x ] = _buildable[ y ][ x ]; //_walkable[y][x];
 				break;
 			case 2:
-				_terrain_properties_high[ y ][ x ] = _buildable[ y ][ x ]; //_walkable[y][x];
+				_terrain_properties_level_2[ y ][ x ] = _buildable[ y ][ x ]; //_walkable[y][x];
 				break;
-			default: // case 4
-				_terrain_properties_very_high[ y ][ x ] = _buildable[ y ][ x ]; //_walkable[y][x];
+			default: // case 4, but TODO 5
+				_terrain_properties_level_3[ y ][ x ] = _buildable[ y ][ x ]; //_walkable[y][x];
 			}
 
 			if( !_buildable[ y ][ x ] && _walkable[ y ][ x ] )
@@ -178,13 +278,13 @@ void terrain_analysis::analyze()
 				switch( _terrain_height[ y ][ x ] )
 				{
 				case 0:
-					_terrain_properties_low[ y ][ x ] = true;
+					_terrain_properties_level_1[ y ][ x ] = true;
 					break;
 				case 2:
-					_terrain_properties_high[ y ][ x ] = true;
+					_terrain_properties_level_2[ y ][ x ] = true;
 					break;
-				default: // case 4
-					_terrain_properties_very_high[ y ][ x ] = true;
+				default: // case 4, but TODO 5
+					_terrain_properties_level_3[ y ][ x ] = true;
 				}
 
 				// depots can't be built within 3 tiles of any resource
@@ -228,13 +328,13 @@ void terrain_analysis::analyze()
 				switch( _terrain_height[ y ][ x ] )
 				{
 				case 0:
-					_terrain_properties_low[ y ][ x ] = true;
+					_terrain_properties_level_1[ y ][ x ] = true;
 					break;
 				case 2:
-					_terrain_properties_high[ y ][ x ] = true;
+					_terrain_properties_level_2[ y ][ x ] = true;
 					break;
-				default: // case 4
-					_terrain_properties_very_high[ y ][ x ] = true;
+				default: // case 4, but TODO 5
+					_terrain_properties_level_3[ y ][ x ] = true;
 				}
 
 				// depots can't be built within 3 tiles of any resource
@@ -257,54 +357,23 @@ void terrain_analysis::analyze()
 #endif
 
 	//region_id
-	taunt::connected_component cc_low( _terrain_properties_low, _region_id );
-	_simplified_cc_low = cc_low.compute_simplified_contours();
+	//taunt::connected_component cc_level_1( _terrain_properties_level_1, &_region_id );
+	taunt::connected_component cc_level_1( _terrain_properties_level_1 );
+	_simplified_cc_level_1 = cc_level_1.compute_simplified_contours();
 
-	auto last_label = cc_low.get_last_label();
-	taunt::connected_component cc_high( _terrain_properties_high, _region_id, last_label );
-	_simplified_cc_high = cc_high.compute_simplified_contours();
+	//auto last_label = cc_level_1.get_last_label();
+	//taunt::connected_component cc_level_2( _terrain_properties_level_2, &_region_id, last_label );
+	taunt::connected_component cc_level_2( _terrain_properties_level_2 );
+	_simplified_cc_level_2 = cc_level_2.compute_simplified_contours();
 
-	last_label = cc_high.get_last_label();
-	taunt::connected_component cc_very_high( _terrain_properties_very_high, _region_id, last_label );
-	_simplified_cc_very_high = cc_very_high.compute_simplified_contours();
+	//last_label = cc_level_2.get_last_label();
+	//taunt::connected_component cc_level_3( _terrain_properties_level_3, &_region_id, last_label );
+	taunt::connected_component cc_level_3( _terrain_properties_level_3 );
+	_simplified_cc_level_3 = cc_level_3.compute_simplified_contours();
 
+	//last_label = cc_level_3.get_last_label();
 	taunt::connected_component cc_unbuildable( _terrain_unbuildable_unwalkable );
 	_simplified_cc_unbuildable = cc_unbuildable.compute_simplified_contours();
-
-	std::string map_id = map_filename();
-	map_id.replace( map_id.end() - 4, map_id.end(), "_region_id.txt" );
-	std::ofstream log( map_id );
-	if( !log.is_open() )
-	{
-		std::cerr << "Can't open file " << map_id << "\n";
-	}
-	std::stringstream ss;
-	for( int y = 0; y < _map_height; ++y )
-	{
-		for( int x = 0; x < _map_width; ++x )
-			ss << _region_id[ y ][ x ];
-		ss << "\n";
-	}
-	log << ss.str();
-	log.close();
-
-	std::string map_height = map_filename();
-	map_height.replace( map_height.end() - 4, map_height.end(), "_height.txt" );
-	std::ofstream log2( map_height );
-	if( !log2.is_open() )
-	{
-		std::cerr << "Can't open file " << map_height << "\n";
-	}
-	std::stringstream ss2;
-	for( int y = 0; y < _map_height; ++y )
-	{
-		for( int x = 0; x < _map_width; ++x )
-			ss2 << _terrain_height[ y ][ x ];
-		ss2 << "\n";
-	}
-	log2 << ss2.str();
-	log2.close();
-
 
 #if defined TAUNT_BENCH
 	elapsed_time = std::chrono::steady_clock::now() - start;
@@ -312,11 +381,11 @@ void terrain_analysis::analyze()
 	start = std::chrono::steady_clock::now();
 #endif
 
-	size_t number_zones_l = _simplified_cc_low.size();
-	size_t number_zones_lh = number_zones_l + _simplified_cc_high.size();
-	size_t number_zones_lhvh = number_zones_lh + _simplified_cc_very_high.size();
-	std::vector< multipoint > resource_clusters( number_zones_lhvh );
-	std::vector< int > number_resource_clusters( number_zones_lhvh, 0 );
+	size_t number_zones_l1 = _simplified_cc_level_1.size();
+	size_t number_zones_l12 = number_zones_l1 + _simplified_cc_level_2.size();
+	size_t number_zones_l123 = number_zones_l12 + _simplified_cc_level_3.size();
+	std::vector< multipoint > resource_clusters( number_zones_l123 );
+	std::vector< int > number_resource_clusters( number_zones_l123, 0 );
 
 	std::vector< point > resource_points;
 	for( int y = 0; y < _map_height; ++y )
@@ -324,22 +393,22 @@ void terrain_analysis::analyze()
 			if( _resources[ y ][ x ] )
 				resource_points.emplace_back( x, y );
 
-	for( size_t i = 0; i < number_zones_l; ++i )
+	for( size_t i = 0; i < number_zones_l1; ++i )
 		for( auto& point : resource_points )
-			if( boost::geometry::covered_by( point, _simplified_cc_low[ i ] ) )
+			if( boost::geometry::covered_by( point, _simplified_cc_level_1[ i ] ) )
 				boost::geometry::append( resource_clusters[ i ], point );
 
-	for( size_t i = 0; i < _simplified_cc_high.size(); ++i )
+	for( size_t i = 0; i < _simplified_cc_level_2.size(); ++i )
 		for( auto& point : resource_points )
-			if( boost::geometry::covered_by( point, _simplified_cc_high[ i ] ) )
-				boost::geometry::append( resource_clusters[ number_zones_l + i ], point );
+			if( boost::geometry::covered_by( point, _simplified_cc_level_2[ i ] ) )
+				boost::geometry::append( resource_clusters[ number_zones_l1 + i ], point );
 
-	for( size_t i = 0; i < _simplified_cc_very_high.size(); ++i )
+	for( size_t i = 0; i < _simplified_cc_level_3.size(); ++i )
 		for( auto& point : resource_points )
-			if( boost::geometry::covered_by( point, _simplified_cc_very_high[ i ] ) )
-				boost::geometry::append( resource_clusters[ number_zones_lh + i ], point );
+			if( boost::geometry::covered_by( point, _simplified_cc_level_3[ i ] ) )
+				boost::geometry::append( resource_clusters[ number_zones_l12 + i ], point );
 
-	std::vector< std::vector< multipoint > > clusters_on_the_map( number_zones_lhvh );
+	std::vector< std::vector< multipoint > > clusters_on_the_map( number_zones_l123 );
 
 #if defined TAUNT_BENCH
 	elapsed_time = std::chrono::steady_clock::now() - start;
@@ -439,12 +508,12 @@ void terrain_analysis::analyze()
 	auto start_ghost = std::chrono::steady_clock::now();
 #endif
 
-	std::vector<boost_polygon> really_simplified_low( _simplified_cc_low.size() );
-	std::vector<boost_polygon> really_simplified_high( _simplified_cc_high.size() );
-	std::vector<boost_polygon> really_simplified_very_high( _simplified_cc_very_high.size() );
+	std::vector<boost_polygon> really_simplified_level_1( _simplified_cc_level_1.size() );
+	std::vector<boost_polygon> really_simplified_level_2( _simplified_cc_level_2.size() );
+	std::vector<boost_polygon> really_simplified_level_3( _simplified_cc_level_3.size() );
 
 	// Compute regions with GHOST
-	for( int i = 0; i < static_cast<int>( _simplified_cc_low.size() ); ++i )
+	for( int i = 0; i < static_cast<int>( _simplified_cc_level_1.size() ); ++i )
 	{
 		if( number_resource_clusters[ i ] >= 2 )
 		{
@@ -452,8 +521,8 @@ void terrain_analysis::analyze()
 			auto start_inner = std::chrono::steady_clock::now();
 
 			boost_polygon temp_simplified;
-			boost::geometry::simplify( _simplified_cc_low[ i ], temp_simplified, SIMPLIFY );
-			really_simplified_low[ i ] = enrich( temp_simplified );
+			boost::geometry::simplify( _simplified_cc_level_1[ i ], temp_simplified, SIMPLIFY );
+			really_simplified_level_1[ i ] = enrich( temp_simplified );
 
 #if defined TAUNT_BENCH
 			elapsed_time = std::chrono::steady_clock::now() - start_inner;
@@ -461,13 +530,13 @@ void terrain_analysis::analyze()
 #endif
 
 			double cost;
-			std::vector<int> solution( really_simplified_low[ i ].outer().size() );
+			std::vector<int> solution( really_simplified_level_1[ i ].outer().size() );
 
 #if defined TAUNT_BENCH
 			start_inner = std::chrono::steady_clock::now();
 #endif
 
-			RegionBuilder builder( number_resource_clusters[ i ] - 1, really_simplified_low[ i ], clusters_on_the_map[ i ] );
+			RegionBuilder builder( number_resource_clusters[ i ] - 1, really_simplified_level_1[ i ], clusters_on_the_map[ i ] );
 
 #if defined TAUNT_BENCH
 			elapsed_time = std::chrono::steady_clock::now() - start_inner;
@@ -519,13 +588,28 @@ void terrain_analysis::analyze()
 				start_inner = std::chrono::steady_clock::now();
 #endif
 
-				make_frontiers( solution, builder.separation_candidates );
+				std::vector<boost_polygon> polygons_level_1{ really_simplified_level_1[ i ] };
+				std::vector<line> separations;
+
+				for( size_t i = 0; i < solution.size(); ++i )
+					if( solution[ i ] == 1 )
+					{
+						separations.push_back( builder.separation_candidates[ i ] );
+						segment seg{ builder.separation_candidates[ i ][ 0 ], builder.separation_candidates[ i ][ 1 ] };
+						_frontiers.push_back( seg );
+					}
+
+				make_regions( separations, polygons_level_1 );
+
+				for( auto& poly : polygons_level_1 )
+					make_contour_label( poly );				
+			}
 
 #if defined TAUNT_BENCH
 				elapsed_time = std::chrono::steady_clock::now() - start_inner;
 				ss << "Make frontiers: " << elapsed_time.count() << "\n";
 #endif
-			}
+		}
 #if defined TAUNT_BENCH
 			else
 			{
@@ -533,7 +617,7 @@ void terrain_analysis::analyze()
 			}
 #endif
 		}
-	}
+			
 
 #if defined TAUNT_BENCH
 	elapsed_time = std::chrono::steady_clock::now() - start;
@@ -541,9 +625,9 @@ void terrain_analysis::analyze()
 	start = std::chrono::steady_clock::now();
 #endif
 
-	for( int i = 0; i < static_cast<int>( _simplified_cc_high.size() ); ++i )
+	for( int i = 0; i < static_cast<int>( _simplified_cc_level_2.size() ); ++i )
 	{
-		int index = i + number_zones_l;
+		int index = i + number_zones_l1;
 		if( number_resource_clusters[ index ] >= 2 )
 		{
 			int timeout = TIMEOUT * ( number_resource_clusters[ i ] - 1 );
@@ -553,8 +637,8 @@ void terrain_analysis::analyze()
 #endif
 
 			boost_polygon temp_simplified;
-			boost::geometry::simplify( _simplified_cc_high[ i ], temp_simplified, SIMPLIFY );
-			really_simplified_high[ i ] = enrich( temp_simplified );
+			boost::geometry::simplify( _simplified_cc_level_2[ i ], temp_simplified, SIMPLIFY );
+			really_simplified_level_2[ i ] = enrich( temp_simplified );
 
 #if defined TAUNT_BENCH
 			elapsed_time = std::chrono::steady_clock::now() - start_inner;
@@ -562,13 +646,13 @@ void terrain_analysis::analyze()
 #endif
 
 			double cost;
-			std::vector<int> solution( really_simplified_high[ i ].outer().size() );
+			std::vector<int> solution( really_simplified_level_2[ i ].outer().size() );
 
 #if defined TAUNT_BENCH
 			start_inner = std::chrono::steady_clock::now();
 #endif
 
-			RegionBuilder builder( number_resource_clusters[ index ] - 1, really_simplified_high[ i ], clusters_on_the_map[ index ] );
+			RegionBuilder builder( number_resource_clusters[ index ] - 1, really_simplified_level_2[ i ], clusters_on_the_map[ index ] );
 
 #if defined TAUNT_BENCH
 			elapsed_time = std::chrono::steady_clock::now() - start_inner;
@@ -621,21 +705,54 @@ void terrain_analysis::analyze()
 				start_inner = std::chrono::steady_clock::now();
 #endif
 
-				make_frontiers( solution, builder.separation_candidates );
+				std::vector<boost_polygon> polygons_level_2{ really_simplified_level_2[ i ] };
+				std::vector<line> separations;
+
+				for( size_t i = 0; i < solution.size(); ++i )
+					if( solution[ i ] == 1 )
+					{
+						separations.push_back( builder.separation_candidates[ i ] );
+						segment seg{ builder.separation_candidates[ i ][ 0 ], builder.separation_candidates[ i ][ 1 ] };
+						_frontiers.push_back( seg );
+					}
+
+				make_regions( separations, polygons_level_2 );
+
+				for( auto& poly : polygons_level_2 )
+					make_contour_label( poly );
+
+				//std::vector<ring> rings;
+				//std::vector<boost_polygon> outputs;
+				//make_frontiers( solution, builder.separation_candidates, rings );
+				//for( auto& r : rings )
+				//{
+				//	std::cout << "ring 2: " << boost::geometry::dsv( r ) << "\n";
+				//	if( boost::geometry::covered_by( r.at(0), really_simplified_level_2[ i ].outer() ) 
+				//			&& boost::geometry::covered_by( r.at( 1 ), really_simplified_level_2[ i ].outer() ) )
+				//	{
+				//		boost::geometry::difference( really_simplified_level_2[ i ], r, outputs );
+				//		std::cout << "Difference computed 2\n";
+				//		for( auto& poly : outputs )
+				//		{
+				//			std::cout << "About to label contour 2\n";
+				//			make_contour_label( poly );
+				//		}
+				//	}
+				//}
 
 #if defined TAUNT_BENCH
 				elapsed_time = std::chrono::steady_clock::now() - start_inner;
 				ss << "Make frontiers: " << elapsed_time.count() << "\n";
 #endif
-			}
+		}
 #if defined TAUNT_BENCH
 			else
 			{
 				ss << "Fail to find a solution for zone " << index << "\n";
 			}
 #endif
-		}
 	}
+}
 
 #if defined TAUNT_BENCH
 	elapsed_time = std::chrono::steady_clock::now() - start;
@@ -643,9 +760,9 @@ void terrain_analysis::analyze()
 	start = std::chrono::steady_clock::now();
 #endif
 
-	for( int i = 0; i < static_cast<int>( _simplified_cc_very_high.size() ); ++i )
+	for( int i = 0; i < static_cast<int>( _simplified_cc_level_3.size() ); ++i )
 	{
-		int index = i + number_zones_lh;
+		int index = i + number_zones_l12;
 		if( number_resource_clusters[ index ] >= 2 )
 		{
 			int timeout = TIMEOUT * ( number_resource_clusters[ i ] - 1 );
@@ -655,8 +772,8 @@ void terrain_analysis::analyze()
 #endif
 
 			boost_polygon temp_simplified;
-			boost::geometry::simplify( _simplified_cc_very_high[ i ], temp_simplified, SIMPLIFY );
-			really_simplified_very_high[ i ] = enrich( temp_simplified );
+			boost::geometry::simplify( _simplified_cc_level_3[ i ], temp_simplified, SIMPLIFY );
+			really_simplified_level_3[ i ] = enrich( temp_simplified );
 
 #if defined TAUNT_BENCH
 			elapsed_time = std::chrono::steady_clock::now() - start_inner;
@@ -664,13 +781,13 @@ void terrain_analysis::analyze()
 #endif
 
 			double cost;
-			std::vector<int> solution( really_simplified_very_high[ i ].outer().size() );
+			std::vector<int> solution( really_simplified_level_3[ i ].outer().size() );
 
 #if defined TAUNT_BENCH
 			start_inner = std::chrono::steady_clock::now();
 #endif
 
-			RegionBuilder builder( number_resource_clusters[ index ] - 1, really_simplified_very_high[ i ], clusters_on_the_map[ index ] );
+			RegionBuilder builder( number_resource_clusters[ index ] - 1, really_simplified_level_3[ i ], clusters_on_the_map[ index ] );
 
 #if defined TAUNT_BENCH
 			elapsed_time = std::chrono::steady_clock::now() - start_inner;
@@ -723,13 +840,46 @@ void terrain_analysis::analyze()
 				start_inner = std::chrono::steady_clock::now();
 #endif
 
-				make_frontiers( solution, builder.separation_candidates );
+				std::vector<boost_polygon> polygons_level_3{ really_simplified_level_3[ i ] };
+				std::vector<line> separations;
+
+				for( size_t i = 0; i < solution.size(); ++i )
+					if( solution[ i ] == 1 )
+					{
+						separations.push_back( builder.separation_candidates[ i ] );
+						segment seg{ builder.separation_candidates[ i ][ 0 ], builder.separation_candidates[ i ][ 1 ] };
+						_frontiers.push_back( seg );
+					}
+
+				make_regions( separations, polygons_level_3 );
+
+				for( auto& poly : polygons_level_3 )
+					make_contour_label( poly );
+
+				//std::vector<ring> rings;
+				//std::vector<boost_polygon> outputs;
+				//make_frontiers( solution, builder.separation_candidates, rings );
+				//for( auto& r : rings )
+				//{
+				//	std::cout << "ring 3: " << boost::geometry::dsv( r ) << "\n";
+				//	if( boost::geometry::covered_by( r.at( 0 ), really_simplified_level_3[ i ].outer() )
+				//			&& boost::geometry::covered_by( r.at( 1 ), really_simplified_level_3[ i ].outer() ) )
+				//	{
+				//		boost::geometry::difference( really_simplified_level_3[ i ], r, outputs );
+				//		std::cout << "Difference computed 3\n";
+				//		for( auto& poly : outputs )
+				//		{
+				//			std::cout << "About to label contour 3\n";
+				//			make_contour_label( poly );
+				//		}
+				//	}
+				//}
 
 #if defined TAUNT_BENCH
 				elapsed_time = std::chrono::steady_clock::now() - start_inner;
 				ss << "Make frontiers: " << elapsed_time.count() << "\n";
 #endif
-			}
+		}
 #if defined TAUNT_BENCH
 			else
 			{
@@ -738,6 +888,41 @@ void terrain_analysis::analyze()
 #endif
 		}
 	}
+
+	//for( size_t y = 0; y < _map_height; ++y )
+	//	for( size_t x = 0; x < _map_width; ++x )
+	//		if( _buildable[y][x] && !has_region_id(x, y) )
+	//			if( has_region_id( x - 1, y ) )
+	//				_region_id[ y ][ x ] = _region_id[ y ][ x - 1 ];
+	//			else
+	//				if( has_region_id( x, y - 1 ) )
+	//					_region_id[ y ][ x ] = _region_id[ y - 1 ][ x ];
+
+	std::string map_id = map_filename();
+	map_id.replace( map_id.end() - 4, map_id.end(), "_region_id.txt" );
+	std::ofstream log( map_id );
+	if( !log.is_open() )
+	{
+		std::cerr << "Can't open file " << map_id << "\n";
+	}
+	std::stringstream ss;
+	for( int y = 0; y < _map_height; ++y )
+	{
+		for( int x = 0; x < _map_width; ++x )
+		{
+			if( _region_id[ y ][ x ] == 0 )
+				ss << ".";
+			else
+			{
+				char c = 64 + _region_id[ y ][ x ];
+				ss << c;
+			}
+		}
+		ss << "\n";
+	}
+	log << ss.str();
+	log.close();
+
 
 #if defined TAUNT_BENCH
 	elapsed_time = std::chrono::steady_clock::now() - start;
@@ -755,32 +940,32 @@ void terrain_analysis::print()
 
 #if defined SC2API
 	// reverse x-axis for the SVG file from SC2 maps (?!),
-	for( size_t i = 0; i < _simplified_cc_low.size(); ++i )
+	for( size_t i = 0; i < _simplified_cc_level_1.size(); ++i )
 	{
-		for( auto& p : _simplified_cc_low[ i ].outer() )
+		for( auto& p : _simplified_cc_level_1[ i ].outer() )
 			p.x( -p.x() );
 
-		for( auto& inner : _simplified_cc_low[ i ].inners() )
+		for( auto& inner : _simplified_cc_level_1[ i ].inners() )
 			for( auto& p : inner )
 				p.x( -p.x() );
 	}
 
-	for( size_t i = 0; i < _simplified_cc_high.size(); ++i )
+	for( size_t i = 0; i < _simplified_cc_level_2.size(); ++i )
 	{
-		for( auto& p : _simplified_cc_high[ i ].outer() )
+		for( auto& p : _simplified_cc_level_2[ i ].outer() )
 			p.x( -p.x() );
 
-		for( auto& inner : _simplified_cc_high[ i ].inners() )
+		for( auto& inner : _simplified_cc_level_2[ i ].inners() )
 			for( auto& p : inner )
 				p.x( -p.x() );
 	}
 
-	for( size_t i = 0; i < _simplified_cc_very_high.size(); ++i )
+	for( size_t i = 0; i < _simplified_cc_level_3.size(); ++i )
 	{
-		for( auto& p : _simplified_cc_very_high[ i ].outer() )
+		for( auto& p : _simplified_cc_level_3[ i ].outer() )
 			p.x( -p.x() );
 
-		for( auto& inner : _simplified_cc_very_high[ i ].inners() )
+		for( auto& inner : _simplified_cc_level_3[ i ].inners() )
 			for( auto& p : inner )
 				p.x( -p.x() );
 	}
@@ -803,32 +988,32 @@ void terrain_analysis::print()
 #endif
 
 	// reverse y-axis for the SVG file
-	for( size_t i = 0; i < _simplified_cc_low.size(); ++i )
+	for( size_t i = 0; i < _simplified_cc_level_1.size(); ++i )
 	{
-		for( auto& p : _simplified_cc_low[ i ].outer() )
+		for( auto& p : _simplified_cc_level_1[ i ].outer() )
 			p.y( -p.y() );
 
-		for( auto& inner : _simplified_cc_low[ i ].inners() )
+		for( auto& inner : _simplified_cc_level_1[ i ].inners() )
 			for( auto& p : inner )
 				p.y( -p.y() );
 	}
 
-	for( size_t i = 0; i < _simplified_cc_high.size(); ++i )
+	for( size_t i = 0; i < _simplified_cc_level_2.size(); ++i )
 	{
-		for( auto& p : _simplified_cc_high[ i ].outer() )
+		for( auto& p : _simplified_cc_level_2[ i ].outer() )
 			p.y( -p.y() );
 
-		for( auto& inner : _simplified_cc_high[ i ].inners() )
+		for( auto& inner : _simplified_cc_level_2[ i ].inners() )
 			for( auto& p : inner )
 				p.y( -p.y() );
 	}
 
-	for( size_t i = 0; i < _simplified_cc_very_high.size(); ++i )
+	for( size_t i = 0; i < _simplified_cc_level_3.size(); ++i )
 	{
-		for( auto& p : _simplified_cc_very_high[ i ].outer() )
+		for( auto& p : _simplified_cc_level_3[ i ].outer() )
 			p.y( -p.y() );
 
-		for( auto& inner : _simplified_cc_very_high[ i ].inners() )
+		for( auto& inner : _simplified_cc_level_3[ i ].inners() )
 			for( auto& p : inner )
 				p.y( -p.y() );
 	}
@@ -859,14 +1044,14 @@ void terrain_analysis::print()
 	boost::geometry::svg_mapper<point> mapper( contour_svg, 5 * _map_width, 5 * _map_height );
 #endif
 
-	for( size_t i = 0; i < _simplified_cc_low.size(); ++i )
-		mapper.add( _simplified_cc_low[ i ] );
+	for( size_t i = 0; i < _simplified_cc_level_1.size(); ++i )
+		mapper.add( _simplified_cc_level_1[ i ] );
 
-	for( size_t i = 0; i < _simplified_cc_high.size(); ++i )
-		mapper.add( _simplified_cc_high[ i ] );
+	for( size_t i = 0; i < _simplified_cc_level_2.size(); ++i )
+		mapper.add( _simplified_cc_level_2[ i ] );
 
-	for( size_t i = 0; i < _simplified_cc_very_high.size(); ++i )
-		mapper.add( _simplified_cc_very_high[ i ] );
+	for( size_t i = 0; i < _simplified_cc_level_3.size(); ++i )
+		mapper.add( _simplified_cc_level_3[ i ] );
 
 	for( size_t i = 0; i < _simplified_cc_unbuildable.size(); ++i )
 		mapper.add( _simplified_cc_unbuildable[ i ] );
@@ -874,14 +1059,14 @@ void terrain_analysis::print()
 	for( size_t i = 0; i < _frontiers.size(); ++i )
 		mapper.add( _frontiers[ i ] );
 
-	for( size_t i = 0; i < _simplified_cc_low.size(); ++i )
-		mapper.map( _simplified_cc_low[ i ], "fill-opacity:0.5;fill:rgb(255,255,0);stroke:rgb(0,0,0);stroke-width:5" );
+	for( size_t i = 0; i < _simplified_cc_level_1.size(); ++i )
+		mapper.map( _simplified_cc_level_1[ i ], "fill-opacity:0.5;fill:rgb(255,255,0);stroke:rgb(0,0,0);stroke-width:5" );
 
-	for( size_t i = 0; i < _simplified_cc_high.size(); ++i )
-		mapper.map( _simplified_cc_high[ i ], "fill-opacity:0.5;fill:rgb(180,255,0);stroke:rgb(0,0,0);stroke-width:5" );
+	for( size_t i = 0; i < _simplified_cc_level_2.size(); ++i )
+		mapper.map( _simplified_cc_level_2[ i ], "fill-opacity:0.5;fill:rgb(180,255,0);stroke:rgb(0,0,0);stroke-width:5" );
 
-	for( size_t i = 0; i < _simplified_cc_very_high.size(); ++i )
-		mapper.map( _simplified_cc_very_high[ i ], "fill-opacity:0.5;fill:rgb(0,255,0);stroke:rgb(0,0,0);stroke-width:5" );
+	for( size_t i = 0; i < _simplified_cc_level_3.size(); ++i )
+		mapper.map( _simplified_cc_level_3[ i ], "fill-opacity:0.5;fill:rgb(0,255,0);stroke:rgb(0,0,0);stroke-width:5" );
 
 	for( size_t i = 0; i < _simplified_cc_unbuildable.size(); ++i )
 		mapper.map( _simplified_cc_unbuildable[ i ], "fill-opacity:0.5;fill:rgb(0,0,255);stroke:rgb(0,0,0);stroke-width:5" );
@@ -896,7 +1081,8 @@ void terrain_analysis::print()
 #ifdef SC2API
 terrain_analysis::terrain_analysis( sc2::Agent* bot, analyze_type at )
 	: _bot( bot ),
-	  _analyze_type( at )
+	_analyze_type( at ),
+	_last_label( 0 )
 {}
 
 int terrain_analysis::compute_terrain_height( int tile_x, int tile_y ) const
@@ -1020,18 +1206,19 @@ std::string terrain_analysis::map_name() const
 /**************/
 terrain_analysis::terrain_analysis( analyze_type at )
 	: _analyze_type( at ),
-	  _map_width( BWAPI::Broodwar->mapWidth() ),
-	  _map_height( BWAPI::Broodwar->mapHeight() ),
-	  _walkable( matrix_bool( _map_height, std::vector<bool>( _map_width, true ) ) ),
-	  _buildable( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
-	  _depot_buildable( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
-	  _resources( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
-	  _region_id( matrix_int( _map_height, std::vector<int>( _map_width, 0 ) ) ),
-	  _terrain_height( matrix_int( _map_height, std::vector<int>( _map_width, 0 ) ) ),
-	  _terrain_properties_low( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
-	  _terrain_properties_high( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
-	  _terrain_properties_very_high( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
-	  _terrain_unbuildable_unwalkable( matrix_int( _map_height, std::vector<int>( _map_width, 0 ) ) )
+	_map_width( BWAPI::Broodwar->mapWidth() ),
+	_map_height( BWAPI::Broodwar->mapHeight() ),
+	_last_label( 0 ),
+	_walkable( matrix_bool( _map_height, std::vector<bool>( _map_width, true ) ) ),
+	_buildable( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
+	_depot_buildable( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
+	_resources( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
+	_region_id( matrix_int( _map_height, std::vector<int>( _map_width, 0 ) ) ),
+	_terrain_height( matrix_int( _map_height, std::vector<int>( _map_width, 0 ) ) ),
+	_terrain_properties_level_1( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
+	_terrain_properties_level_2( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
+	_terrain_properties_level_3( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
+	_terrain_unbuildable_unwalkable( matrix_int( _map_height, std::vector<int>( _map_width, 0 ) ) )
 {}
 
 int terrain_analysis::compute_terrain_height( int tile_x, int tile_y ) const

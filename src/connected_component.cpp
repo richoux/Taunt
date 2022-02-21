@@ -2,29 +2,34 @@
 
 #include "connected_component.hpp"
 
+#include <iostream>
+
 namespace taunt
 {
-	connected_component::connected_component( const std::vector< std::vector<int> >& map )
+	connected_component::connected_component( const matrix_int& map )
 		: _map( map ),
 		  _height( _map.size() ), // maps are implemented as [y][x], but all methods interface are [x][y]
 		  _width( _map[ 0 ].size() ),
 		  _contours( std::vector<contour>() )
+		  //_last_label( -1 )
 	{}
 	
-	connected_component::connected_component( std::vector< std::vector<int> >&& map )
+	connected_component::connected_component( matrix_int&& map )
 		: _map( std::move( map ) ),
 		  _height( _map.size() ), // maps are implemented as [y][x], but all methods interface are [x][y]
 		  _width( _map[ 0 ].size() ),
 		  _contours( std::vector<contour>() )
+		  //_last_label( -1 )
 	{}
 
-	connected_component::connected_component( const std::vector< std::vector<bool> >& map_bool, std::vector< std::vector<int> >& region_id, int last_label )
+	//connected_component::connected_component( const std::vector< std::vector<bool> >& map_bool, std::vector< std::vector<int> >* region_id, int last_label )
+	connected_component::connected_component( const matrix_bool& map_bool )
 		: _map( std::vector< std::vector<int> >( map_bool.size(), std::vector<int>( map_bool[0].size(), 0 ) ) ),
 		  _height( _map.size() ), // maps are implemented as [y][x], but all methods interface are [x][y]
 		  _width( _map[ 0 ].size() ),
-		  _contours( std::vector<contour>() ),
-		  _region_id( region_id ),
-		  _last_label( last_label )
+		  _contours( std::vector<contour>() )
+		  //_region_id( region_id ),
+		  //_last_label( last_label )
 	{
 		for( size_t y = 0; y < _height; ++y )
 			for( size_t x = 0; x < _width; ++x )
@@ -68,7 +73,7 @@ namespace taunt
 			  && ( is_walkable( x + 1, y + 1 )  || !is_on_map( x + 1, y + 1 ) );
 	}
 
-	boost::geometry::model::ring<point> connected_component::neighbors_with_direction( int direction, const point& current_point )
+	contour connected_component::neighbors_with_direction( int direction, const point& current_point )
 	{
 		int x = current_point.x();
 		int y = current_point.y();
@@ -232,27 +237,35 @@ namespace taunt
 		point current_point( x, y );
 		boost::geometry::append( contour, current_point );
 
-		int label;
-
-		if( !has_region_id( x, y ) )
-		{
-			if( has_region_id( x - 1, y ) )
-				label = _region_id[ y ][ x - 1 ];
-			else
-				if( has_region_id( x, y - 1 ) )
-					label = _region_id[ y - 1 ][ x ];
-				else
-					label = ++_last_label; // new label
-		}
-		else // should never happen
-			label = _region_id[ y ][ x ];
+		//int label;
+		//if( _last_label != -1 )
+		//{
+		//	if( !has_region_id( x, y ) )
+		//	{
+		//		if( has_region_id( x - 1, y ) )
+		//			label = (*_region_id)[ y ][ x - 1 ];
+		//		else
+		//			if( has_region_id( x, y - 1 ) )
+		//				label = (*_region_id)[ y - 1 ][ x ];
+		//			else
+		//			{
+		//				label = ++_last_label; // new label
+		//				std::cout << "New label (contour): " << _last_label << "\n";
+		//			}
+		//	}
+		//	else // should never happen
+		//		label = (*_region_id)[ y ][ x ];
+		//}
 
 		// we can't have next_point == starting_point at the first iteration of the loop
 		// since Taunt doesn't consider isolated unwalkable tiles.
 		do
 		{
 			_map[ current_point.y() ][ current_point.x() ] = 3;
-			_region_id[ current_point.y() ][ current_point.x() ] = label;
+
+			//if( _last_label != -1 )
+			//	(*_region_id)[ current_point.y() ][ current_point.x() ] = label;
+
 			// take the second to last point if contour contains at least 2 points, or the last one otherwise.
 			auto parent = contour.size() > 1 ? *(contour.rbegin()+1) : *contour.rbegin();
 			auto next_point = look_around( current_point, parent, direction ); 
@@ -280,25 +293,28 @@ namespace taunt
 							else
 								if( !is_walkable( x - 1, y ) )
 									search_for_contour( x, y, direction::W );
-								else // walkable tile inside a walkable area
-									if( !has_region_id( x, y ) )
-									{
-										if( has_region_id( x - 1, y ) )
-											_region_id[y][x] = _region_id[y][x - 1];
-										else
-											if( has_region_id( x, y - 1 ) )
-												_region_id[ y ][ x ] = _region_id[ y - 1 ][ x ];
-											else
-												_region_id[ y ][ x ] = ++_last_label; // new label
-									}
+								//else // walkable tile inside a walkable area
+								//	if( _last_label != -1 && !has_region_id( x, y ) )
+								//	{										
+								//		if( has_region_id( x - 1, y ) )
+								//			(*_region_id)[y][x] = (*_region_id)[y][x - 1];
+								//		else
+								//			if( has_region_id( x, y - 1 ) )
+								//				(*_region_id)[ y ][ x ] = (*_region_id)[ y - 1 ][ x ];
+								//			else
+								//			{
+								//				(*_region_id)[ y ][ x ] = ++_last_label; // new label
+								//				std::cout << "New label (walktile): " << _last_label << "\n";
+								//			}
+								//	}
 				}
 	}
 
-	std::vector< boost::geometry::model::polygon<point> > connected_component::compute_simplified_contours()
+	std::vector< boost_polygon > connected_component::compute_simplified_contours()
 	{
 		compute_contours();
 		
-		std::vector< boost::geometry::model::polygon<point> > simplified_contours( _contours.size() );
+		std::vector< boost_polygon > simplified_contours( _contours.size() );
 
 		for( size_t i = 0 ; i < _contours.size(); ++i )
 		{
@@ -307,7 +323,7 @@ namespace taunt
 		}
 
 		_is_inner = std::vector( simplified_contours.size(), false );
-		std::vector< std::vector< boost::geometry::model::polygon<point> > > parts( simplified_contours.size() );
+		std::vector< std::vector< boost_polygon > > parts( simplified_contours.size() );
 				
 		for( size_t i = 0 ; i < simplified_contours.size(); ++i )
 			for( size_t j = 0 ; j < simplified_contours.size(); ++j )
