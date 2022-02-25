@@ -32,7 +32,7 @@
   <ItemGroup>
     <ClInclude Include="..\include\analyze_type.hpp" />
     <ClInclude Include="..\include\base_location.hpp" />
-    <ClInclude Include="..\include\chokepoint.hpp" />
+    <ClInclude Include="..\include\separation.hpp" />
     <ClInclude Include="..\include\connected_component.hpp" />
     <ClInclude Include="..\include\geometry.hpp" />
     <ClInclude Include="..\include\model\constraint_minimal_region_area.hpp" />

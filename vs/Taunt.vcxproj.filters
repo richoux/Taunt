@@ -80,7 +80,7 @@
     <ClInclude Include="..\include\base_location.hpp">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\chokepoint.hpp">
+    <ClInclude Include="..\include\separation.hpp">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="..\include\terrain_analysis.hpp">

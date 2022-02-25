@@ -2,6 +2,7 @@
 #include <vector>
 
 #include "positions.hpp"
+#include "geometry.hpp"
 
 namespace taunt
 {
