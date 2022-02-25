@@ -8,11 +8,11 @@
 #include "model/constraint_one_cluster_per_region.hpp"
 
 OneClusterPerRegion::OneClusterPerRegion( const std::vector<ghost::Variable>& variables,
-                                          const boost_polygon& contour,
+                                          const boost_polygon& polygon,
                                           const std::vector<multipoint>& resources,
                                           const std::vector<line>& separations )
 	: Constraint( variables ),
-	  _contour( contour ),
+	  _polygon( polygon ),
 	  _separations( separations )
 {
 	for( auto& resource : resources )
@@ -68,7 +68,7 @@ double OneClusterPerRegion::required_error( const std::vector<ghost::Variable*>&
 	std::cout << "Call OneClusterPerRegion::required_error\n";
 #endif
 
-	std::vector<ring> zones{ {{_contour.outer()}} };
+	std::vector<ring> zones{ {{_polygon.outer()}} };
 
 	for( size_t i = 0 ; i < variables.size() ; ++i )
 		if( variables[i]->get_value() == 1 )

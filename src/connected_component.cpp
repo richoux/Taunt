@@ -10,7 +10,7 @@ namespace taunt
 		: _map( map ),
 		  _height( _map.size() ), // maps are implemented as [y][x], but all methods interface are [x][y]
 		  _width( _map[ 0 ].size() ),
-		  _contours( std::vector<contour>() )
+		  _rings( std::vector<ring>() )
 		  //_last_label( -1 )
 	{}
 	
@@ -18,7 +18,7 @@ namespace taunt
 		: _map( std::move( map ) ),
 		  _height( _map.size() ), // maps are implemented as [y][x], but all methods interface are [x][y]
 		  _width( _map[ 0 ].size() ),
-		  _contours( std::vector<contour>() )
+		  _rings( std::vector<ring>() )
 		  //_last_label( -1 )
 	{}
 
@@ -27,7 +27,7 @@ namespace taunt
 		: _map( std::vector< std::vector<int> >( map_bool.size(), std::vector<int>( map_bool[0].size(), 0 ) ) ),
 		  _height( _map.size() ), // maps are implemented as [y][x], but all methods interface are [x][y]
 		  _width( _map[ 0 ].size() ),
-		  _contours( std::vector<contour>() )
+		  _rings( std::vector<ring>() )
 		  //_region_id( region_id ),
 		  //_last_label( last_label )
 	{
@@ -73,7 +73,7 @@ namespace taunt
 			  && ( is_walkable( x + 1, y + 1 )  || !is_on_map( x + 1, y + 1 ) );
 	}
 
-	contour connected_component::neighbors_with_direction( int direction, const point& current_point )
+	ring connected_component::neighbors_with_direction( int direction, const point& current_point )
 	{
 		double x = current_point.x();
 		double y = current_point.y();
@@ -228,14 +228,14 @@ namespace taunt
 		return point( -1, -1 );
 	}
 
-	// contour search from Chang et al. - A linear-time component-labeling algorithm using contour tracing technique
-	void connected_component::search_for_contour( int x, int y, direction direction )
+	// polygon search from Chang et al. - A linear-time component-labeling algorithm using polygon tracing technique
+	void connected_component::search_for_polygon( int x, int y, direction direction )
 	{
-		_contours.push_back( contour() );
-		auto& contour = *_contours.rbegin();
+		_rings.push_back( ring() );
+		auto& ring = *_rings.rbegin();
 		point starting_point( x, y );
 		point current_point( x, y );
-		boost::geometry::append( contour, current_point );
+		boost::geometry::append( ring, current_point );
 
 		//int label;
 		//if( _last_label != -1 )
@@ -250,7 +250,7 @@ namespace taunt
 		//			else
 		//			{
 		//				label = ++_last_label; // new label
-		//				std::cout << "New label (contour): " << _last_label << "\n";
+		//				std::cout << "New label (ring): " << _last_label << "\n";
 		//			}
 		//	}
 		//	else // should never happen
@@ -266,33 +266,33 @@ namespace taunt
 			//if( _last_label != -1 )
 			//	(*_region_id)[ current_point.y() ][ current_point.x() ] = label;
 
-			// take the second to last point if contour contains at least 2 points, or the last one otherwise.
-			auto parent = contour.size() > 1 ? *(contour.rbegin()+1) : *contour.rbegin();
+			// take the second to last point if ring contains at least 2 points, or the last one otherwise.
+			auto parent = ring.size() > 1 ? *(ring.rbegin()+1) : *ring.rbegin();
 			auto next_point = look_around( current_point, parent, direction ); 
-			boost::geometry::append( contour, next_point );
+			boost::geometry::append( ring, next_point );
 			current_point = next_point;
 		}
 		while( !is_same_point( current_point, starting_point ) );
 	}
 
-	// contour search from Chang et al. - A linear-time component-labeling algorithm using contour tracing technique
-	void connected_component::compute_contours()
+	// polygon search from Chang et al. - A linear-time component-labeling algorithm using polygon tracing technique
+	void connected_component::compute_polygons()
 	{
 		for( size_t y = 0; y < _height; ++y )
 			for( size_t x = 0; x < _width; ++x )
 				if( is_walkable( x, y ) && !is_marked( x, y ) && has_walkable_around( x, y ) )
 				{
 					if( !is_walkable( x, y + 1 ) )
-						search_for_contour( x, y, direction::S );
+						search_for_polygon( x, y, direction::S );
 					else
 						if( !is_walkable( x + 1, y ) )
-							search_for_contour( x, y, direction::E );
+							search_for_polygon( x, y, direction::E );
 						else
 							if( !is_walkable( x, y - 1 ) )
-								search_for_contour( x, y, direction::N );
+								search_for_polygon( x, y, direction::N );
 							else
 								if( !is_walkable( x - 1, y ) )
-									search_for_contour( x, y, direction::W );
+									search_for_polygon( x, y, direction::W );
 								//else // walkable tile inside a walkable area
 								//	if( _last_label != -1 && !has_region_id( x, y ) )
 								//	{										
@@ -310,44 +310,44 @@ namespace taunt
 				}
 	}
 
-	std::vector< boost_polygon > connected_component::compute_simplified_contours()
+	std::vector< boost_polygon > connected_component::compute_simplified_polygons()
 	{
-		compute_contours();
+		compute_polygons();
 		
-		std::vector< boost_polygon > simplified_contours( _contours.size() );
+		std::vector< boost_polygon > simplified_polygons( _rings.size() );
 
-		for( size_t i = 0 ; i < _contours.size(); ++i )
+		for( size_t i = 0 ; i < _rings.size(); ++i )
 		{
-			boost::geometry::correct( _contours[i] );
-			boost::geometry::simplify( _contours[i], simplified_contours[i].outer(), 0);
+			boost::geometry::correct( _rings[i] );
+			boost::geometry::simplify( _rings[i], simplified_polygons[i].outer(), 0);
 		}
 
-		_is_inner = std::vector( simplified_contours.size(), false );
-		std::vector< std::vector< boost_polygon > > parts( simplified_contours.size() );
+		_is_inner = std::vector( simplified_polygons.size(), false );
+		std::vector< std::vector< boost_polygon > > parts( simplified_polygons.size() );
 				
-		for( size_t i = 0 ; i < simplified_contours.size(); ++i )
-			for( size_t j = 0 ; j < simplified_contours.size(); ++j )
+		for( size_t i = 0 ; i < simplified_polygons.size(); ++i )
+			for( size_t j = 0 ; j < simplified_polygons.size(); ++j )
 			{
 				if( i == j )
 					continue;
 
 				// if [i] is in [j]
-				if( boost::geometry::within( simplified_contours[i].outer(), simplified_contours[j].outer() ) )
+				if( boost::geometry::within( simplified_polygons[i].outer(), simplified_polygons[j].outer() ) )
 				{
 					// add [i] as an inner ring of [j]
-					simplified_contours[j].inners().push_back( simplified_contours[i].outer() );
+					simplified_polygons[j].inners().push_back( simplified_polygons[i].outer() );
 					// mark [i] so we know we don't have to consider it
 					_is_inner[i] = true;
 				}
 			}
 
-		for( int i = static_cast<int>( simplified_contours.size() ) - 1 ; i >= 0 ; --i )
+		for( int i = static_cast<int>( simplified_polygons.size() ) - 1 ; i >= 0 ; --i )
 			if( _is_inner[i] )
-				simplified_contours.erase( simplified_contours.begin() + i );
+				simplified_polygons.erase( simplified_polygons.begin() + i );
 
-		for( auto& contour : simplified_contours )
-			boost::geometry::correct( contour );
+		for( auto& polygon : simplified_polygons )
+			boost::geometry::correct( polygon );
 
-		return simplified_contours;
+		return simplified_polygons;
 	}
 }

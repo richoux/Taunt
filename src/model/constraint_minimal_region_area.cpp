@@ -7,18 +7,18 @@
 #include "model/constraint_minimal_region_area.hpp"
 
 MinRegionArea::MinRegionArea( const std::vector<ghost::Variable>& variables,
-                              const polygon& contour,
+                              const polygon& polygon,
                               const std::vector<line>& separations,
                               int number_separations )
 	: Constraint( variables ),
-	  _contour( contour ),
+	  _polygon( polygon ),
 	  _separations( separations ),
-	  _target_area( std::max( 180, static_cast<int>( boost::geometry::area( _contour.outer() ) / ( number_separations + 6 ) ) ) ) // say we need 2 separations, so target areas should be at least 1/8th of the total area
+	  _target_area( std::max( 180, static_cast<int>( boost::geometry::area( _polygon.outer() ) / ( number_separations + 6 ) ) ) ) // say we need 2 separations, so target areas should be at least 1/8th of the total area
 {
 #if defined MUF
 	for( size_t i = 0 ; i < variables.size() ; ++i )
 	{
-		std::vector<ring> zones{ {{_contour.outer()}} };
+		std::vector<ring> zones{ {{_polygon.outer()}} };
 		for( size_t k = 0 ; k < zones.size() ; ++k )
 			if( is_in( _separations[i], zones[k] ) )
 			{
@@ -117,7 +117,7 @@ double MinRegionArea::required_error( const std::vector<ghost::Variable*>& varia
 #endif
 	int error = 0;
 
-	std::vector<ring> zones{ {{_contour.outer()}} };
+	std::vector<ring> zones{ {{_polygon.outer()}} };
 
 	for( size_t i = 0 ; i < variables.size() ; ++i )
 		if( variables[i]->get_value() == 1 )

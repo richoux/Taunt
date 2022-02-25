@@ -22,7 +22,7 @@ class RegionBuilder : public ghost::ModelBuilder
 	
 	public:
 	RegionBuilder( int number_separations,
-	               const boost_polygon& contour,
+	               const boost_polygon& polygon,
 	               const std::vector<multipoint>& resources );
 
 	void declare_variables() override;
@@ -31,7 +31,7 @@ class RegionBuilder : public ghost::ModelBuilder
 	//void declare_auxiliary_data() override;
 
 	int number_separations;
-	boost_polygon contour;
+	boost_polygon polygon;
 	std::vector<multipoint> resources;
 	std::vector<line> separation_candidates;
 };

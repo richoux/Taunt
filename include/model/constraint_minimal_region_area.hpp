@@ -14,7 +14,7 @@ using polygon = boost::geometry::model::polygon<point>;
 
 class MinRegionArea : public ghost::Constraint
 {
-	polygon _contour;
+	polygon _polygon;
 	std::vector<line> _separations;
 	int _target_area;
 
@@ -23,7 +23,7 @@ class MinRegionArea : public ghost::Constraint
 	
 public:
 	MinRegionArea( const std::vector<ghost::Variable>& variables,
-	               const polygon& contour,
+	               const polygon& polygon,
 	               const std::vector<line>& separations,
 	               int number_separations );
 

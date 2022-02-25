@@ -2,5 +2,5 @@
 
 namespace taunt
 {
-	enum analyze_type{ SHORTEST_CHOKES, EQUIVALENT_AREA };
+	enum analyze_type{ SHORTEST_SEPARATIONS, EQUIVALENT_AREA };
 }

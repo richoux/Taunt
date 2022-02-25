@@ -17,7 +17,7 @@
 
 class OneClusterPerRegion : public ghost::Constraint
 {
-	boost_polygon _contour;
+	boost_polygon _polygon;
 	std::vector<line> _separations;
 	std::vector<ring> _resource_boxes;
 
@@ -26,7 +26,7 @@ class OneClusterPerRegion : public ghost::Constraint
 	
 public:
 	OneClusterPerRegion( const std::vector<ghost::Variable>& variables,
-	                     const boost_polygon& contour,
+	                     const boost_polygon& polygon,
 	                     const std::vector<multipoint>& resources,
 	                     const std::vector<line>& separations );
 

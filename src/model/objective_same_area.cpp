@@ -1,8 +1,8 @@
 #include "model/objective_same_area.hpp"
 
-SameArea::SameArea( const std::vector<ghost::Variable>& variables, const polygon& contour, const std::vector<line>& separations )
+SameArea::SameArea( const std::vector<ghost::Variable>& variables, const polygon& polygon, const std::vector<line>& separations )
 	: Minimize( variables, "Least Squares Area Difference" ),
-	  _contour( contour ),
+	  _polygon( polygon ),
 	  _separations( separations )
 { }
 
@@ -25,7 +25,7 @@ bool SameArea::is_in( const line& separation, const ring& zone ) const
 
 double SameArea::required_cost( const std::vector<ghost::Variable*>& variables ) const
 {
-	std::vector<ring> zones{ {{_contour.outer()}} };
+	std::vector<ring> zones{ {{_polygon.outer()}} };
 
 	for( size_t i = 0 ; i < variables.size() ; ++i )
 		if( variables[i]->get_value() == 1 )

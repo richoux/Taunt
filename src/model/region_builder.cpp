@@ -6,23 +6,23 @@
 //#include "model/objective_same_area.hpp"
 
 RegionBuilder::RegionBuilder( int number_separations,
-                              const boost_polygon& contour,
+                              const boost_polygon& polygon,
                               const std::vector<multipoint>& resources )
 	: ghost::ModelBuilder( true ), // permutation problem
 	  number_separations( number_separations ),
-	  contour( contour ),
+		polygon( polygon ),
 	  resources( resources ),
 	  separation_candidates{}
 {	
-	for( size_t p1 = 0 ; p1 < contour.outer().size() - 2 ; ++p1 )
-		for( size_t p2 = p1 + 2 ; p2 < contour.outer().size() ; ++p2 )
+	for( size_t p1 = 0 ; p1 < polygon.outer().size() - 2 ; ++p1 )
+		for( size_t p2 = p1 + 2 ; p2 < polygon.outer().size() ; ++p2 )
 		{
-			if( !boost::geometry::equals( contour.outer()[p1], contour.outer()[p2] )
-			    && ( p2 > p1 + 2 || ( contour.outer()[p1].x() != contour.outer()[p2].x() && contour.outer()[p1].y() != contour.outer()[p2].y() ) ) )
+			if( !boost::geometry::equals( polygon.outer()[p1], polygon.outer()[p2] )
+			    && ( p2 > p1 + 2 || ( polygon.outer()[p1].x() != polygon.outer()[p2].x() && polygon.outer()[p1].y() != polygon.outer()[p2].y() ) ) )
 			{
 				bool to_add = true;
-				line line{ contour.outer()[p1], contour.outer()[p2] };
-				ring ring_line{ contour.outer()[p1], contour.outer()[p2] };
+				line line{ polygon.outer()[p1], polygon.outer()[p2] };
+				ring ring_line{ polygon.outer()[p1], polygon.outer()[p2] };
 				boost::geometry::correct( ring_line );
 				
 				for( auto& resource_cluster : resources )
@@ -33,14 +33,14 @@ RegionBuilder::RegionBuilder( int number_separations,
 							break;
 						}
 			
-				for( auto& inner : contour.inners() )
+				for( auto& inner : polygon.inners() )
 					if( boost::geometry::covered_by( ring_line, inner ) || boost::geometry::crosses( inner, line ) )
 					{
 						to_add = false;
 						break;
 					}
 
-				if( !boost::geometry::covered_by( line, contour.outer() ) )
+				if( !boost::geometry::covered_by( line, polygon.outer() ) )
 					to_add = false;
 				
 				if( to_add )
@@ -72,7 +72,7 @@ void RegionBuilder::declare_variables()
 void RegionBuilder::declare_constraints()
 {
 	//constraints.emplace_back( std::make_shared<WithinPolygon>( variables, auxiliary_data ) );
-	constraints.emplace_back( std::make_shared<NoCuts>( variables, contour, resources, separation_candidates ) );
+	constraints.emplace_back( std::make_shared<NoCuts>( variables, polygon, resources, separation_candidates ) );
 	//constraints.emplace_back( std::make_shared<NumberSeparations>( variables, number_separations ) );
 
 	// for( auto& var : variables )
@@ -82,12 +82,12 @@ void RegionBuilder::declare_constraints()
 	// 	constraints.emplace_back( std::make_shared<MinRegionArea>( vec_var, auxiliary_data, number_separations ) );
 	// }
 
-	constraints.emplace_back( std::make_shared<OneClusterPerRegion>( variables, contour, resources, separation_candidates ) );
-	//constraints.emplace_back( std::make_shared<MinRegionArea>( variables, contour, separation_candidates, number_separations ) );
+	constraints.emplace_back( std::make_shared<OneClusterPerRegion>( variables, polygon, resources, separation_candidates ) );
+	//constraints.emplace_back( std::make_shared<MinRegionArea>( variables, polygon, separation_candidates, number_separations ) );
 }
 
 void RegionBuilder::declare_objective()
 {
 	objective = std::make_shared<MinSeparationWidth>( variables, separation_candidates );
-	//objective = std::make_shared<SameArea>( variables, contour, separation_candidates );
+	//objective = std::make_shared<SameArea>( variables, polygon, separation_candidates );
 }

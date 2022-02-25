@@ -7,7 +7,7 @@
 #include "analyze_type.hpp"
 #include "region.hpp"
 #include "positions.hpp"
-#include "chokepoint.hpp"
+#include "separation.hpp"
 #include "connected_component.hpp"
 
 #ifdef SC2API
@@ -41,7 +41,7 @@ namespace taunt
 		std::vector< tile_position > _start_base_locations;
 		tile_position _start_location;
 		std::vector< region > _regions;
-		std::vector< chokepoint > _chokepoints;
+		std::vector< separation > _separations;
 		
 		// From the CommandCenter bot
 		matrix_bool	_walkable;			// whether a tile is buildable (includes static resources)
@@ -74,7 +74,7 @@ namespace taunt
 		multipolygon make_regions( const std::vector<line>& separations, const boost_polygon& polygon );
 		void compute_region_id( const boost_polygon& region );
 		void compute_region_id( const multipolygon& regions );
-		//void make_contour_label( const boost_polygon& poly );
+		//void make_polygon_label( const boost_polygon& poly );
 		boost_polygon enrich( const boost_polygon& input ) const;
 
 		int compute_terrain_height( int tile_x, int tile_y ) const;
@@ -91,9 +91,9 @@ namespace taunt
 
 	public:
 #ifdef SC2API
-		terrain_analysis( sc2::Agent* bot, analyze_type at = analyze_type::SHORTEST_CHOKES );
+		terrain_analysis( sc2::Agent* bot, analyze_type at = analyze_type::SHORTEST_SEPARATIONS );
 #else
-		terrain_analysis( analyze_type at = analyze_type::SHORTEST_CHOKES );
+		terrain_analysis( analyze_type at = analyze_type::SHORTEST_SEPARATIONS );
 #endif
 
 		void analyze();
@@ -113,10 +113,10 @@ namespace taunt
 		region get_region_at( const position& p ) const;
 		inline region get_region_at( int tile_x, int tile_y ) const { return _regions[ _region_id[ tile_y ][ tile_x ] ]; }
 
-		inline std::vector< chokepoint > get_chokepoints() const { return _chokepoints; }
-		// inline chokepoint get_nearest_chokepoint( const tile_position& tp ) const { return get_nearest_point( tp.x, tp.y ); }
-		// chokepoint get_nearest_chokepoint( const position& p ) const;
-		// chokepoint get_nearest_chokepoint( int tile_x, int tile_y ) const;
+		inline std::vector< separation > get_separations() const { return _separations; }
+		// inline separation get_nearest_separation( const tile_position& tp ) const { return get_nearest_point( tp.x, tp.y ); }
+		// separation get_nearest_separation( const position& p ) const;
+		// separation get_nearest_separation( int tile_x, int tile_y ) const;
 
 		// bool is_connected( const region& r1, const region& r2 ) const;
 		// inline bool is_connected( const tile_position& tp1, const tile_position& tp2 ) const { return is_connected( tp1.x, tp1.y, tp2.x, tp2.y ); }

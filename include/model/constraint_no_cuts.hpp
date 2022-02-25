@@ -17,13 +17,13 @@
 
 class NoCuts : public ghost::Constraint
 {
-	boost_polygon _contour;
+	boost_polygon _polygon;
 	std::vector<box> _resource_boxes;
 	std::vector<line> _separations;
 	
 public:
 	NoCuts( const std::vector<ghost::Variable>& variables,
-	        const boost_polygon& contour,
+	        const boost_polygon& polygon,
 	        const std::vector<multipoint>& resources,
 	        const std::vector<line>& separations );
 

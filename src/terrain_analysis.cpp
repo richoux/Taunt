@@ -83,7 +83,7 @@ void terrain_analysis::compute_region_id( const multipolygon& regions )
 		compute_region_id( region );
 }
 
-//void terrain_analysis::make_contour_label( const boost_polygon& poly )
+//void terrain_analysis::make_polygon_label( const boost_polygon& poly )
 //{
 //	++_last_label;
 //	for( auto& p : poly.outer() )
@@ -324,21 +324,21 @@ void terrain_analysis::analyze()
 	//region_id
 	//taunt::connected_component cc_level_1( _terrain_properties_level_1, &_region_id );
 	taunt::connected_component cc_level_1( _terrain_properties_level_1 );
-	_simplified_cc_level_1 = cc_level_1.compute_simplified_contours();
+	_simplified_cc_level_1 = cc_level_1.compute_simplified_polygons();
 
 	//auto last_label = cc_level_1.get_last_label();
 	//taunt::connected_component cc_level_2( _terrain_properties_level_2, &_region_id, last_label );
 	taunt::connected_component cc_level_2( _terrain_properties_level_2 );
-	_simplified_cc_level_2 = cc_level_2.compute_simplified_contours();
+	_simplified_cc_level_2 = cc_level_2.compute_simplified_polygons();
 
 	//last_label = cc_level_2.get_last_label();
 	//taunt::connected_component cc_level_3( _terrain_properties_level_3, &_region_id, last_label );
 	taunt::connected_component cc_level_3( _terrain_properties_level_3 );
-	_simplified_cc_level_3 = cc_level_3.compute_simplified_contours();
+	_simplified_cc_level_3 = cc_level_3.compute_simplified_polygons();
 
 	//last_label = cc_level_3.get_last_label();
 	taunt::connected_component cc_unbuildable( _terrain_unbuildable_unwalkable );
-	_simplified_cc_unbuildable = cc_unbuildable.compute_simplified_contours();
+	_simplified_cc_unbuildable = cc_unbuildable.compute_simplified_polygons();
 
 #if defined TAUNT_BENCH
 	elapsed_time = std::chrono::steady_clock::now() - start;
@@ -694,8 +694,8 @@ void terrain_analysis::analyze()
 				//		std::cout << "Difference computed 2\n";
 				//		for( auto& poly : outputs )
 				//		{
-				//			std::cout << "About to label contour 2\n";
-				//			make_contour_label( poly );
+				//			std::cout << "About to label polygon 2\n";
+				//			make_polygon_label( poly );
 				//		}
 				//	}
 				//}
@@ -829,8 +829,8 @@ void terrain_analysis::analyze()
 				//		std::cout << "Difference computed 3\n";
 				//		for( auto& poly : outputs )
 				//		{
-				//			std::cout << "About to label contour 3\n";
-				//			make_contour_label( poly );
+				//			std::cout << "About to label polygon 3\n";
+				//			make_polygon_label( poly );
 				//		}
 				//	}
 				//}
@@ -1008,14 +1008,14 @@ void terrain_analysis::print()
 			boost::geometry::set<1>( point, -boost::geometry::get<1>( point ) );
 	}
 
-	std::string contour_mapfile_svg = mapfile;
-	contour_mapfile_svg.replace( contour_mapfile_svg.end() - 4, contour_mapfile_svg.end(), "_taunted.svg" );
+	std::string polygon_mapfile_svg = mapfile;
+	polygon_mapfile_svg.replace( polygon_mapfile_svg.end() - 4, polygon_mapfile_svg.end(), "_taunted.svg" );
 
-	std::ofstream contour_svg( contour_mapfile_svg );
+	std::ofstream polygon_svg( polygon_mapfile_svg );
 #if defined SC2API
-	boost::geometry::svg_mapper<point> mapper( contour_svg, 4 * _map_width, 4 * _map_height );
+	boost::geometry::svg_mapper<point> mapper( polygon_svg, 4 * _map_width, 4 * _map_height );
 #else
-	boost::geometry::svg_mapper<point> mapper( contour_svg, 5 * _map_width, 5 * _map_height );
+	boost::geometry::svg_mapper<point> mapper( polygon_svg, 5 * _map_width, 5 * _map_height );
 #endif
 
 	for( size_t i = 0; i < _simplified_cc_level_1.size(); ++i )

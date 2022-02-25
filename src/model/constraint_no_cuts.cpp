@@ -1,11 +1,11 @@
 #include "model/constraint_no_cuts.hpp"
 
 NoCuts::NoCuts( const std::vector<ghost::Variable>& variables,
-                const boost_polygon& contour,
+                const boost_polygon& polygon,
                 const std::vector<multipoint>& resources,
                 const std::vector<line>& separations )
 	: Constraint( variables ),
-	  _contour( contour ),
+	  _polygon( polygon ),
 	  _separations( separations )
 {
 	for( auto& resource : resources )
@@ -35,7 +35,7 @@ double NoCuts::required_error( const std::vector<ghost::Variable*>& variables ) 
 					++error;
 
 			// Don't cross unwalkable/unbuildable parts
-			for( auto& inner : _contour.inners() )
+			for( auto& inner : _polygon.inners() )
 				if( boost::geometry::crosses( _separations[i], inner ) || boost::geometry::covered_by( _separations[i], inner ) )
 					++error;
 

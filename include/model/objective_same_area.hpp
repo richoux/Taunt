@@ -14,14 +14,14 @@ using polygon = boost::geometry::model::polygon<point>;
 
 class SameArea : public ghost::Minimize
 {
-	polygon _contour;
+	polygon _polygon;
 	std::vector<line> _separations;
 
 	bool is_in( const line& separation, const ring& zone ) const;
 
 public:
 	SameArea( const std::vector<ghost::Variable>& variables,
-	          const polygon& contour,
+	          const polygon& polygon,
 	          const std::vector<line>& separations );
 	
 	double required_cost( const std::vector<ghost::Variable*>& variables ) const override;
