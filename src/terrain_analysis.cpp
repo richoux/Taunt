@@ -57,10 +57,10 @@ void terrain_analysis::compute_region_id( const boost_polygon& region )
 	++_last_label;
 	box region_box;
 	boost::geometry::envelope( region, region_box );
-	int min_x = std::round( region_box.min_corner().x() );
-	int min_y = std::round( region_box.min_corner().y() );
-	int max_x = std::round( region_box.max_corner().x() );
-	int max_y = std::round( region_box.max_corner().y() );
+	//int min_x = std::round( region_box.min_corner().x() );
+	//int min_y = std::round( region_box.min_corner().y() );
+	//int max_x = std::round( region_box.max_corner().x() );
+	//int max_y = std::round( region_box.max_corner().y() );
 
 	// To get around a bug of boost::geometry::covered_by: very slightly enlarge the polygon to make sure bg::covered_by is working properly
 	multipolygon buffered_region;
@@ -81,6 +81,56 @@ void terrain_analysis::compute_region_id( const multipolygon& regions )
 {
 	for( const auto& region : regions )
 		compute_region_id( region );
+}
+
+void terrain_analysis::connect_separations_and_regions()
+{
+	for( auto& separation : _separations )
+	{
+		std::map<int, int> counters;
+
+		box polygon_box;
+		boost::geometry::envelope( separation._polygon, polygon_box );
+
+		// To get around a bug of boost::geometry::covered_by: very slightly enlarge the polygon to make sure bg::covered_by is working properly
+		multipolygon buffered_polygon;
+		boost::geometry::buffer( separation._polygon, buffered_polygon, _small_distance_strategy, _side_strategy, _join_strategy, _end_strategy, _point_strategy );
+
+		for( double y = polygon_box.min_corner().y(); y <= polygon_box.max_corner().y(); ++y )
+			for( double x = polygon_box.min_corner().x(); x <= polygon_box.max_corner().x(); ++x )
+				if( boost::geometry::covered_by( point{ x, y }, buffered_polygon ) )
+					++counters[ _region_id[ y ][ x ] ];
+
+		int max = 0;
+		int second_max = 0;
+
+		int max_id = 0;
+		int second_max_id = 0;
+
+		for( const auto& count : counters )
+			if( max < count.second )
+			{
+				second_max = max;
+				second_max_id = max_id;
+				max = count.second;
+				max_id = count.first;
+			}
+
+		if( second_max == 0 ) // happen if the first element in counters was the max
+			for( const auto& count : counters )
+				if( second_max < count.second && count.first != max_id )
+				{
+					second_max = count.second;
+					second_max_id = count.first;
+				}
+
+		for( size_t r = 0; r < _regions.size(); ++r )
+			if( _regions[ r ].get_id() == max_id || _regions[ r ].get_id() == second_max_id )
+			{
+				separation._regions.push_back( &_regions[ r ] );
+				_regions[ r ]._separations.push_back( &separation );
+			}
+	}
 }
 
 //void terrain_analysis::make_polygon_label( const boost_polygon& poly )

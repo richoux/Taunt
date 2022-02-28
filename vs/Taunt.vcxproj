@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\base_location.cpp" />
     <ClCompile Include="..\src\connected_component.cpp" />
     <ClCompile Include="..\src\model\constraint_minimal_region_area.cpp" />
     <ClCompile Include="..\src\model\constraint_no_cuts.cpp" />
@@ -27,11 +28,14 @@
     <ClCompile Include="..\src\model\objective_same_area.cpp" />
     <ClCompile Include="..\src\model\print_frontiers.cpp" />
     <ClCompile Include="..\src\model\region_builder.cpp" />
+    <ClCompile Include="..\src\region.cpp" />
+    <ClCompile Include="..\src\separation.cpp" />
     <ClCompile Include="..\src\terrain_analysis.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\analyze_type.hpp" />
     <ClInclude Include="..\include\base_location.hpp" />
+    <ClInclude Include="..\include\matrix.hpp" />
     <ClInclude Include="..\include\separation.hpp" />
     <ClInclude Include="..\include\connected_component.hpp" />
     <ClInclude Include="..\include\geometry.hpp" />

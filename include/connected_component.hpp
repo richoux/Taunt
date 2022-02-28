@@ -5,9 +5,7 @@
 #include <cstddef>
 
 #include "geometry.hpp"
-
-using matrix_bool = std::vector< std::vector<bool> >;
-using matrix_int = std::vector< std::vector<int> >;
+#include "matrix.hpp"
 
 namespace taunt
 {

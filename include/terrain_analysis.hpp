@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 
+#include "matrix.hpp"
 #include "geometry.hpp"
 #include "analyze_type.hpp"
 #include "region.hpp"
@@ -15,9 +16,6 @@
 #else
 #include "BWAPI.h"
 #endif
-
-using matrix_bool = std::vector< std::vector<bool> >;
-using matrix_int = std::vector< std::vector<int> >;
 
 #ifdef SC2API
 using unit_type = sc2::UnitTypeID;
@@ -74,6 +72,7 @@ namespace taunt
 		multipolygon make_regions( const std::vector<line>& separations, const boost_polygon& polygon );
 		void compute_region_id( const boost_polygon& region );
 		void compute_region_id( const multipolygon& regions );
+		void connect_separations_and_regions();
 		//void make_polygon_label( const boost_polygon& poly );
 		boost_polygon enrich( const boost_polygon& input ) const;
 
