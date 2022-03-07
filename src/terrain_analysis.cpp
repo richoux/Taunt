@@ -57,17 +57,11 @@ void terrain_analysis::compute_region_id( const boost_polygon& region )
 	++_last_label;
 	box region_box;
 	boost::geometry::envelope( region, region_box );
-	//int min_x = std::round( region_box.min_corner().x() );
-	//int min_y = std::round( region_box.min_corner().y() );
-	//int max_x = std::round( region_box.max_corner().x() );
-	//int max_y = std::round( region_box.max_corner().y() );
 
 	// To get around a bug of boost::geometry::covered_by: very slightly enlarge the polygon to make sure bg::covered_by is working properly
 	multipolygon buffered_region;
 	boost::geometry::buffer( region, buffered_region, _small_distance_strategy, _side_strategy, _join_strategy, _end_strategy, _point_strategy );
 
-	//for( int y = min_y; y <= max_y; ++y )
-	//	for( int x = min_x; x <= max_x; ++x )
 	for( double y = region_box.min_corner().y() ; y <= region_box.max_corner().y() ; ++y )
 		for( double x = region_box.min_corner().x() ; x <= region_box.max_corner().x() ; ++x )
 		{
@@ -132,17 +126,6 @@ void terrain_analysis::connect_separations_and_regions()
 			}
 	}
 }
-
-//void terrain_analysis::make_polygon_label( const boost_polygon& poly )
-//{
-//	++_last_label;
-//	for( auto& p : poly.outer() )
-//		_region_id[ p.y() ][ p.x() ] = _last_label;
-//
-//	for( auto& inner : poly.inners() )
-//		for( auto& p : inner )
-//			_region_id[ p.y() ][ p.x() ] = _last_label;
-//}
 
 boost_polygon terrain_analysis::enrich( const boost_polygon& input ) const
 {
@@ -371,22 +354,15 @@ void terrain_analysis::analyze()
 	start = std::chrono::steady_clock::now();
 #endif
 
-	//region_id
-	//taunt::connected_component cc_level_1( _terrain_properties_level_1, &_region_id );
 	taunt::connected_component cc_level_1( _terrain_properties_level_1 );
 	_simplified_cc_level_1 = cc_level_1.compute_simplified_polygons();
 
-	//auto last_label = cc_level_1.get_last_label();
-	//taunt::connected_component cc_level_2( _terrain_properties_level_2, &_region_id, last_label );
 	taunt::connected_component cc_level_2( _terrain_properties_level_2 );
 	_simplified_cc_level_2 = cc_level_2.compute_simplified_polygons();
 
-	//last_label = cc_level_2.get_last_label();
-	//taunt::connected_component cc_level_3( _terrain_properties_level_3, &_region_id, last_label );
 	taunt::connected_component cc_level_3( _terrain_properties_level_3 );
 	_simplified_cc_level_3 = cc_level_3.compute_simplified_polygons();
 
-	//last_label = cc_level_3.get_last_label();
 	taunt::connected_component cc_unbuildable( _terrain_unbuildable_unwalkable );
 	_simplified_cc_unbuildable = cc_unbuildable.compute_simplified_polygons();
 
@@ -731,25 +707,6 @@ void terrain_analysis::analyze()
 				auto regions = make_regions( separations, really_simplified_level_2[ i ] );
 				compute_region_id( regions );
 
-				//std::vector<ring> rings;
-				//std::vector<boost_polygon> outputs;
-				//make_frontiers( solution, builder.separation_candidates, rings );
-				//for( auto& r : rings )
-				//{
-				//	std::cout << "ring 2: " << boost::geometry::dsv( r ) << "\n";
-				//	if( boost::geometry::covered_by( r.at(0), really_simplified_level_2[ i ].outer() ) 
-				//			&& boost::geometry::covered_by( r.at( 1 ), really_simplified_level_2[ i ].outer() ) )
-				//	{
-				//		boost::geometry::difference( really_simplified_level_2[ i ], r, outputs );
-				//		std::cout << "Difference computed 2\n";
-				//		for( auto& poly : outputs )
-				//		{
-				//			std::cout << "About to label polygon 2\n";
-				//			make_polygon_label( poly );
-				//		}
-				//	}
-				//}
-
 #if defined TAUNT_BENCH
 				elapsed_time = std::chrono::steady_clock::now() - start_inner;
 				ss << "Make frontiers: " << elapsed_time.count() << "\n";
@@ -866,25 +823,6 @@ void terrain_analysis::analyze()
 				auto regions = make_regions( separations, really_simplified_level_3[ i ] );
 				compute_region_id( regions );
 
-				//std::vector<ring> rings;
-				//std::vector<boost_polygon> outputs;
-				//make_frontiers( solution, builder.separation_candidates, rings );
-				//for( auto& r : rings )
-				//{
-				//	std::cout << "ring 3: " << boost::geometry::dsv( r ) << "\n";
-				//	if( boost::geometry::covered_by( r.at( 0 ), really_simplified_level_3[ i ].outer() )
-				//			&& boost::geometry::covered_by( r.at( 1 ), really_simplified_level_3[ i ].outer() ) )
-				//	{
-				//		boost::geometry::difference( really_simplified_level_3[ i ], r, outputs );
-				//		std::cout << "Difference computed 3\n";
-				//		for( auto& poly : outputs )
-				//		{
-				//			std::cout << "About to label polygon 3\n";
-				//			make_polygon_label( poly );
-				//		}
-				//	}
-				//}
-
 #if defined TAUNT_BENCH
 				elapsed_time = std::chrono::steady_clock::now() - start_inner;
 				ss << "Make frontiers: " << elapsed_time.count() << "\n";
@@ -908,15 +846,6 @@ void terrain_analysis::analyze()
 	unbuildables.assign( _simplified_cc_unbuildable.begin(), _simplified_cc_unbuildable.end() );
 	compute_region_id( unbuildables );
 	compute_region_id( _separation_zones );
-
-	//for( size_t y = 0; y < _map_height; ++y )
-	//	for( size_t x = 0; x < _map_width; ++x )
-	//		if( _buildable[y][x] && !has_region_id(x, y) )
-	//			if( has_region_id( x - 1, y ) )
-	//				_region_id[ y ][ x ] = _region_id[ y ][ x - 1 ];
-	//			else
-	//				if( has_region_id( x, y - 1 ) )
-	//					_region_id[ y ][ x ] = _region_id[ y - 1 ][ x ];
 
 	std::string map_id = map_filename();
 	map_id.replace( map_id.end() - 4, map_id.end(), "_region_id.txt" );

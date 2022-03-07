@@ -73,7 +73,6 @@ namespace taunt
 		void compute_region_id( const boost_polygon& region );
 		void compute_region_id( const multipolygon& regions );
 		void connect_separations_and_regions();
-		//void make_polygon_label( const boost_polygon& poly );
 		boost_polygon enrich( const boost_polygon& input ) const;
 
 		int compute_terrain_height( int tile_x, int tile_y ) const;

@@ -11,7 +11,6 @@ namespace taunt
 		  _height( _map.size() ), // maps are implemented as [y][x], but all methods interface are [x][y]
 		  _width( _map[ 0 ].size() ),
 		  _rings( std::vector<ring>() )
-		  //_last_label( -1 )
 	{}
 	
 	connected_component::connected_component( matrix_int&& map )
@@ -19,17 +18,13 @@ namespace taunt
 		  _height( _map.size() ), // maps are implemented as [y][x], but all methods interface are [x][y]
 		  _width( _map[ 0 ].size() ),
 		  _rings( std::vector<ring>() )
-		  //_last_label( -1 )
 	{}
 
-	//connected_component::connected_component( const std::vector< std::vector<bool> >& map_bool, std::vector< std::vector<int> >* region_id, int last_label )
 	connected_component::connected_component( const matrix_bool& map_bool )
 		: _map( std::vector< std::vector<int> >( map_bool.size(), std::vector<int>( map_bool[0].size(), 0 ) ) ),
 		  _height( _map.size() ), // maps are implemented as [y][x], but all methods interface are [x][y]
 		  _width( _map[ 0 ].size() ),
 		  _rings( std::vector<ring>() )
-		  //_region_id( region_id ),
-		  //_last_label( last_label )
 	{
 		for( size_t y = 0; y < _height; ++y )
 			for( size_t x = 0; x < _width; ++x )
@@ -237,34 +232,11 @@ namespace taunt
 		point current_point( x, y );
 		boost::geometry::append( ring, current_point );
 
-		//int label;
-		//if( _last_label != -1 )
-		//{
-		//	if( !has_region_id( x, y ) )
-		//	{
-		//		if( has_region_id( x - 1, y ) )
-		//			label = (*_region_id)[ y ][ x - 1 ];
-		//		else
-		//			if( has_region_id( x, y - 1 ) )
-		//				label = (*_region_id)[ y - 1 ][ x ];
-		//			else
-		//			{
-		//				label = ++_last_label; // new label
-		//				std::cout << "New label (ring): " << _last_label << "\n";
-		//			}
-		//	}
-		//	else // should never happen
-		//		label = (*_region_id)[ y ][ x ];
-		//}
-
 		// we can't have next_point == starting_point at the first iteration of the loop
-		// since Taunt doesn't consider isolated unwalkable tiles.
+		// since Taunt doesn't consider isolated tiles.
 		do
 		{
 			_map[ current_point.y() ][ current_point.x() ] = 3;
-
-			//if( _last_label != -1 )
-			//	(*_region_id)[ current_point.y() ][ current_point.x() ] = label;
 
 			// take the second to last point if ring contains at least 2 points, or the last one otherwise.
 			auto parent = ring.size() > 1 ? *(ring.rbegin()+1) : *ring.rbegin();
@@ -293,20 +265,6 @@ namespace taunt
 							else
 								if( !is_walkable( x - 1, y ) )
 									search_for_polygon( x, y, direction::W );
-								//else // walkable tile inside a walkable area
-								//	if( _last_label != -1 && !has_region_id( x, y ) )
-								//	{										
-								//		if( has_region_id( x - 1, y ) )
-								//			(*_region_id)[y][x] = (*_region_id)[y][x - 1];
-								//		else
-								//			if( has_region_id( x, y - 1 ) )
-								//				(*_region_id)[ y ][ x ] = (*_region_id)[ y - 1 ][ x ];
-								//			else
-								//			{
-								//				(*_region_id)[ y ][ x ] = ++_last_label; // new label
-								//				std::cout << "New label (walktile): " << _last_label << "\n";
-								//			}
-								//	}
 				}
 	}
 
