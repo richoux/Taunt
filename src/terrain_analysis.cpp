@@ -1,5 +1,6 @@
 #include <cmath>
 #include <fstream>
+#include <map>
 
 #include <ghost/solver.hpp>
 
@@ -14,6 +15,9 @@ using taunt::region;
 
 #define SIMPLIFY 0.5
 #define TIMEOUT 100000
+#define SMALL_DISTANCE_STRATEGY 0.01
+#define DISTANCE_STRATEGY 1
+#define MIN_SIZE_REGION 40
 
 /******************/
 /***   Common   ***/
@@ -55,6 +59,7 @@ multipolygon terrain_analysis::make_regions( const std::vector<line>& separation
 void terrain_analysis::compute_region_id( const boost_polygon& region )
 {
 	++_last_label;
+	int counter_region_size = 0;
 	box region_box;
 	boost::geometry::envelope( region, region_box );
 
@@ -65,16 +70,102 @@ void terrain_analysis::compute_region_id( const boost_polygon& region )
 	for( double y = region_box.min_corner().y() ; y <= region_box.max_corner().y() ; ++y )
 		for( double x = region_box.min_corner().x() ; x <= region_box.max_corner().x() ; ++x )
 		{
+			if( !_walkable[y][x] )
+				continue;
+
 			point p{ x, y };
-			if( boost::geometry::covered_by( p, buffered_region ) )
-				_region_id[ y ][ x ] = _last_label;
-		}	
+			//if( boost::geometry::covered_by( p, buffered_region ) )
+			for( const auto& buffered : buffered_region )
+				if( boost::geometry::covered_by( p, buffered.outer() ) )
+				{
+					_region_id[ y ][ x ] = _last_label;
+					++counter_region_size;
+					break;
+				}
+		}
+
+	if( counter_region_size < MIN_SIZE_REGION )
+		_id_to_remove.push_back( _last_label );
 }
 
 void terrain_analysis::compute_region_id( const multipolygon& regions )
 {
 	for( const auto& region : regions )
 		compute_region_id( region );
+}
+
+void terrain_analysis::compute_region_id_for_unbuildable( const boost_polygon& region )
+{
+	box region_box;
+	boost::geometry::envelope( region, region_box );
+
+	multipolygon wide_buffered_region;
+	boost::geometry::buffer( region, wide_buffered_region, _distance_strategy, _side_strategy, _join_strategy, _end_strategy, _point_strategy );
+	int label;
+
+	// intersect the unbuildable area buffer with polygons of the same level
+	// to check if the unbuildable area is a separation or not.
+	std::vector<boost_polygon> intersections;
+	multipolygon cc_levels;
+	cc_levels.assign( _simplified_cc_level_1.begin(), _simplified_cc_level_1.end() );
+	cc_levels.insert( cc_levels.end(), _simplified_cc_level_2.begin(), _simplified_cc_level_2.end() );
+	cc_levels.insert( cc_levels.end(), _simplified_cc_level_3.begin(), _simplified_cc_level_3.end() );
+	cc_levels.insert( cc_levels.end(), _simplified_cc_level_4.begin(), _simplified_cc_level_4.end() );
+	boost::geometry::intersection( wide_buffered_region, cc_levels, intersections );
+
+	std::map<int, bool> labels_found;
+	for( const auto& intersection : intersections )
+		for( const auto& point : intersection.outer() )
+		{
+			// auto point = intersection.outer()[ 0 ];
+			int region_label = _region_id[ static_cast<int>( point.y() ) ][ static_cast<int>( point.x() ) ];
+			if( region_label != 0 )
+				labels_found[ region_label ] = true;
+		}
+	
+	if( labels_found.empty() )
+		return;
+
+	if( labels_found.size() > 1 ) // the area is a separation, so it needs a new label
+		label = ++_last_label;
+	else // the area is surrounded by a unique region, so it takes the same label
+		label = labels_found.begin()->first;
+
+	// To get around a bug of boost::geometry::covered_by: very slightly enlarge the polygon to make sure bg::covered_by is working properly
+	multipolygon buffered_region;
+	boost::geometry::buffer( region, buffered_region, _small_distance_strategy, _side_strategy, _join_strategy, _end_strategy, _point_strategy );
+
+	for( double y = region_box.min_corner().y(); y <= region_box.max_corner().y(); ++y )
+		for( double x = region_box.min_corner().x(); x <= region_box.max_corner().x(); ++x )
+		{
+			if( !_walkable[ y ][ x ] || _region_id[ y ][ x ] != 0 )
+				continue;
+
+			point p{ x, y };
+			for( const auto& buffered : buffered_region )
+				if( boost::geometry::covered_by( p, buffered.outer() ) )
+				{
+					_region_id[ y ][ x ] = label;
+					break;
+				}
+		}
+}
+
+void terrain_analysis::compute_region_id_for_unbuildable( const multipolygon& regions )
+{
+	for( const auto& region : regions )
+		compute_region_id_for_unbuildable( region );
+}
+
+void terrain_analysis::remove_artefacts()
+{
+	if( _id_to_remove.empty() )
+		return;
+
+	for( int y = 0; y < _map_height; ++y )
+		for( int x = 0; x < _map_width; ++x )
+			if( std::find( _id_to_remove.begin(), _id_to_remove.end(), _region_id[ y ][ x ] ) != _id_to_remove.end() )
+				_region_id[ y ][ x ] = 0;
 }
 
 void terrain_analysis::connect_separations_and_regions()
@@ -206,6 +297,7 @@ void terrain_analysis::analyze()
 	_terrain_properties_level_1 = matrix_bool( _map_height, std::vector<bool>( _map_width, false ) );
 	_terrain_properties_level_2 = matrix_bool( _map_height, std::vector<bool>( _map_width, false ) );
 	_terrain_properties_level_3 = matrix_bool( _map_height, std::vector<bool>( _map_width, false ) );
+	_terrain_properties_level_4 = matrix_bool( _map_height, std::vector<bool>( _map_width, false ) );
 	_terrain_unbuildable_unwalkable = matrix_int( _map_height, std::vector<int>( _map_width, 0 ) );
 #endif
 
@@ -237,8 +329,11 @@ void terrain_analysis::analyze()
 			case 2:
 				_terrain_properties_level_2[ y ][ x ] = _buildable[ y ][ x ]; //_walkable[y][x];
 				break;
-			default: // case 4, but TODO 5
+			case 4:
 				_terrain_properties_level_3[ y ][ x ] = _buildable[ y ][ x ]; //_walkable[y][x];
+				break;
+			default: // case 5
+				_terrain_properties_level_4[ y ][ x ] = _buildable[ y ][ x ]; //_walkable[y][x];
 			}
 
 			if( !_buildable[ y ][ x ] && _walkable[ y ][ x ] )
@@ -281,8 +376,11 @@ void terrain_analysis::analyze()
 				case 2:
 					_terrain_properties_level_2[ y ][ x ] = true;
 					break;
-				default: // case 4, but TODO 5
+				case 4:
 					_terrain_properties_level_3[ y ][ x ] = true;
+					break;
+				default: // case 5
+					_terrain_properties_level_4[ y ][ x ] = true;
 				}
 
 				// depots can't be built within 3 tiles of any resource
@@ -331,9 +429,11 @@ void terrain_analysis::analyze()
 				case 2:
 					_terrain_properties_level_2[ y ][ x ] = true;
 					break;
-				default: // case 4, but TODO 5
+				case 4:
 					_terrain_properties_level_3[ y ][ x ] = true;
-				}
+					break;
+				default: // case 5
+					_terrain_properties_level_4[ y ][ x ] = true;				}
 
 				// depots can't be built within 3 tiles of any resource
 				for( int ry = -3; ry <= 3; ++ry )
@@ -363,6 +463,9 @@ void terrain_analysis::analyze()
 	taunt::connected_component cc_level_3( _terrain_properties_level_3 );
 	_simplified_cc_level_3 = cc_level_3.compute_simplified_polygons();
 
+	taunt::connected_component cc_level_4( _terrain_properties_level_4 );
+	_simplified_cc_level_4 = cc_level_4.compute_simplified_polygons();
+
 	taunt::connected_component cc_unbuildable( _terrain_unbuildable_unwalkable );
 	_simplified_cc_unbuildable = cc_unbuildable.compute_simplified_polygons();
 
@@ -375,8 +478,9 @@ void terrain_analysis::analyze()
 	size_t number_zones_l1 = _simplified_cc_level_1.size();
 	size_t number_zones_l12 = number_zones_l1 + _simplified_cc_level_2.size();
 	size_t number_zones_l123 = number_zones_l12 + _simplified_cc_level_3.size();
-	std::vector< multipoint > resource_clusters( number_zones_l123 );
-	std::vector< int > number_resource_clusters( number_zones_l123, 0 );
+	size_t number_zones_l1234 = number_zones_l123 + _simplified_cc_level_3.size();
+	std::vector< multipoint > resource_clusters( number_zones_l1234 );
+	std::vector< int > number_resource_clusters( number_zones_l1234, 0 );
 
 	std::vector< point > resource_points;
 	for( int y = 0; y < _map_height; ++y )
@@ -399,7 +503,12 @@ void terrain_analysis::analyze()
 			if( boost::geometry::covered_by( point, _simplified_cc_level_3[ i ] ) )
 				boost::geometry::append( resource_clusters[ number_zones_l12 + i ], point );
 
-	std::vector< std::vector< multipoint > > clusters_on_the_map( number_zones_l123 );
+	for( size_t i = 0; i < _simplified_cc_level_4.size(); ++i )
+		for( auto& point : resource_points )
+			if( boost::geometry::covered_by( point, _simplified_cc_level_4[ i ] ) )
+				boost::geometry::append( resource_clusters[ number_zones_l123 + i ], point );
+
+	std::vector< std::vector< multipoint > > clusters_on_the_map( number_zones_l1234 );
 
 #if defined TAUNT_BENCH
 	elapsed_time = std::chrono::steady_clock::now() - start;
@@ -502,6 +611,7 @@ void terrain_analysis::analyze()
 	std::vector<boost_polygon> really_simplified_level_1( _simplified_cc_level_1.size() );
 	std::vector<boost_polygon> really_simplified_level_2( _simplified_cc_level_2.size() );
 	std::vector<boost_polygon> really_simplified_level_3( _simplified_cc_level_3.size() );
+	std::vector<boost_polygon> really_simplified_level_4( _simplified_cc_level_4.size() );
 
 	// Compute regions with GHOST
 	for( int i = 0; i < static_cast<int>( _simplified_cc_level_1.size() ); ++i )
@@ -611,7 +721,7 @@ void terrain_analysis::analyze()
 
 #if defined TAUNT_BENCH
 	elapsed_time = std::chrono::steady_clock::now() - start;
-	ss << "GHOST computation low terrain: " << elapsed_time.count() << "\n";
+	ss << "GHOST computation terrain level 1: " << elapsed_time.count() << "\n";
 	start = std::chrono::steady_clock::now();
 #endif
 
@@ -727,7 +837,7 @@ void terrain_analysis::analyze()
 
 #if defined TAUNT_BENCH
 	elapsed_time = std::chrono::steady_clock::now() - start;
-	ss << "GHOST computation high terrain: " << elapsed_time.count() << "\n";
+	ss << "GHOST computation terrain level 2: " << elapsed_time.count() << "\n";
 	start = std::chrono::steady_clock::now();
 #endif
 
@@ -841,10 +951,133 @@ void terrain_analysis::analyze()
 		}
 	}
 
+#if defined TAUNT_BENCH
+	elapsed_time = std::chrono::steady_clock::now() - start;
+	ss << "GHOST computation terrain level 3: " << elapsed_time.count() << "\n";
+	start = std::chrono::steady_clock::now();
+#endif
+
+	for( int i = 0; i < static_cast<int>( _simplified_cc_level_4.size() ); ++i )
+	{
+		int index = i + number_zones_l123;
+		if( number_resource_clusters[ index ] >= 2 )
+		{
+			int timeout = TIMEOUT * ( number_resource_clusters[ i ] - 1 );
+
+#if defined TAUNT_BENCH
+			auto start_inner = std::chrono::steady_clock::now();
+#endif
+
+			boost_polygon temp_simplified;
+			boost::geometry::simplify( _simplified_cc_level_4[ i ], temp_simplified, SIMPLIFY );
+			really_simplified_level_4[ i ] = enrich( temp_simplified );
+
+#if defined TAUNT_BENCH
+			elapsed_time = std::chrono::steady_clock::now() - start_inner;
+			ss << "enrich: " << elapsed_time.count() << "\n";
+#endif
+
+			double cost;
+			std::vector<int> solution( really_simplified_level_4[ i ].outer().size() );
+
+#if defined TAUNT_BENCH
+			start_inner = std::chrono::steady_clock::now();
+#endif
+
+			RegionBuilder builder( number_resource_clusters[ index ] - 1, really_simplified_level_4[ i ], clusters_on_the_map[ index ] );
+
+#if defined TAUNT_BENCH
+			elapsed_time = std::chrono::steady_clock::now() - start_inner;
+			ss << "Make Builder: " << elapsed_time.count() << "\n";
+#endif
+
+			ghost::Options options;
+			options.tabu_time_selected = builder.separation_candidates.size() / number_resource_clusters[ index ];
+			options.custom_starting_point = true;
+
+#if defined TAUNT_BENCH
+			start_inner = std::chrono::steady_clock::now();
+#endif
+
+			ghost::Solver solver( builder );
+
+#if defined TAUNT_BENCH
+			elapsed_time = std::chrono::steady_clock::now() - start_inner;
+			ss << "Make Solver: " << elapsed_time.count() << "\n";
+			start_inner = std::chrono::steady_clock::now();
+#endif
+
+			bool found_solution = solver.solve( cost, solution, 150ms, options );
+
+#if defined TAUNT_BENCH
+			elapsed_time = std::chrono::steady_clock::now() - start_inner;
+			ss << "Run Solver: " << elapsed_time.count() << "\n";
+#endif
+
+			while( !found_solution && timeout < 10 * TIMEOUT )
+			{
+				timeout *= 2;
+
+#if defined TAUNT_BENCH
+				ss << "Run Solver again with new timeout=" << timeout << "\n";
+				start_inner = std::chrono::steady_clock::now();
+#endif
+
+				found_solution = solver.solve( cost, solution, timeout, options );
+
+#if defined TAUNT_BENCH
+				elapsed_time = std::chrono::steady_clock::now() - start_inner;
+				ss << "Run Solver: " << elapsed_time.count() << "\n";
+#endif
+			}
+
+			if( found_solution )
+			{
+#if defined TAUNT_BENCH
+				start_inner = std::chrono::steady_clock::now();
+#endif
+
+				std::vector<line> separations;
+
+				for( size_t i = 0; i < solution.size(); ++i )
+					if( solution[ i ] == 1 )
+					{
+						separations.push_back( builder.separation_candidates[ i ] );
+						_frontiers.push_back( builder.separation_candidates[ i ] );
+					}
+
+				auto regions = make_regions( separations, really_simplified_level_4[ i ] );
+				compute_region_id( regions );
+
+#if defined TAUNT_BENCH
+				elapsed_time = std::chrono::steady_clock::now() - start_inner;
+				ss << "Make frontiers: " << elapsed_time.count() << "\n";
+#endif
+			}
+#if defined TAUNT_BENCH
+			else
+			{
+				ss << "Fail to find a solution for zone " << index << "\n";
+			}
+#endif
+		}
+		else
+		{
+			compute_region_id( _simplified_cc_level_4[ i ] );
+		}
+	}
+
+#if defined TAUNT_BENCH
+	elapsed_time = std::chrono::steady_clock::now() - start;
+	ss << "GHOST computation terrain level 4: " << elapsed_time.count() << "\n";
+	start = std::chrono::steady_clock::now();
+#endif
+
 	// assign region id to unbuildables zones (slopes, bridges, ...) and separations.
 	multipolygon unbuildables;
 	unbuildables.assign( _simplified_cc_unbuildable.begin(), _simplified_cc_unbuildable.end() );
-	compute_region_id( unbuildables );
+	remove_artefacts();
+	compute_region_id_for_unbuildable( unbuildables );
 	compute_region_id( _separation_zones );
 
 	std::string map_id = map_filename();
@@ -864,6 +1097,8 @@ void terrain_analysis::analyze()
 			else
 			{
 				char c = 64 + _region_id[ y ][ x ];
+				if( 64 + _region_id[ y ][ x ] > 126 )
+					c = _region_id[ y ][ x ] - 14;
 				ss << c;
 			}
 		}
@@ -872,6 +1107,104 @@ void terrain_analysis::analyze()
 	log << ss.str();
 	log.close();
 
+
+	// mega traces
+	/*
+	std::string map_buildable = map_filename();
+	map_buildable.replace( map_buildable.end() - 4, map_buildable.end(), "_buildable.txt" );
+	std::ofstream log_buildable( map_buildable );
+	if( !log_buildable.is_open() )
+	{
+		std::cerr << "Can't open file " << map_buildable << "\n";
+	}
+
+	std::string map_walkable = map_filename();
+	map_walkable.replace( map_walkable.end() - 4, map_walkable.end(), "_walkable.txt" );
+	std::ofstream log_walkable( map_walkable );
+	if( !log_walkable.is_open() )
+	{
+		std::cerr << "Can't open file " << map_walkable << "\n";
+	}
+
+	std::string map_level_1 = map_filename();
+	map_level_1.replace( map_level_1.end() - 4, map_level_1.end(), "_level_1.txt" );
+	std::ofstream log_level_1( map_level_1 );
+	if( !log_level_1.is_open() )
+	{
+		std::cerr << "Can't open file " << map_level_1 << "\n";
+	}
+
+	std::string map_level_2 = map_filename();
+	map_level_2.replace( map_level_2.end() - 4, map_level_2.end(), "_level_2.txt" );
+	std::ofstream log_level_2( map_level_2 );
+	if( !log_level_2.is_open() )
+	{
+		std::cerr << "Can't open file " << map_level_2 << "\n";
+	}
+
+	std::string map_level_3 = map_filename();
+	map_level_3.replace( map_level_3.end() - 4, map_level_3.end(), "_level_3.txt" );
+	std::ofstream log_level_3( map_level_3 );
+	if( !log_level_3.is_open() )
+	{
+		std::cerr << "Can't open file " << map_level_3 << "\n";
+	}
+
+	std::string map_unbuild_unwalk = map_filename();
+	map_unbuild_unwalk.replace( map_unbuild_unwalk.end() - 4, map_unbuild_unwalk.end(), "_unbuild_unwalk.txt" );
+	std::ofstream log_unbuild_unwalk( map_unbuild_unwalk );
+	if( !log_unbuild_unwalk.is_open() )
+	{
+		std::cerr << "Can't open file " << map_unbuild_unwalk << "\n";
+	}
+
+	std::stringstream ss_buildable;
+	std::stringstream ss_walkable;
+	std::stringstream ss_level_1;
+	std::stringstream ss_level_2;
+	std::stringstream ss_level_3;
+	std::stringstream ss_unbuild_unwalk;
+
+	for( int y = 0; y < _map_height; ++y )
+	{
+		for( int x = 0; x < _map_width; ++x )
+		{
+			//if( _buildable[ y ][ x ] )
+			//	ss_buildable << "1";
+			//else
+			//	ss_buildable << "0";
+			ss_buildable << _buildable[ y ][ x ];
+			ss_walkable << _walkable[ y ][ x ];
+			ss_level_1 << _terrain_properties_level_1[ y ][ x ];
+			ss_level_2 << _terrain_properties_level_2[ y ][ x ];
+			ss_level_3 << _terrain_properties_level_3[ y ][ x ];
+			ss_unbuild_unwalk << _terrain_unbuildable_unwalkable[ y ][ x ]-1;
+		}
+		ss_buildable << "\n";
+		ss_walkable << "\n";
+		ss_level_1 << "\n";
+		ss_level_2 << "\n";
+		ss_level_3 << "\n";
+		ss_unbuild_unwalk << "\n";
+	}
+	log_buildable << ss_buildable.str();
+	log_buildable.close();
+
+	log_walkable << ss_walkable.str();
+	log_walkable.close();
+
+	log_level_1 << ss_level_1.str();
+	log_level_1.close();
+
+	log_level_2 << ss_level_2.str();
+	log_level_2.close();
+
+	log_level_3 << ss_level_3.str();
+	log_level_3.close();
+
+	log_unbuild_unwalk << ss_unbuild_unwalk.str();
+	log_unbuild_unwalk.close();
+	*/
 
 #if defined TAUNT_BENCH
 	elapsed_time = std::chrono::steady_clock::now() - start;
@@ -915,6 +1248,16 @@ void terrain_analysis::print()
 			p.x( -p.x() );
 
 		for( auto& inner : _simplified_cc_level_3[ i ].inners() )
+			for( auto& p : inner )
+				p.x( -p.x() );
+	}
+
+	for( size_t i = 0; i < _simplified_cc_level_4.size(); ++i )
+	{
+		for( auto& p : _simplified_cc_level_4[ i ].outer() )
+			p.x( -p.x() );
+
+		for( auto& inner : _simplified_cc_level_4[ i ].inners() )
 			for( auto& p : inner )
 				p.x( -p.x() );
 	}
@@ -969,6 +1312,16 @@ void terrain_analysis::print()
 				p.y( -p.y() );
 	}
 
+	for( size_t i = 0; i < _simplified_cc_level_4.size(); ++i )
+	{
+		for( auto& p : _simplified_cc_level_4[ i ].outer() )
+			p.y( -p.y() );
+
+		for( auto& inner : _simplified_cc_level_4[ i ].inners() )
+			for( auto& p : inner )
+				p.y( -p.y() );
+	}
+
 	for( size_t i = 0; i < _simplified_cc_unbuildable.size(); ++i )
 	{
 		for( auto& p : _simplified_cc_unbuildable[ i ].outer() )
@@ -1006,6 +1359,9 @@ void terrain_analysis::print()
 	for( size_t i = 0; i < _simplified_cc_level_3.size(); ++i )
 		mapper.add( _simplified_cc_level_3[ i ] );
 
+	for( size_t i = 0; i < _simplified_cc_level_4.size(); ++i )
+		mapper.add( _simplified_cc_level_4[ i ] );
+
 	for( size_t i = 0; i < _simplified_cc_unbuildable.size(); ++i )
 		mapper.add( _simplified_cc_unbuildable[ i ] );
 
@@ -1019,7 +1375,10 @@ void terrain_analysis::print()
 		mapper.map( _simplified_cc_level_2[ i ], "fill-opacity:0.5;fill:rgb(180,255,0);stroke:rgb(0,0,0);stroke-width:5" );
 
 	for( size_t i = 0; i < _simplified_cc_level_3.size(); ++i )
-		mapper.map( _simplified_cc_level_3[ i ], "fill-opacity:0.5;fill:rgb(0,255,0);stroke:rgb(0,0,0);stroke-width:5" );
+		mapper.map( _simplified_cc_level_3[ i ], "fill-opacity:0.5;fill:rgb(90,255,0);stroke:rgb(0,0,0);stroke-width:5" );
+
+	for( size_t i = 0; i < _simplified_cc_level_4.size(); ++i )
+		mapper.map( _simplified_cc_level_4[ i ], "fill-opacity:0.5;fill:rgb(0,255,0);stroke:rgb(0,0,0);stroke-width:5" );
 
 	for( size_t i = 0; i < _simplified_cc_unbuildable.size(); ++i )
 		mapper.map( _simplified_cc_unbuildable[ i ], "fill-opacity:0.5;fill:rgb(0,0,255);stroke:rgb(0,0,0);stroke-width:5" );
@@ -1036,8 +1395,8 @@ terrain_analysis::terrain_analysis( sc2::Agent* bot, analyze_type at )
 	: _bot( bot ),
 	_analyze_type( at ),
 	_last_label( 0 ),
-	_small_distance_strategy( 0.01 ),
-	_distance_strategy( 0.5 )
+	_small_distance_strategy( SMALL_DISTANCE_STRATEGY ),
+	_distance_strategy( DISTANCE_STRATEGY )
 {}
 
 int terrain_analysis::compute_terrain_height( int tile_x, int tile_y ) const
@@ -1174,8 +1533,8 @@ terrain_analysis::terrain_analysis( analyze_type at )
 	_terrain_properties_level_2( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
 	_terrain_properties_level_3( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
 	_terrain_unbuildable_unwalkable( matrix_int( _map_height, std::vector<int>( _map_width, 0 ) ) ),
-	_small_distance_strategy( 0.01 ),
-	_distance_strategy( 0.5 )
+	_small_distance_strategy( SMALL_DISTANCE_STRATEGY ),
+	_distance_strategy( DISTANCE_STRATEGY )
 {}
 
 int terrain_analysis::compute_terrain_height( int tile_x, int tile_y ) const

@@ -37,7 +37,11 @@ position region::get_entry_position( const separation& sep )
 	multipolygon commun;
 	boost::geometry::intersection( sep._polygon, _polygon, commun );
 	point boost_centroid;
-	boost::geometry::centroid( commun, boost_centroid );
+
+	// This will always consider the first intersection only. How to improve that?
+	// For instance on Destination, a ^-shaped separating bridge has two different
+	// entry points for its south entry. How to consider both?
+	boost::geometry::centroid( commun[0], boost_centroid);
 
 	return { static_cast<position_type>( std::round( boost_centroid.x() ) ), static_cast<position_type>( std::round( boost_centroid.y() ) ) };
 }

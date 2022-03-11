@@ -35,12 +35,12 @@ namespace taunt
 		int _map_height;
 		int _last_label;
 
-		std::vector< tile_position > _base_locations;
-		std::vector< tile_position > _start_base_locations;
-		tile_position _start_location;
 		std::vector< region > _regions;
 		std::vector< separation > _separations;
-		
+		std::vector< base_location > _base_locations;
+		std::vector< tile_position > _start_base_locations;
+		tile_position _start_location;
+
 		// From the CommandCenter bot
 		matrix_bool	_walkable;			// whether a tile is buildable (includes static resources)
 		matrix_bool	_buildable;			// whether a tile is buildable (includes static resources)
@@ -52,14 +52,19 @@ namespace taunt
 		matrix_bool _terrain_properties_level_1;
 		matrix_bool _terrain_properties_level_2;
 		matrix_bool _terrain_properties_level_3;
+		matrix_bool _terrain_properties_level_4;
 		matrix_int  _terrain_unbuildable_unwalkable;
 
 		std::vector<boost_polygon> _simplified_cc_level_1;
 		std::vector<boost_polygon> _simplified_cc_level_2;
 		std::vector<boost_polygon> _simplified_cc_level_3;
+		std::vector<boost_polygon> _simplified_cc_level_4;
 		std::vector<boost_polygon> _simplified_cc_unbuildable;
 		multipolygon _separation_zones;
 		std::vector<line> _frontiers;
+
+		// To keep track to artefacts to delete latter.
+		std::vector< int > _id_to_remove;
 
 		boost::geometry::strategy::buffer::distance_symmetric<double> _small_distance_strategy;
 		boost::geometry::strategy::buffer::distance_symmetric<double> _distance_strategy;
@@ -72,6 +77,9 @@ namespace taunt
 		multipolygon make_regions( const std::vector<line>& separations, const boost_polygon& polygon );
 		void compute_region_id( const boost_polygon& region );
 		void compute_region_id( const multipolygon& regions );
+		void compute_region_id_for_unbuildable( const boost_polygon& region );
+		void compute_region_id_for_unbuildable( const multipolygon& regions );
+		void remove_artefacts();
 		void connect_separations_and_regions();
 		boost_polygon enrich( const boost_polygon& input ) const;
 
@@ -99,7 +107,7 @@ namespace taunt
 		inline void change_analyze_type( analyze_type at ) { _analyze_type = at; }
 		inline analyze_type get_analyze_type() const { return _analyze_type; }
 
-		inline std::vector< tile_position > get_base_locations() const { return _base_locations; }
+		inline std::vector< base_location > get_base_locations() const { return _base_locations; }
 		inline std::vector< tile_position > get_start_base_locations() const { return _start_base_locations; }
 		inline tile_position get_start_location() const { return _start_location; }
 		tile_position get_nearest_base_location( const tile_position& tp ) const;
