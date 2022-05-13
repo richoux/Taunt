@@ -1,0 +1,93 @@
+{
+  "version": "2.1.0",
+  "$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.5.json",
+  "runs": [
+    {
+      "results": [
+        {
+          "ruleId": "C26495",
+          "message": {
+            "text": "Variable 'taunt::base_location::_region' is uninitialized. Always initialize a member variable (type.6)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/Developpement/Github/Taunt/src/base_location.cpp"
+                },
+                "region": {
+                  "startLine": 5,
+                  "startColumn": 16,
+                  "endLine": 5,
+                  "endColumn": 16
+                }
+              },
+              "logicalLocations": [
+                {
+                  "fullyQualifiedName": "taunt::base_location::{ctor}",
+                  "decoratedName": "??0base_location@taunt@@QEAA@AEBUPoint2DI@sc2@@AEBV?$vector@UPoint2DI@sc2@@V?$allocator@UPoint2DI@sc2@@@std@@@std@@1@Z",
+                  "kind": "function"
+                }
+              ]
+            }
+          ],
+          "properties": {
+            "targetSymbol": "taunt::base_location::_region"
+          }
+        }
+      ],
+      "tool": {
+        "driver": {
+          "name": "PREfast",
+          "fullName": "PREfast Code Analysis",
+          "version": "14.31.31104.0",
+          "informationUri": "https://aka.ms/cpp/ca"
+        }
+      },
+      "invocations": [
+        {
+          "commandLine": "\"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.31.31103\\bin\\HostX64\\x64\\c1xx.dll\" -ACf{1F7B090C-16DB-4822-966A-A93D26ED4681} -ACpmspft140.dll -Alint -D_PREFAST_ -D_AST_FE_ -Analyze -zm0x00007FF7E98E9CC0 -il C:\\Users\\flo\\AppData\\Local\\Temp\\_CL_ca179c6fast -typedil -f ..\\src\\base_location.cpp -Ze -D_MSC_EXTENSIONS -Zp16 -pc \\:/ -D_MSC_VER=1931 -D_MSC_FULL_VER=193131104 -D_MSC_BUILD=0 -D_M_AMD64=100 -ZILP448 -D_M_X64=100 -D_WIN64 -D_WIN32 -GR -D_CPPRTTI -I D:\\Developpement\\Github\\Taunt\\include -nologo -W 3 -diagnostics:column -D_GUARDOVERFLOW_CRT_ALLOCATORS=1 -GF -Og -Ot -Oy -Oi -DCODE_ANALYSIS -DSC2API -DNDEBUG -D_CONSOLE -D_UNICODE -DUNICODE -EHs -D_CPPUNWIND -EHc -MT -clrNoPureCRT -D_MT -GS -D_M_FP_PRECISE -Zc:wchar_t -Zc:forScope -std:c++17 -permissive- -FoTaunt\\x64\\Release\\base_location.obj -FdD:\\Developpement\\Github\\Taunt\\vs\\/../lib/Taunt_SC2.pdb -external:W 3 -Gd -analyze:projectdirectory D:\\Developpement\\Github\\Taunt\\vs -analyze:rulesetdirectory ;C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Team Tools\\Static Analysis Tools\\\\Rule Sets; -analyze:ruleset C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Team Tools\\Static Analysis Tools\\Rule Sets\\NativeRecommendedRules.ruleset -analyze:quiet -analyze:plugin C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.31.31103\\bin\\HostX64\\x64\\EspXEngine.dll -FC -errorreport:prompt -I D:\\Developpement\\boost_1_78_0 -I C:\\Users\\Public\\Documents\\ghost\\include -I D:\\Developpement\\StarCraft2_AI\\cpp-sc2\\include -I D:\\Developpement\\StarCraft2_AI\\cpp-sc2\\build\\generated -I D:\\Developpement\\StarCraft2_AI\\cpp-sc2\\contrib\\protobuf\\src -I C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.31.31103\\include -I C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.31.31103\\atlmfc\\include -I C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\VS\\include -I C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.19041.0\\ucrt -I C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.19041.0\\um -I C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.19041.0\\shared -I C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.19041.0\\winrt -I C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.19041.0\\cppwinrt -I D:\\Developpement\\Github\\Taunt\\vs\\Include\\um -external:I C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.31.31103\\include -I C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.31.31103\\include -external:I C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.31.31103\\atlmfc\\include -I C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.31.31103\\atlmfc\\include -external:I C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\VS\\include -I C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\VS\\include -external:I C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.19041.0\\ucrt -I C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.19041.0\\ucrt -external:I C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.19041.0\\um -I C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.19041.0\\um -external:I C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.19041.0\\shared -I C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.19041.0\\shared -external:I C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.19041.0\\winrt -I C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.19041.0\\winrt -external:I C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.19041.0\\cppwinrt -I C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.19041.0\\cppwinrt -external:I D:\\Developpement\\Github\\Taunt\\vs\\Include\\um -I D:\\Developpement\\Github\\Taunt\\vs\\Include\\um -MPdiagMutex 000000000000016C",
+          "executionSuccessful": true
+        }
+      ],
+      "artifacts": [
+        {
+          "location": {
+            "uri": "file:///D:/Developpement/Github/Taunt/src/base_location.cpp"
+          },
+          "roles": [
+            "analysisTarget",
+            "resultFile"
+          ],
+          "hashes": {
+            "sha-256": "81fdaf1e4205f7992a998145467fc3cfdb71bb5ae3a60ecbef468d5a5ce8b1ee"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///d:/developpement/github/taunt/include/base_location.hpp"
+          },
+          "hashes": {
+            "sha-256": "bf71d64c5affdaca75c1b90db2a9a7ed33e6b7e21af2ef1eb99571b38853d8fd"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///d:/developpement/github/taunt/include/positions.hpp"
+          },
+          "hashes": {
+            "sha-256": "d8f07e10e8ff6478e258185f4731f99149a87f7f114dd3b09d4c57cf59d671ca"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///d:/developpement/starcraft2_ai/cpp-sc2/include/sc2api/sc2_common.h"
+          },
+          "hashes": {
+            "sha-256": "b02b2aecf8a6b7912fe370c5086fbb84ebd8e1a17ff161167be662a0c23e581b"
+          }
+        }
+      ]
+    }
+  ]
+}
