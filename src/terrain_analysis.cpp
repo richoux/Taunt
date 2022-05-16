@@ -647,6 +647,7 @@ void terrain_analysis::analyze()
 			ghost::Options options;
 			options.tabu_time_selected = builder.separation_candidates.size() / number_resource_clusters[ i ];
 			options.custom_starting_point = true;
+			options.parallel_runs = true;
 
 #if defined TAUNT_BENCH
 			start_inner = std::chrono::steady_clock::now();
@@ -762,6 +763,7 @@ void terrain_analysis::analyze()
 			ghost::Options options;
 			options.tabu_time_selected = builder.separation_candidates.size() / number_resource_clusters[ index ];
 			options.custom_starting_point = true;
+			options.parallel_runs = true;
 
 #if defined TAUNT_BENCH
 			start_inner = std::chrono::steady_clock::now();
@@ -878,6 +880,7 @@ void terrain_analysis::analyze()
 			ghost::Options options;
 			options.tabu_time_selected = builder.separation_candidates.size() / number_resource_clusters[ index ];
 			options.custom_starting_point = true;
+			options.parallel_runs = true;
 
 #if defined TAUNT_BENCH
 			start_inner = std::chrono::steady_clock::now();
@@ -994,6 +997,7 @@ void terrain_analysis::analyze()
 			ghost::Options options;
 			options.tabu_time_selected = builder.separation_candidates.size() / number_resource_clusters[ index ];
 			options.custom_starting_point = true;
+			options.parallel_runs = true;
 
 #if defined TAUNT_BENCH
 			start_inner = std::chrono::steady_clock::now();
