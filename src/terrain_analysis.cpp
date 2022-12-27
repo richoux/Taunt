@@ -324,9 +324,11 @@ void terrain_analysis::analyze()
 			switch( _terrain_height[ y ][ x ] )
 			{
 			case 0:
+			case 1:
 				_terrain_properties_level_1[ y ][ x ] = _buildable[ y ][ x ]; //_walkable[y][x];
 				break;
 			case 2:
+			case 3:
 				_terrain_properties_level_2[ y ][ x ] = _buildable[ y ][ x ]; //_walkable[y][x];
 				break;
 			case 4:
@@ -371,9 +373,11 @@ void terrain_analysis::analyze()
 				switch( _terrain_height[ y ][ x ] )
 				{
 				case 0:
+				case 1:
 					_terrain_properties_level_1[ y ][ x ] = true;
 					break;
 				case 2:
+				case 3:
 					_terrain_properties_level_2[ y ][ x ] = true;
 					break;
 				case 4:
@@ -424,9 +428,11 @@ void terrain_analysis::analyze()
 				switch( _terrain_height[ y ][ x ] )
 				{
 				case 0:
+				case 1:
 					_terrain_properties_level_1[ y ][ x ] = true;
 					break;
 				case 2:
+				case 3:
 					_terrain_properties_level_2[ y ][ x ] = true;
 					break;
 				case 4:
@@ -1536,6 +1542,7 @@ terrain_analysis::terrain_analysis( analyze_type at )
 	_terrain_properties_level_1( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
 	_terrain_properties_level_2( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
 	_terrain_properties_level_3( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
+	_terrain_properties_level_4( matrix_bool( _map_height, std::vector<bool>( _map_width, false ) ) ),
 	_terrain_unbuildable_unwalkable( matrix_int( _map_height, std::vector<int>( _map_width, 0 ) ) ),
 	_small_distance_strategy( SMALL_DISTANCE_STRATEGY ),
 	_distance_strategy( DISTANCE_STRATEGY )
