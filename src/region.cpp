@@ -1,16 +1,33 @@
 #include "region.hpp"
+#include "base_location.hpp"
+#include "separation.hpp"
+#include "terrain_analysis.hpp"
 
 using namespace taunt;
 
-region::region( int id, const std::vector<const base_location*>& base_locations, const std::vector< const separation*>& separations, const boost_polygon& polygon )
+region::region( int id, terrain_analysis *_terrain_analysis, const boost_polygon& polygon )
 	: _id( id ),
-	_base_locations( base_locations ),
-	_separations( separations ),
+	_ta( _terrain_analysis ),
 	_polygon( polygon )
 {
 	point boost_centroid;
 	boost::geometry::centroid( _polygon, boost_centroid );
 	_centroid = position{ static_cast<position_type>( std::round( boost_centroid.x() ) ), static_cast<position_type>( std::round( boost_centroid.y() ) ) };
+}
+
+std::vector< base_location > region::get_base_locations() const
+{
+	return _ta->get_base_locations();
+}
+
+const base_location& region::get_first_base_locations() const
+{
+	return _ta->get_base_location( 0 );
+}
+
+std::vector< separation > region::get_separations() const
+{
+	return _ta->get_separations();
 }
 
 position region::get_nearest_contour_position( const position& pos )
@@ -31,7 +48,7 @@ position region::get_nearest_contour_position( const position& pos )
 
 position region::get_entry_position( const separation& sep )
 {
-	if( std::find_if( _separations.begin(), _separations.end(), [&]( auto s ) {return sep._id == s->_id;} ) == _separations.end() )
+	if( std::find_if( _separations_indexes.begin(), _separations_indexes.end(), [&]( auto i ) {return sep.get_id() == _ta->get_separation(i).get_id(); }) == _separations_indexes.end() )
 		return {-1,-1};
 
 	multipolygon commun;

@@ -1084,6 +1084,10 @@ void terrain_analysis::analyze()
 	compute_region_id_for_unbuildable( unbuildables );
 	compute_region_id( _separation_zones );
 
+
+	// Commented for runtime benchmarks
+	// Uncomment to debug the region ID computation
+	/*
 	std::string map_id = map_filename();
 	map_id.replace( map_id.end() - 4, map_id.end(), "_region_id.txt" );
 	std::ofstream log( map_id );
@@ -1110,7 +1114,7 @@ void terrain_analysis::analyze()
 	}
 	log << ss.str();
 	log.close();
-
+	*/
 
 	// mega traces
 	/*

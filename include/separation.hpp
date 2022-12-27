@@ -6,7 +6,8 @@
 
 namespace taunt
 {
-   class separation
+
+  class separation
   {
     friend class region;
     friend class terrain_analysis;

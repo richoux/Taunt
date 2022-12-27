@@ -9,7 +9,7 @@
 #include "region.hpp"
 #include "positions.hpp"
 #include "separation.hpp"
-#include "connected_component.hpp"
+#include "base_location.hpp"
 
 #ifdef SC2API
 #include "sc2api/sc2_api.h"
@@ -108,6 +108,7 @@ namespace taunt
 		inline analyze_type get_analyze_type() const { return _analyze_type; }
 
 		inline std::vector< base_location > get_base_locations() const { return _base_locations; }
+		inline const base_location& get_base_location( int index ) const { return _base_locations[ index ]; } // check range preconditions
 		inline std::vector< tile_position > get_start_base_locations() const { return _start_base_locations; }
 		inline tile_position get_start_location() const { return _start_location; }
 		tile_position get_nearest_base_location( const tile_position& tp ) const;
@@ -115,11 +116,13 @@ namespace taunt
 		tile_position get_nearest_base_location( int tile_x, int tile_y ) const;
 
 		inline std::vector< region > get_regions() const { return _regions; }
+		inline const region& get_region( int index ) const { return _regions[ index ]; } // check range preconditions
 		inline region get_region_at( const tile_position& tp ) const { return get_region_at( tp.x, tp.y ); }
 		region get_region_at( const position& p ) const;
 		inline region get_region_at( int tile_x, int tile_y ) const { return _regions[ _region_id[ tile_y ][ tile_x ] ]; }
 
 		inline std::vector< separation > get_separations() const { return _separations; }
+		inline const separation& get_separation( int index ) const { return _separations[ index ]; } // check range preconditions
 		// inline separation get_nearest_separation( const tile_position& tp ) const { return get_nearest_point( tp.x, tp.y ); }
 		// separation get_nearest_separation( const position& p ) const;
 		// separation get_nearest_separation( int tile_x, int tile_y ) const;
